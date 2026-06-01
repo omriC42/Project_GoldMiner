@@ -1,0 +1,72 @@
+Quartus Prime Archive log --	C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/goldV1.qarlog
+
+Archive:	C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/goldV1.qar
+Date:		Mon Jun 01 13:02:40 2026
+Quartus Prime		17.0.0 Build 595 04/25/2017 SJ Lite Edition
+
+	=========== Files Selected: ===========
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5.cmp
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5.qip
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5.sip
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5.spd
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5.v
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5/CLK_31P5_0002.qip
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5/CLK_31P5_0002.v
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/CLK_31P5_sim/CLK_31P5.vo
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/DE10_Standard_Audio.sdc
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/KBDINTF.qxp
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/Lab1Demo.qpf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/Lab1Demo.qsf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/Lab1Demo_assignment_defaults.qdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/AUDIO.bdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/JukeBox1.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/Mili_sec_counter.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/SinTable.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/ToneDecoder.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/addr_counter.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/audio_codec_controller/DualSerial2parallel.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/audio_codec_controller/audio_codec_controller.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/audio_codec_controller/clock_500.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/audio_codec_controller/i2c.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/melody_player_1.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/AUDIO/prescaler.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/KEYBOARDX/TOP_KBD.bdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/KEYBOARDX/keyPad_decoder.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/KEYBOARDX/random.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/KEYBOARDX/simple_up_counter.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/Seg7/SEG7.SV
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/Gold_DISPLAY.bdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/GoldsMatrixBitMap.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/HART_DISPLAY.bdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/HartsMatrixBitMap.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/MyConstant.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/NumbersBitMap.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/ROCK_DISPLAY.bdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/RockMatrixBitMap.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/Smiley_Block_T.bdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/TOP_VGA_DEMO_KBD.bdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/VGA_Controller.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/back_ground_draw.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/game_controller.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/objects_mux.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/smileyBitMap.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/smiley_move.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/square_Hart_object.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/square_object.sv
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/valX.bsf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/valX.qip
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/valX.v
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/valX_bb.v
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/RTL/VGA/valX_inst.v
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/assignment_defaults.qdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/constraints/DE10_Standard_Audio.sdc
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/constraints/pin.tcl
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/db/stp2_auto_stripped.stp
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/output_files/Chain1.cdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/output_files/Chain2.cdf
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/output_files/stp2.stp
+C:/technion/EE_project/Project_GoldMiner/VGA_FINAL_PROJ_restored/rtl/vga_bg.mif
+	======= Total: 61 files to archive =======
+
+	================ Status: ===============
+All files archived successfully.
