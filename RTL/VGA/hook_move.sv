@@ -15,9 +15,9 @@ module	hook_move	(
 					input	 logic startOfFrame,      //short pulse every start of frame 30Hz 
 					input	 logic shoot_key,   //move Y Up     
 					input	 logic x0,
-					input  logic y0,
-					input  logic collision,         //collision if smiley hits an object
-					input  logic [2:0] HitEdgeCode, 
+					input  logic y0,//maybe not needed implement as parameter?
+					input  logic collision,         //legacy use for collision
+					input  logic [2:0] HitEdgeCode, //legacy use for collision
 					output logic signed 	[10:0] Xend, 
 					output logic signed	[10:0] Yend  
 					
@@ -34,8 +34,8 @@ const int	FIXED_POINT_MULTIPLIER = 64; // note it must be 2^n
 // we do all calculations with topLeftX_FixedPoint to get a resolution of 1/64 pixel in calcuatuions,
 // we devide at the end by FIXED_POINT_MULTIPLIER which must be 2^n, to return to the initial proportions
 // movement limits 
-const int   OBJECT_WIDTH_X = 64;
-const int   OBJECT_HIGHT_Y = 64;
+const int   OBJECT_WIDTH_X = 64; //TODO:change according to graphics
+const int   OBJECT_HIGHT_Y = 64; //TODO:change according to graphics
 const int	SafetyMargin   =	2;
 const int	x_FRAME_LEFT	=	SafetyMargin; 
 const int	x_FRAME_RIGHT	=	639 - SafetyMargin - OBJECT_WIDTH_X; 
@@ -62,7 +62,7 @@ const logic [3:0] BOTTOM =  4'b0001;
 //--------------
 //Angle trigonometric lookup table
 //provide transformation LUT_trigfunc[state_index]=64*trigfunc(15*state_index)
-
+/*TODO check if degrees look good on screen*/
 const int ANGLE_RESOLUTION = 12; //change according to delta theta using formula res=180/delta theta
 localparam signed [7:0] LUT_cos [0:ANGLE_RESOLUTION] = '{
     8'sd64,  // Index 0:  0 degrees
@@ -97,8 +97,8 @@ localparam signed [7:0] LUT_sin [0:ANGLE_RESOLUTION] = '{
 };
 
 //--------------
-localparam signed [10:0] MIN_R = 11'sd40; //to be changed when implementing graphics
-localparam signed [2:0] DELTA_R = 3'sd5 ; //to be changed to LUT when implementing treasures mass
+localparam signed [10:0] MIN_R = 11'sd40; //TODO:to be changed when implementing graphics
+localparam signed [2:0] DELTA_R = 3'sd5 ; //TODO:to be changed to LUT when implementing treasures mass
 
 
 
@@ -123,9 +123,9 @@ logic signed [MAX_RADIUS_BITS:0] R;
  //calculate swing edge cases unsynchronically
 always_comb begin
 	next_swing_dir = swing_dir;
-	if ((state_index == 4'd12) && swing_dir) 
+	if ((state_index == 4'd12) && swing_dir)//right end and swings right 
         next_swing_dir = 1'b0;
-   else if ((state_index == 4'd0) && ~swing_dir) 
+   else if ((state_index == 4'd0) && ~swing_dir) //left end and swings left
         next_swing_dir = 1'b1;
  end
 	
@@ -159,19 +159,19 @@ begin : fsm_sync_proc
 			S_SHOOT:  begin     // lengthen hook and check collisions
 		//------------
 			R <= R+DELTA_R;
-			if ((Xend >= x_FRAME_RIGHT) || (Xend <= x_FRAME_LEFT)  || 
+			if ((Xend >= x_FRAME_RIGHT) || (Xend <= x_FRAME_LEFT)  || //check collision with boundries
 			(Yend >= y_FRAME_BOTTOM)) begin
 				SM_motion <= S_RETRACT;
 			end
 					
-		 // handle collision with treasure 			
+		 /*TODO handle collision with treasure */			
 				
 		end 
 		
 		//------------
 			S_RETRACT:  begin      //shorten hook back and handle treasures mass
 		//------------
-			//change DELTA_R according to LUT
+			/*TODO change DELTA_R according to LUT*/
 			R <= R-DELTA_R;
 			if(R<=MIN_R)
 				SM_motion <= S_SWING;
@@ -185,7 +185,7 @@ begin : fsm_sync_proc
 end // end fsm_sync
 
 
-//return from FIXED point trunc back to prame size parameters 
+//calculate asynchronically the end coordinites to be provided to graphic module
   
 assign 	Xend = x0+((R*LUT_cos[state_index])>>>6) ;  // calculate x coordinate and normalise by 64 because of LUT
 assign 	Yend = y0+((R*LUT_sin[state_index])>>>6) ;  // calculate y coordinate and normalise by 64 because of LUT  
