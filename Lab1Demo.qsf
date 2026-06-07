@@ -39,7 +39,7 @@
 
 set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CSXFC6D6F31C6
-set_global_assignment -name TOP_LEVEL_ENTITY TOP_VGA_DEMO_KBD
+set_global_assignment -name TOP_LEVEL_ENTITY hook_draw
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.0.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "15:51:54  JULY 08, 2018"
 set_global_assignment -name LAST_QUARTUS_VERSION "17.0.0 Lite Edition"
@@ -159,68 +159,6 @@ set_location_assignment PIN_W24 -to ADC_SCLK
 set_location_assignment PIN_Y24 -to AUDOUT[6]
 set_location_assignment PIN_Y23 -to AUDOUT[7]
 set_location_assignment PIN_AJ4 -to resetN_pin
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUD_ADCDAT
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[1]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[2]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[3]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[4]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[5]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[6]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[7]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[1]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[2]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[3]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[4]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[5]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[6]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[7]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to boardersDrawReq
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK_50
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[1]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[2]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[3]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[4]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[5]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[6]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[1]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[2]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[3]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[4]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[5]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[6]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[7]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[8]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[9]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[10]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[11]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[12]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[13]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[14]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[15]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[16]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[17]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[18]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[19]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[20]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[21]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[22]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[23]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[24]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[25]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[26]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[27]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[28]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_CLK
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_DAT
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to greenLight
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to redLight
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to yellowLight
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to resetN_pin
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[3]
 set_global_assignment -name FITTER_EFFORT FAST_FIT
 set_global_assignment -name TIMEQUEST_REPORT_SCRIPT_INCLUDE_DEFAULT_ANALYSIS OFF
 set_global_assignment -name VERILOG_INPUT_VERSION VERILOG_2001
@@ -233,9 +171,6 @@ set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE output_files/stp2.stp
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
@@ -322,7 +257,6 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_COUNTER_PIPELINE=
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name BDF_FILE RTL/VGA/TOP_VGA_DEMO_KBD.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/smiley_move.sv
@@ -363,4 +297,72 @@ set_global_assignment -name SIP_FILE CLK_31P5.sip
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/MyConstant.sv
 set_global_assignment -name CDF_FILE output_files/Chain2.cdf
 set_global_assignment -name SIGNALTAP_FILE output_files/stp2.stp
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/hook_move.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/hook_draw.sv
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUD_ADCDAT
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to boardersDrawReq
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK_50
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[8]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[9]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[10]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[11]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[12]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[13]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[14]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[15]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[16]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[17]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[18]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[19]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[20]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[21]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[22]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[23]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[24]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[25]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[26]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[27]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to OVGA[28]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_CLK
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_DAT
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to greenLight
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to redLight
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to yellowLight
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to resetN_pin
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[3]
 set_global_assignment -name SLD_FILE db/stp2_auto_stripped.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

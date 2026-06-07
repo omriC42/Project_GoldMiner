@@ -14,10 +14,11 @@ module	hook_move	(
 					input	 logic resetN,
 					input	 logic startOfFrame,      //short pulse every start of frame 30Hz 
 					input	 logic shoot_key,   //move Y Up     
-					input	 logic x0,
-					input  logic y0,
-					input  logic collision,         //collision if smiley hits an object
-					input  logic [2:0] HitEdgeCode, 
+					input	 logic signed 	[10:0] x0,
+					input  logic signed 	[10:0] y0,
+					input  logic collision,         //collision if hook hits an object
+					input  logic [2:0] HitEdgeCode,
+					output logic signed [10:0] R,
 					output logic signed 	[10:0] Xend, 
 					output logic signed	[10:0] Yend  
 					
@@ -28,7 +29,7 @@ module	hook_move	(
 
 
 
-const int MAX_RADIUS_BITS = 10; //to be changed according to border
+
 const int	FIXED_POINT_MULTIPLIER = 64; // note it must be 2^n 
 // FIXED_POINT_MULTIPLIER is used to enable working with integers in high resolution so that 
 // we do all calculations with topLeftX_FixedPoint to get a resolution of 1/64 pixel in calcuatuions,
@@ -63,7 +64,7 @@ const logic [3:0] BOTTOM =  4'b0001;
 //Angle trigonometric lookup table
 //provide transformation LUT_trigfunc[state_index]=64*trigfunc(15*state_index)
 
-const int ANGLE_RESOLUTION = 12; //change according to delta theta using formula res=180/delta theta
+localparam int ANGLE_RESOLUTION = 4'd12; //change according to delta theta using formula res=180/delta theta
 localparam signed [7:0] LUT_cos [0:ANGLE_RESOLUTION] = '{
     8'sd64,  // Index 0:  0 degrees
     8'sd62,  // Index 1:  15 degrees
@@ -98,7 +99,7 @@ localparam signed [7:0] LUT_sin [0:ANGLE_RESOLUTION] = '{
 
 //--------------
 localparam signed [10:0] MIN_R = 11'sd40; //to be changed when implementing graphics
-localparam signed [2:0] DELTA_R = 3'sd5 ; //to be changed to LUT when implementing treasures mass
+localparam signed [2:0] DELTA_R = 4'sd5 ; //to be changed to LUT when implementing treasures mass
 
 
 
@@ -117,7 +118,6 @@ logic toggle_x_key_D ;
 logic [3:0] state_index;
 logic swing_dir;
 logic next_swing_dir;
-logic signed [MAX_RADIUS_BITS:0] R;
  //---------
 
  //calculate swing edge cases unsynchronically
@@ -161,7 +161,7 @@ begin : fsm_sync_proc
 			R <= R+DELTA_R;
 			if ((Xend >= x_FRAME_RIGHT) || (Xend <= x_FRAME_LEFT)  || 
 			(Yend >= y_FRAME_BOTTOM)) begin
-				SM_motion <= S_RETRACT;
+				SM_Motion <= S_RETRACT;
 			end
 					
 		 // handle collision with treasure 			
@@ -174,7 +174,7 @@ begin : fsm_sync_proc
 			//change DELTA_R according to LUT
 			R <= R-DELTA_R;
 			if(R<=MIN_R)
-				SM_motion <= S_SWING;
+				SM_Motion <= S_SWING;
 		end 
 
 		endcase  // case 
@@ -189,7 +189,7 @@ end // end fsm_sync
   
 assign 	Xend = x0+((R*LUT_cos[state_index])>>>6) ;  // calculate x coordinate and normalise by 64 because of LUT
 assign 	Yend = y0+((R*LUT_sin[state_index])>>>6) ;  // calculate y coordinate and normalise by 64 because of LUT  
-	
+
 
 endmodule	
 //---------------
