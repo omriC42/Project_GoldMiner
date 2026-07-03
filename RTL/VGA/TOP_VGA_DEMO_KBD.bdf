@@ -875,7 +875,7 @@ agreement for further details.
 	(annotation_block (parameter)(rect -5072 -752 -4790 -524))
 )
 (symbol
-	(rect -4968 696 -4808 776)
+	(rect -4984 688 -4824 768)
 	(text "MyConstant" (rect 5 0 65 12)(font "Arial" ))
 	(text "inst2" (rect 8 64 30 81)(font "Intel Clear" ))
 	(port
@@ -898,7 +898,7 @@ agreement for further details.
 	(drawing
 		(rectangle (rect 16 16 144 64))
 	)
-	(annotation_block (parameter)(rect -5144 696 -4975 753))
+	(annotation_block (parameter)(rect -5160 688 -4991 745))
 )
 (symbol
 	(rect -4640 -8 -4608 24)
@@ -1458,14 +1458,14 @@ agreement for further details.
 		(pt 264 32)
 		(output)
 		(text "collision" (rect 0 0 38 12)(font "Arial" ))
-		(text "collision" (rect 211 27 243 39)(font "Arial" ))
+		(text "collision" (rect 211 27 249 39)(font "Arial" ))
 		(line (pt 264 32)(pt 248 32))
 	)
 	(port
 		(pt 264 48)
 		(output)
 		(text "SingleHitPulse" (rect 0 0 70 12)(font "Arial" ))
-		(text "SingleHitPulse" (rect 184 43 243 55)(font "Arial" ))
+		(text "SingleHitPulse" (rect 184 43 254 55)(font "Arial" ))
 		(line (pt 264 48)(pt 248 48))
 	)
 	(drawing
@@ -1947,17 +1947,6 @@ agreement for further details.
 	(pt -4856 848)
 )
 (connector
-	(text "SQR_topLeftX[10..0]" (rect -4798 712 -4701 729)(font "Intel Clear" ))
-	(pt -4672 728)
-	(pt -4808 728)
-	(bus)
-)
-(connector
-	(pt -4672 728)
-	(pt -4672 768)
-	(bus)
-)
-(connector
 	(pt -4672 768)
 	(pt -4880 768)
 	(bus)
@@ -2125,6 +2114,17 @@ agreement for further details.
 	(text "singleHit" (rect -5144 848 -5103 865)(font "Intel Clear" ))
 	(pt -5152 864)
 	(pt -5104 864)
+)
+(connector
+	(text "SQR_topLeftX[10..0]" (rect -4814 704 -4717 721)(font "Intel Clear" ))
+	(pt -4672 720)
+	(pt -4824 720)
+	(bus)
+)
+(connector
+	(pt -4672 768)
+	(pt -4672 720)
+	(bus)
 )
 (junction (pt -5008 1136))
 (junction (pt -4160 1144))

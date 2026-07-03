@@ -293,7 +293,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect 552 440 784 616)
+	(rect 560 456 792 632)
 	(text "smiley_move" (rect 5 0 72 12)(font "Arial" ))
 	(text "inst" (rect 8 160 25 172)(font "Arial" ))
 	(port
@@ -387,10 +387,10 @@ agreement for further details.
 	(drawing
 		(rectangle (rect 16 16 216 160))
 	)
-	(annotation_block (parameter)(rect 552 288 809 402))
+	(annotation_block (parameter)(rect 560 304 817 418))
 )
 (symbol
-	(rect 936 376 1160 520)
+	(rect 928 376 1152 520)
 	(text "square_object" (rect 5 0 73 12)(font "Arial" ))
 	(text "inst6" (rect 8 128 31 140)(font "Arial" ))
 	(port
@@ -481,29 +481,7 @@ agreement for further details.
 	(drawing
 		(rectangle (rect 16 16 208 128))
 	)
-	(annotation_block (parameter)(rect 936 528 1164 604))
-)
-(connector
-	(text "clk" (rect 880 392 894 409)(font "Intel Clear" ))
-	(pt 856 408)
-	(pt 936 408)
-)
-(connector
-	(text "resetN" (rect 880 408 913 420)(font "Arial" ))
-	(pt 856 424)
-	(pt 936 424)
-)
-(connector
-	(text "pixelX[10..0]" (rect 874 424 934 436)(font "Arial" ))
-	(pt 840 440)
-	(pt 936 440)
-	(bus)
-)
-(connector
-	(text "pixelY[10..0]" (rect 874 440 936 452)(font "Arial" ))
-	(pt 840 456)
-	(pt 936 456)
-	(bus)
+	(annotation_block (parameter)(rect 928 528 1156 604))
 )
 (connector
 	(text "pixelY[10..0]" (rect 402 392 461 409)(font "Intel Clear" ))
@@ -524,70 +502,6 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt 392 488)
-	(pt 552 488)
-)
-(connector
-	(pt 392 472)
-	(pt 552 472)
-)
-(connector
-	(pt 504 568)
-	(pt 552 568)
-	(bus)
-)
-(connector
-	(pt 504 656)
-	(pt 504 568)
-	(bus)
-)
-(connector
-	(text "startOfFrame" (rect 472 488 535 505)(font "Intel Clear" ))
-	(pt 392 504)
-	(pt 552 504)
-)
-(connector
-	(text "Y_direction_key" (rect 461 504 537 521)(font "Intel Clear" ))
-	(pt 400 520)
-	(pt 552 520)
-)
-(connector
-	(text "toggle_x_key" (rect 472 520 536 537)(font "Intel Clear" ))
-	(pt 392 536)
-	(pt 552 536)
-)
-(connector
-	(text "collision " (rect 481 536 522 553)(font "Intel Clear" ))
-	(pt 392 552)
-	(pt 552 552)
-)
-(connector
-	(text "SmileyTLX[10..0]" (rect 796 456 877 473)(font "Intel Clear" ))
-	(pt 784 472)
-	(pt 936 472)
-	(bus)
-)
-(connector
-	(text "SmileyTLY[10..0]" (rect 794 472 875 489)(font "Intel Clear" ))
-	(pt 784 488)
-	(pt 936 488)
-	(bus)
-)
-(connector
-	(pt 1160 408)
-	(pt 1168 408)
-	(bus)
-)
-(connector
-	(pt 1160 424)
-	(pt 1176 424)
-	(bus)
-)
-(connector
-	(pt 1160 440)
-	(pt 1184 440)
-)
-(connector
 	(pt 1600 376)
 	(pt 1592 376)
 )
@@ -597,30 +511,10 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt 1168 408)
-	(pt 1168 392)
-	(bus)
-)
-(connector
-	(text "smileyOffsetX[10..0]" (rect 1149 376 1246 393)(font "Intel Clear" ))
-	(pt 1168 392)
-	(pt 1248 392)
-	(bus)
-)
-(connector
-	(pt 1176 424)
-	(pt 1176 408)
-	(bus)
-)
-(connector
 	(text "smileyOffsety[10..0]" (rect 1146 392 1242 409)(font "Intel Clear" ))
 	(pt 1176 408)
 	(pt 1248 408)
 	(bus)
-)
-(connector
-	(pt 1184 440)
-	(pt 1184 424)
 )
 (connector
 	(text "smileyRecDR" (rect 1160 408 1223 425)(font "Intel Clear" ))
@@ -665,6 +559,175 @@ agreement for further details.
 (connector
 	(pt 1576 392)
 	(pt 1488 392)
+	(bus)
+)
+(connector
+	(text "smileyOffsetX[10..0]" (rect 1149 376 1246 393)(font "Intel Clear" ))
+	(pt 1248 392)
+	(pt 1152 392)
+	(bus)
+)
+(connector
+	(pt 1152 392)
+	(pt 1152 408)
+	(bus)
+)
+(connector
+	(pt 1176 408)
+	(pt 1176 424)
+	(bus)
+)
+(connector
+	(pt 1184 424)
+	(pt 1184 440)
+)
+(connector
+	(text "clk" (rect 872 392 886 409)(font "Intel Clear" ))
+	(pt 848 408)
+	(pt 928 408)
+)
+(connector
+	(text "resetN" (rect 872 408 905 420)(font "Arial" ))
+	(pt 848 424)
+	(pt 928 424)
+)
+(connector
+	(text "pixelX[10..0]" (rect 866 424 926 436)(font "Arial" ))
+	(pt 832 440)
+	(pt 928 440)
+	(bus)
+)
+(connector
+	(text "pixelY[10..0]" (rect 866 440 928 452)(font "Arial" ))
+	(pt 832 456)
+	(pt 928 456)
+	(bus)
+)
+(connector
+	(pt 1152 424)
+	(pt 1176 424)
+	(bus)
+)
+(connector
+	(pt 1152 440)
+	(pt 1184 440)
+)
+(connector
+	(pt 392 472)
+	(pt 552 472)
+)
+(connector
+	(pt 928 472)
+	(pt 800 472)
+	(bus)
+)
+(connector
+	(pt 392 488)
+	(pt 544 488)
+)
+(connector
+	(pt 928 488)
+	(pt 808 488)
+	(bus)
+)
+(connector
+	(pt 392 504)
+	(pt 536 504)
+)
+(connector
+	(pt 400 520)
+	(pt 528 520)
+)
+(connector
+	(pt 392 536)
+	(pt 520 536)
+)
+(connector
+	(pt 392 552)
+	(pt 512 552)
+)
+(connector
+	(pt 504 656)
+	(pt 504 584)
+	(bus)
+)
+(connector
+	(pt 552 472)
+	(pt 552 488)
+)
+(connector
+	(pt 552 488)
+	(pt 560 488)
+)
+(connector
+	(pt 800 472)
+	(pt 800 488)
+	(bus)
+)
+(connector
+	(text "SmileyTLX[10..0]" (rect 796 472 877 489)(font "Intel Clear" ))
+	(pt 800 488)
+	(pt 792 488)
+	(bus)
+)
+(connector
+	(pt 544 488)
+	(pt 544 504)
+)
+(connector
+	(pt 544 504)
+	(pt 560 504)
+)
+(connector
+	(pt 808 488)
+	(pt 808 504)
+	(bus)
+)
+(connector
+	(text "SmileyTLY[10..0]" (rect 794 488 875 505)(font "Intel Clear" ))
+	(pt 808 504)
+	(pt 792 504)
+	(bus)
+)
+(connector
+	(pt 536 504)
+	(pt 536 520)
+)
+(connector
+	(text "startOfFrame" (rect 480 504 543 521)(font "Intel Clear" ))
+	(pt 536 520)
+	(pt 560 520)
+)
+(connector
+	(pt 528 520)
+	(pt 528 536)
+)
+(connector
+	(text "Y_direction_key" (rect 469 520 545 537)(font "Intel Clear" ))
+	(pt 528 536)
+	(pt 560 536)
+)
+(connector
+	(pt 520 536)
+	(pt 520 552)
+)
+(connector
+	(text "toggle_x_key" (rect 480 536 544 553)(font "Intel Clear" ))
+	(pt 520 552)
+	(pt 560 552)
+)
+(connector
+	(pt 512 552)
+	(pt 512 568)
+)
+(connector
+	(text "collision " (rect 489 552 530 569)(font "Intel Clear" ))
+	(pt 512 568)
+	(pt 560 568)
+)
+(connector
+	(pt 504 584)
+	(pt 560 584)
 	(bus)
 )
 (text "  " (rect 24 624 31 643)(font "Intel Clear" (font_size 8)))
