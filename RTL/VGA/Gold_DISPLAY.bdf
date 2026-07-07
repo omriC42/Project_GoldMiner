@@ -150,9 +150,9 @@ agreement for further details.
 )
 (pin
 	(output)
-	(rect -944 -824 -768 -808)
+	(rect -944 -840 -746 -824)
 	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
-	(text "hartRGB[7..0]" (rect 90 0 158 12)(font "Arial" ))
+	(text "GoldDrawingRequest" (rect 90 0 192 12)(font "Arial" ))
 	(pt 0 8)
 	(drawing
 		(line (pt 0 8)(pt 52 8))
@@ -166,9 +166,9 @@ agreement for further details.
 )
 (pin
 	(output)
-	(rect -944 -840 -768 -824)
+	(rect -944 -824 -768 -808)
 	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
-	(text "HartDrawingRequest" (rect 90 0 191 12)(font "Arial" ))
+	(text "GoldRGB[7..0]" (rect 90 0 161 12)(font "Arial" ))
 	(pt 0 8)
 	(drawing
 		(line (pt 0 8)(pt 52 8))
@@ -181,7 +181,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect -1296 -904 -1048 -728)
+	(rect -1304 -912 -1056 -736)
 	(text "GoldsMatrixBitMap" (rect 5 0 95 12)(font "Arial" ))
 	(text "inst25" (rect 8 160 36 177)(font "Intel Clear" ))
 	(port
@@ -360,65 +360,6 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "resetN" (rect -1358 -872 -1328 -855)(font "Intel Clear" ))
-	(pt -1384 -856)
-	(pt -1296 -856)
-)
-(connector
-	(pt -1384 -792)
-	(pt -1296 -792)
-)
-(connector
-	(pt -1384 -696)
-	(pt -1384 -792)
-)
-(connector
-	(text "clk" (rect -1358 -888 -1344 -871)(font "Intel Clear" ))
-	(pt -1296 -872)
-	(pt -1384 -872)
-)
-(connector
-	(pt -1352 -776)
-	(pt -1296 -776)
-)
-(connector
-	(pt -952 -832)
-	(pt -952 -872)
-)
-(connector
-	(pt -960 -816)
-	(pt -960 -856)
-	(bus)
-)
-(connector
-	(text "BoxHartTopLeftX[10..0]" (rect -1584 -856 -1474 -839)(font "Intel Clear" ))
-	(pt -1584 -840)
-	(pt -1296 -840)
-	(bus)
-)
-(connector
-	(text "BoxHartTopLeftY[10..0]" (rect -1584 -840 -1474 -823)(font "Intel Clear" ))
-	(pt -1576 -824)
-	(pt -1296 -824)
-	(bus)
-)
-(connector
-	(text "boxHartDrawingRequest" (rect -1584 -824 -1470 -807)(font "Intel Clear" ))
-	(pt -1568 -808)
-	(pt -1296 -808)
-)
-(connector
-	(text "HartDrwingRequest" (rect -1046 -888 -954 -871)(font "Intel Clear" ))
-	(pt -952 -872)
-	(pt -1048 -872)
-)
-(connector
-	(text "hartRGB[7..0]" (rect -1022 -872 -959 -855)(font "Intel Clear" ))
-	(pt -960 -856)
-	(pt -1048 -856)
-	(bus)
-)
-(connector
 	(pt -1952 -800)
 	(pt -1952 -808)
 )
@@ -498,39 +439,12 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt -1584 -840)
-	(pt -1584 -808)
-	(bus)
-)
-(connector
-	(pt -1576 -824)
-	(pt -1576 -792)
-	(bus)
-)
-(connector
-	(pt -1568 -808)
-	(pt -1568 -776)
-)
-(connector
-	(pt -1968 -800)
-	(pt -1960 -800)
-)
-(connector
 	(pt -1960 -800)
 	(pt -1952 -800)
 )
 (connector
-	(pt -1968 -784)
-	(pt -1960 -784)
-)
-(connector
 	(pt -1960 -784)
 	(pt -1944 -784)
-)
-(connector
-	(pt -1968 -768)
-	(pt -1960 -768)
-	(bus)
 )
 (connector
 	(pt -1960 -768)
@@ -538,18 +452,8 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt -1968 -752)
-	(pt -1960 -752)
-	(bus)
-)
-(connector
 	(pt -1960 -752)
 	(pt -1928 -752)
-	(bus)
-)
-(connector
-	(pt -1968 -720)
-	(pt -1960 -720)
 	(bus)
 )
 (connector
@@ -562,11 +466,79 @@ agreement for further details.
 	(pt -1408 -592)
 )
 (connector
-	(pt -1352 -776)
-	(pt -1352 -592)
+	(text "resetN" (rect -1366 -880 -1336 -863)(font "Intel Clear" ))
+	(pt -1392 -864)
+	(pt -1304 -864)
 )
-(junction (pt -1960 -800))
-(junction (pt -1960 -784))
-(junction (pt -1960 -768))
-(junction (pt -1960 -752))
-(junction (pt -1960 -720))
+(connector
+	(pt -1384 -800)
+	(pt -1304 -800)
+)
+(connector
+	(pt -1384 -696)
+	(pt -1384 -800)
+)
+(connector
+	(text "clk" (rect -1366 -896 -1352 -879)(font "Intel Clear" ))
+	(pt -1304 -880)
+	(pt -1392 -880)
+)
+(connector
+	(pt -1352 -784)
+	(pt -1304 -784)
+)
+(connector
+	(pt -952 -832)
+	(pt -952 -880)
+)
+(connector
+	(pt -960 -816)
+	(pt -960 -864)
+	(bus)
+)
+(connector
+	(text "BoxHartTopLeftX[10..0]" (rect -1592 -864 -1482 -847)(font "Intel Clear" ))
+	(pt -1584 -848)
+	(pt -1304 -848)
+	(bus)
+)
+(connector
+	(text "BoxHartTopLeftY[10..0]" (rect -1592 -848 -1482 -831)(font "Intel Clear" ))
+	(pt -1576 -832)
+	(pt -1304 -832)
+	(bus)
+)
+(connector
+	(text "boxHartDrawingRequest" (rect -1592 -832 -1478 -815)(font "Intel Clear" ))
+	(pt -1568 -816)
+	(pt -1304 -816)
+)
+(connector
+	(pt -1584 -808)
+	(pt -1584 -848)
+	(bus)
+)
+(connector
+	(pt -1576 -792)
+	(pt -1576 -832)
+	(bus)
+)
+(connector
+	(pt -1568 -776)
+	(pt -1568 -816)
+)
+(connector
+	(pt -1352 -592)
+	(pt -1352 -784)
+)
+(connector
+	(text "<<__$DEF_ALIAS5198>>" (rect -1054 -896 -936 -879)(font "Intel Clear" )(invisible))
+	(pt -952 -880)
+	(pt -1056 -880)
+)
+(connector
+	(text "hartRGB[7..0]" (rect -1030 -880 -967 -863)(font "Intel Clear" ))
+	(pt -960 -864)
+	(pt -1056 -864)
+	(bus)
+)

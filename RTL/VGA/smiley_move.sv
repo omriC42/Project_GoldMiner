@@ -62,7 +62,7 @@ const logic [3:0] LEFT =	 4'b0010;
 const logic [3:0] BOTTOM =  4'b0001; 
 
 
-const int FIXED_Y = 160; // 2/3 height from the bottom (480 - 160 = 320, which is 2/3 of 480)
+const int FIXED_Y = 96; // height from the top allowing a grid of 64 X 64 underneath
 
 enum  logic [2:0] {IDLE_ST,         	// initial state
 						 MOVE_ST, 				// moving no colision 
