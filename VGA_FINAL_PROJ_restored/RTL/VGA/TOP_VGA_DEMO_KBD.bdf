@@ -567,7 +567,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect -4504 -152 -4200 40)
+	(rect -4504 -168 -4200 24)
 	(text "HART_DISPLAY" (rect 5 0 99 19)(font "Intel Clear" (font_size 8)))
 	(text "inst12" (rect 8 171 36 188)(font "Intel Clear" ))
 	(port
@@ -1374,7 +1374,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect -3872 -208 -3712 -128)
+	(rect -3880 -208 -3720 -128)
 	(text "MyConstant" (rect 5 0 65 12)(font "Arial" ))
 	(text "inst22" (rect 8 64 36 81)(font "Intel Clear" ))
 	(port
@@ -1397,7 +1397,7 @@ agreement for further details.
 	(drawing
 		(rectangle (rect 16 16 144 64))
 	)
-	(annotation_block (parameter)(rect -4056 -232 -3887 -175))
+	(annotation_block (parameter)(rect -4064 -232 -3895 -175))
 )
 (symbol
 	(rect -3872 -104 -3712 -24)
@@ -1589,22 +1589,22 @@ agreement for further details.
 	)
 	(parameter
 		"initial_x"
-		"320"
+		"280"
 		""
 		(type "PARAMETER_SIGNED_DEC")	)
 	(parameter
 		"initial_y"
-		"96"
+		"32"
 		""
 		(type "PARAMETER_SIGNED_DEC")	)
 	(parameter
 		"initial_x_speed"
-		"0"
+		"60"
 		""
 		(type "PARAMETER_SIGNED_DEC")	)
 	(parameter
 		"initial_y_speed"
-		"0"
+		"50"
 		""
 		(type "PARAMETER_SIGNED_DEC")	)
 	(drawing
@@ -1700,61 +1700,8 @@ agreement for further details.
 	(pt -4360 -560)
 )
 (connector
-	(text "clk" (rect -4592 -136 -4578 -119)(font "Intel Clear" ))
-	(pt -4504 -120)
-	(pt -4696 -120)
-)
-(connector
-	(text "resetN" (rect -4590 -120 -4560 -103)(font "Intel Clear" ))
-	(pt -4504 -104)
-	(pt -4696 -104)
-)
-(connector
-	(text "pixelX[10..0]" (rect -4590 -104 -4531 -87)(font "Intel Clear" ))
-	(pt -4504 -88)
-	(pt -4696 -88)
-	(bus)
-)
-(connector
-	(text "pixelY[10..0]" (rect -4590 -88 -4531 -71)(font "Intel Clear" ))
-	(pt -4504 -72)
-	(pt -4696 -72)
-	(bus)
-)
-(connector
-	(text "keypadValid" (rect -4614 -40 -4554 -23)(font "Intel Clear" ))
-	(pt -4504 -24)
-	(pt -4696 -24)
-)
-(connector
-	(pt -4504 -56)
-	(pt -4720 -56)
-	(bus)
-)
-(connector
-	(pt -4720 -56)
-	(pt -4720 -144)
-	(bus)
-)
-(connector
-	(text "hartRGB[7..0]" (rect -4190 -120 -4127 -103)(font "Intel Clear" ))
-	(pt -4200 -104)
-	(pt -4096 -104)
-	(bus)
-)
-(connector
-	(text "collision_Smiley_Hart" (rect -4606 -24 -4503 -7)(font "Intel Clear" ))
-	(pt -4624 -8)
-	(pt -4504 -8)
-)
-(connector
 	(pt -4744 -144)
 	(pt -4720 -144)
-	(bus)
-)
-(connector
-	(pt -4744 -40)
-	(pt -4504 -40)
 	(bus)
 )
 (connector
@@ -1984,11 +1931,6 @@ agreement for further details.
 	(pt -4336 -728)
 )
 (connector
-	(text "HartDrawingRequest" (rect -4190 -136 -4093 -119)(font "Intel Clear" ))
-	(pt -4200 -120)
-	(pt -4096 -120)
-)
-(connector
 	(text "clk" (rect -4833 816 -4819 833)(font "Intel Clear" ))
 	(pt -4800 832)
 	(pt -4872 832)
@@ -2179,11 +2121,6 @@ agreement for further details.
 	(pt -5104 864)
 )
 (connector
-	(pt -3712 -176)
-	(pt -3688 -176)
-	(bus)
-)
-(connector
 	(pt -3592 -40)
 	(pt -3504 -40)
 )
@@ -2272,36 +2209,9 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "clk" (rect -3584 -168 -3570 -151)(font "Intel Clear" ))
-	(pt -3688 -152)
-	(pt -3528 -152)
-)
-(connector
-	(text "resetN" (rect -3582 -152 -3552 -135)(font "Intel Clear" ))
-	(pt -3688 -136)
-	(pt -3528 -136)
-)
-(connector
 	(text "keypadValid" (rect -3606 -72 -3546 -55)(font "Intel Clear" ))
 	(pt -3688 -56)
 	(pt -3528 -56)
-)
-(connector
-	(pt -3688 -88)
-	(pt -3528 -88)
-	(bus)
-)
-(connector
-	(text "pixelX[10..0]" (rect -3654 -136 -3595 -119)(font "Intel Clear" ))
-	(pt -3688 -120)
-	(pt -3528 -120)
-	(bus)
-)
-(connector
-	(text "pixelY[10..0]" (rect -3678 -120 -3619 -103)(font "Intel Clear" ))
-	(pt -3680 -104)
-	(pt -3528 -104)
-	(bus)
 )
 (connector
 	(pt -3712 -72)
@@ -2309,30 +2219,116 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt -3688 -176)
-	(pt -3688 -152)
+	(text "clk" (rect -3568 -168 -3554 -151)(font "Intel Clear" ))
+	(pt -3664 -152)
+	(pt -3528 -152)
+)
+(connector
+	(text "resetN" (rect -3574 -152 -3544 -135)(font "Intel Clear" ))
+	(pt -3664 -136)
+	(pt -3528 -136)
+)
+(connector
+	(pt -3720 -176)
+	(pt -3704 -176)
 	(bus)
 )
 (connector
-	(pt -3688 -152)
-	(pt -3688 -136)
+	(pt -3528 -88)
+	(pt -3704 -88)
 	(bus)
 )
 (connector
-	(pt -3688 -136)
-	(pt -3688 -120)
+	(text "pixelX[10..0]" (rect -3616 -136 -3557 -119)(font "Intel Clear" ))
+	(pt -3528 -120)
+	(pt -3656 -120)
 	(bus)
 )
 (connector
-	(pt -3688 -120)
-	(pt -3688 -88)
+	(pt -3704 -176)
+	(pt -3704 -88)
 	(bus)
+)
+(connector
+	(text "pixelY[10..0]" (rect -3600 -120 -3541 -103)(font "Intel Clear" ))
+	(pt -3528 -104)
+	(pt -3664 -104)
+	(bus)
+)
+(connector
+	(pt -4744 -40)
+	(pt -4736 -40)
+	(bus)
+)
+(connector
+	(text "clk" (rect -4592 -152 -4578 -135)(font "Intel Clear" ))
+	(pt -4504 -136)
+	(pt -4696 -136)
+)
+(connector
+	(text "resetN" (rect -4590 -136 -4560 -119)(font "Intel Clear" ))
+	(pt -4504 -120)
+	(pt -4696 -120)
+)
+(connector
+	(text "pixelX[10..0]" (rect -4590 -120 -4531 -103)(font "Intel Clear" ))
+	(pt -4504 -104)
+	(pt -4696 -104)
+	(bus)
+)
+(connector
+	(text "pixelY[10..0]" (rect -4590 -104 -4531 -87)(font "Intel Clear" ))
+	(pt -4504 -88)
+	(pt -4696 -88)
+	(bus)
+)
+(connector
+	(text "keypadValid" (rect -4614 -56 -4554 -39)(font "Intel Clear" ))
+	(pt -4504 -40)
+	(pt -4696 -40)
+)
+(connector
+	(pt -4720 -72)
+	(pt -4504 -72)
+	(bus)
+)
+(connector
+	(pt -4720 -144)
+	(pt -4720 -72)
+	(bus)
+)
+(connector
+	(text "hartRGB[7..0]" (rect -4190 -136 -4127 -119)(font "Intel Clear" ))
+	(pt -4200 -120)
+	(pt -4096 -120)
+	(bus)
+)
+(connector
+	(pt -4736 -40)
+	(pt -4736 -56)
+	(bus)
+)
+(connector
+	(pt -4736 -56)
+	(pt -4504 -56)
+	(bus)
+)
+(connector
+	(pt -4624 -8)
+	(pt -4624 -24)
+)
+(connector
+	(text "collision_Smiley_Hart" (rect -4606 -40 -4503 -23)(font "Intel Clear" ))
+	(pt -4624 -24)
+	(pt -4504 -24)
+)
+(connector
+	(text "HartDrawingRequest" (rect -4190 -152 -4093 -135)(font "Intel Clear" ))
+	(pt -4200 -136)
+	(pt -4096 -136)
 )
 (junction (pt -5008 1136))
 (junction (pt -4160 1144))
-(junction (pt -3688 -152))
-(junction (pt -3688 -136))
-(junction (pt -3688 -120))
 (text "// (c) Technion IIT, Department of Electrical Engineering 2025" (rect -4832 -896 -4473 -877)(font "Intel Clear" (font_size 8)))
 (text "KEY \"8\"  is Y_direction" (rect -5136 336 -5034 353)(font "Intel Clear" ))
 (text "\"Enter\"  is toggleX" (rect -5136 320 -5053 337)(font "Intel Clear" ))

@@ -387,7 +387,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect 416 760 648 936)
+	(rect 408 736 640 912)
 	(text "smiley_move" (rect 5 0 72 12)(font "Arial" ))
 	(text "inst" (rect 8 160 25 172)(font "Arial" ))
 	(port
@@ -481,7 +481,7 @@ agreement for further details.
 	(drawing
 		(rectangle (rect 16 16 216 160))
 	)
-	(annotation_block (parameter)(rect 416 608 673 722))
+	(annotation_block (parameter)(rect 408 584 665 698))
 )
 (connector
 	(text "clk" (rect 720 720 734 737)(font "Intel Clear" ))
@@ -492,18 +492,6 @@ agreement for further details.
 	(text "resetN" (rect 720 736 753 748)(font "Arial" ))
 	(pt 696 752)
 	(pt 776 752)
-)
-(connector
-	(text "pixelX[10..0]" (rect 714 752 774 764)(font "Arial" ))
-	(pt 680 768)
-	(pt 776 768)
-	(bus)
-)
-(connector
-	(text "pixelY[10..0]" (rect 714 768 776 780)(font "Arial" ))
-	(pt 680 784)
-	(pt 776 784)
-	(bus)
 )
 (connector
 	(text "pixelY[10..0]" (rect 242 720 301 737)(font "Intel Clear" ))
@@ -618,42 +606,13 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt 768 800)
-	(pt 768 792)
-	(bus)
-)
-(connector
 	(pt 776 800)
 	(pt 768 800)
 	(bus)
 )
 (connector
-	(text "SmileyTLX[10..0]" (rect 660 776 741 793)(font "Intel Clear" ))
-	(pt 768 792)
-	(pt 648 792)
-	(bus)
-)
-(connector
-	(pt 344 984)
-	(pt 344 888)
-	(bus)
-)
-(connector
-	(pt 240 800)
-	(pt 240 792)
-)
-(connector
 	(pt 232 800)
 	(pt 240 800)
-)
-(connector
-	(pt 240 792)
-	(pt 416 792)
-)
-(connector
-	(pt 760 816)
-	(pt 760 808)
-	(bus)
 )
 (connector
 	(pt 776 816)
@@ -661,80 +620,126 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "SmileyTLY[10..0]" (rect 658 792 739 809)(font "Intel Clear" ))
-	(pt 760 808)
-	(pt 648 808)
-	(bus)
-)
-(connector
-	(pt 248 816)
-	(pt 248 808)
-)
-(connector
 	(pt 232 816)
 	(pt 248 816)
-)
-(connector
-	(pt 248 808)
-	(pt 416 808)
-)
-(connector
-	(pt 256 832)
-	(pt 256 824)
 )
 (connector
 	(pt 232 832)
 	(pt 256 832)
 )
 (connector
-	(text "startOfFrame" (rect 336 808 399 825)(font "Intel Clear" ))
-	(pt 256 824)
-	(pt 416 824)
-)
-(connector
-	(pt 264 848)
-	(pt 264 840)
-)
-(connector
 	(pt 240 848)
 	(pt 264 848)
-)
-(connector
-	(text "Y_direction_key" (rect 325 824 401 841)(font "Intel Clear" ))
-	(pt 264 840)
-	(pt 416 840)
-)
-(connector
-	(pt 272 864)
-	(pt 272 856)
 )
 (connector
 	(pt 232 864)
 	(pt 272 864)
 )
 (connector
-	(text "toggle_x_key" (rect 336 840 400 857)(font "Intel Clear" ))
-	(pt 272 856)
-	(pt 416 856)
-)
-(connector
-	(pt 280 880)
-	(pt 280 872)
-)
-(connector
 	(pt 232 880)
 	(pt 280 880)
 )
 (connector
-	(text "collision " (rect 345 856 386 873)(font "Intel Clear" ))
-	(pt 280 872)
-	(pt 416 872)
-)
-(connector
-	(pt 344 888)
-	(pt 416 888)
+	(pt 768 784)
+	(pt 776 784)
 	(bus)
 )
+(connector
+	(pt 344 984)
+	(pt 344 864)
+	(bus)
+)
+(connector
+	(pt 240 800)
+	(pt 240 768)
+)
+(connector
+	(pt 240 768)
+	(pt 408 768)
+)
+(connector
+	(pt 760 816)
+	(pt 760 784)
+	(bus)
+)
+(connector
+	(pt 248 816)
+	(pt 248 784)
+)
+(connector
+	(pt 248 784)
+	(pt 408 784)
+)
+(connector
+	(pt 256 832)
+	(pt 256 800)
+)
+(connector
+	(text "startOfFrame" (rect 328 784 391 801)(font "Intel Clear" ))
+	(pt 256 800)
+	(pt 408 800)
+)
+(connector
+	(pt 264 848)
+	(pt 264 816)
+)
+(connector
+	(text "Y_direction_key" (rect 317 800 393 817)(font "Intel Clear" ))
+	(pt 264 816)
+	(pt 408 816)
+)
+(connector
+	(pt 272 864)
+	(pt 272 832)
+)
+(connector
+	(text "toggle_x_key" (rect 328 816 392 833)(font "Intel Clear" ))
+	(pt 272 832)
+	(pt 408 832)
+)
+(connector
+	(pt 280 880)
+	(pt 280 848)
+)
+(connector
+	(text "collision " (rect 337 832 378 849)(font "Intel Clear" ))
+	(pt 280 848)
+	(pt 408 848)
+)
+(connector
+	(pt 344 864)
+	(pt 408 864)
+	(bus)
+)
+(connector
+	(text "SmileyTLY[10..0]" (rect 650 768 731 785)(font "Intel Clear" ))
+	(pt 760 784)
+	(pt 640 784)
+	(bus)
+)
+(connector
+	(text "SmileyTLX[10..0],pixelY[10..0],pixelX[10..0]" (rect 652 752 856 769)(font "Intel Clear" ))
+	(pt 640 768)
+	(pt 768 768)
+	(bus)
+)
+(connector
+	(pt 768 768)
+	(pt 776 768)
+	(bus)
+)
+(connector
+	(pt 768 768)
+	(pt 768 784)
+	(bus)
+)
+(connector
+	(pt 768 784)
+	(pt 768 800)
+	(bus)
+)
+(junction (pt 768 784))
+(junction (pt 768 768))
 (text "  " (rect -136 952 -129 971)(font "Intel Clear" (font_size 8)))
 (text "   " (rect -16 992 -6 1011)(font "Intel Clear" (font_size 8)))
 (text "            " (rect 344 936 386 955)(font "Intel Clear" (font_size 8)))
