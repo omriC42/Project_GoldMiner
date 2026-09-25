@@ -3,7 +3,7 @@
 // System-Verilog Alex Grinshpun May 2018
 // New coding convention dudy December 2018
 // (c) Technion IIT, Department of Electrical Engineering 2025 
-
+// have objects below 255 lower part of object is 245
 
 module	square_object	(	
 					input		logic	clk,

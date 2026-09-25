@@ -315,28 +315,36 @@ agreement for further details.
 		(pt 248 32)
 		(output)
 		(text "drawingRequest" (rect 0 0 77 12)(font "Arial" ))
-		(text "drawingRequest" (rect 162 27 239 39)(font "Arial" ))
+		(text "drawingRequest" (rect 162 27 227 39)(font "Arial" ))
 		(line (pt 248 32)(pt 232 32))
 	)
 	(port
 		(pt 248 48)
 		(output)
 		(text "RGBout[7..0]" (rect 0 0 64 12)(font "Arial" ))
-		(text "RGBout[7..0]" (rect 173 43 237 55)(font "Arial" ))
+		(text "RGBout[7..0]" (rect 173 43 227 55)(font "Arial" ))
 		(line (pt 248 48)(pt 232 48)(line_width 3))
 	)
 	(drawing
 		(rectangle (rect 16 16 232 160))
 	)
 )
-(connector
-	(text "HART_SELECT" (rect -1368 -768 -1299 -751)(font "Intel Clear" ))
-	(pt -1384 -696)
-	(pt -1400 -696)
-)
-(connector
-	(pt -1400 -632)
-	(pt -1352 -632)
+(symbol
+	(rect -1408 -640 -1376 -608)
+	(text "GND" (rect 8 16 29 26)(font "Arial" (font_size 6)))
+	(text "inst1" (rect 3 21 25 38)(font "Intel Clear" )(invisible))
+	(port
+		(pt 16 0)
+		(output)
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(line (pt 16 8)(pt 16 0))
+	)
+	(drawing
+		(line (pt 8 8)(pt 16 16))
+		(line (pt 16 16)(pt 24 8))
+		(line (pt 8 8)(pt 24 8))
+	)
 )
 (connector
 	(pt -944 -832)
@@ -415,10 +423,6 @@ agreement for further details.
 	(text "clk" (rect -1366 -888 -1352 -871)(font "Intel Clear" ))
 	(pt -1304 -872)
 	(pt -1392 -872)
-)
-(connector
-	(pt -1352 -632)
-	(pt -1352 -776)
 )
 (connector
 	(pt -1352 -776)
@@ -548,6 +552,19 @@ agreement for further details.
 (connector
 	(pt -1640 -776)
 	(pt -1568 -776)
+)
+(connector
+	(pt -1352 -640)
+	(pt -1392 -640)
+)
+(connector
+	(pt -1352 -776)
+	(pt -1352 -640)
+)
+(connector
+	(text "<<__$DEF_ALIAS7822>>" (rect -1344 -680 -1226 -663)(font "Intel Clear" )(invisible))
+	(pt -1384 -696)
+	(pt -1400 -696)
 )
 (junction (pt -1960 -800))
 (junction (pt -1960 -784))

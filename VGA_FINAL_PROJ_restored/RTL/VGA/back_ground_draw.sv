@@ -63,6 +63,11 @@ begin
 		blueBits <= 2'b11;//LIGHT_COLOR;
 		boardersDrawReq <= 	1'b0 ; 
 		
+		// Borders and color strip DISABLED (Sep 2026) so the background picture (VGA_BG.mif)
+		// shows clean. boardersDrawReq now stays 0, so the mux always shows the picture here.
+		// The miner is still kept on screen by the X limits in smiley_move.
+		// To bring them back, remove the /* and */ below.
+/*
 		if (   
 		// 1. draw the yellow borders
 						((pixelX <= bracketOffset) && (pixelX >=(bracketOffset- bracketOffset/4))) ||
@@ -94,6 +99,7 @@ begin
 	
 				
 		 end 
+*/
 		
 		
 	BG_RGB <=  { blueBits, redBits, greenBits } ; //collect color nibbles to an 8 bit word		

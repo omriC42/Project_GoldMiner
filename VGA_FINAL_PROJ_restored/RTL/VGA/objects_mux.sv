@@ -8,22 +8,25 @@
 //-- Eyal Lev 31 Jan 2021
 
 module	objects_mux	(	
-//		--------	Clock Input	 	
 					input		logic	clk,
 					input		logic	resetN,
 		   // smiley 
-					input		logic	smileyDrawingRequest, // two set of inputs per unit
+					input		logic	smileyDrawingRequest,
 					input		logic	[7:0] smileyRGB, 
 					     
-		  // add the box for numbers here 
-			
-					input logic [7:0] boxRGB,
-					input logic boxDrawingRequest,
-			  
-		  ////////////////////////
+		  // dust behind the mine cart (under the miner, not part of any collision)
+					input    logic dustDrawingRequest,
+					input		logic	[7:0] dustRGB,
+
+		  // countdown clock (top right of the screen)
+					input    logic timerDrawingRequest,
+					input		logic	[7:0] timerRGB,
+
+		  // Gold field (gold + rocks, drawn by GoldsMatrixBitMap)
+					input    logic GoldDrawingRequest, 
+					input		logic	[7:0] goldRGB,   
+					
 		  // background 
-					input    logic HartDrawingRequest, 
-					input		logic	[7:0] hartRGB,   
 					input		logic	[7:0] backGroundRGB, 
 					input		logic	BGDrawingRequest, 
 					input		logic	[7:0] RGB_MIF, 
@@ -40,22 +43,17 @@ begin
 	else begin
 		if (smileyDrawingRequest == 1'b1 )   
 			RGBOut <= smileyRGB;  //first priority 
-		 
-//--- add logic for box here ------------------------------------------------------		
-
-	else if(boxDrawingRequest == 1'b1) 
-		RGBOut <= boxRGB;
-
-
-
-//---------------------------------------------------------------------------------		
- 		else if (HartDrawingRequest == 1'b1)
-				RGBOut <= hartRGB;
+		else if (dustDrawingRequest == 1'b1)
+			RGBOut <= dustRGB;
+		else if (timerDrawingRequest == 1'b1)
+			RGBOut <= timerRGB;
+ 		else if (GoldDrawingRequest == 1'b1)
+			RGBOut <= goldRGB;
 		else if (BGDrawingRequest == 1'b1)
-				RGBOut <= backGroundRGB ;
+			RGBOut <= backGroundRGB ;
 		else RGBOut <= RGB_MIF ;// last priority 
-		end ; 
-	end
+	end 
+end
 
 endmodule
 

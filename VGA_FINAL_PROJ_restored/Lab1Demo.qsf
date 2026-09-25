@@ -63,8 +63,10 @@ set_location_assignment PIN_AA30 -to SW[9]
 set_location_assignment PIN_AA24 -to ball_toggle
 set_location_assignment PIN_AB23 -to ir_write
 set_location_assignment PIN_AC23 -to sound_on
-set_location_assignment PIN_AD24 -to LEDR[3]
-set_location_assignment PIN_AG25 -to LEDR[4]
+set_location_assignment PIN_AD24 -to gameOver
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to gameOver
+set_location_assignment PIN_AG25 -to levelWon
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to levelWon
 set_location_assignment PIN_AF25 -to numKey[0]
 set_location_assignment PIN_AE24 -to numKey[1]
 set_location_assignment PIN_AF24 -to numKey[2]
@@ -308,17 +310,29 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to redLight
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to yellowLight
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to resetN_pin
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[3]
-set_global_assignment -name BDF_FILE RTL/VGA/ROCK_DISPLAY.bdf
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=0000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=61" -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=2048" -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[17] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[18] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[19] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[22] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[24] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[26] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[28] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[29] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[30] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[31] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=2048" -section_id auto_signaltap_0
 set_global_assignment -name BDF_FILE RTL/VGA/TOP_VGA_DEMO_KBD.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/smiley_move.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/dust_draw.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_hud.sv
 set_global_assignment -name BDF_FILE RTL/VGA/Smiley_Block_T.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/smileyBitMap.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/square_object.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/back_ground_draw.sv
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/square_Hart_object.sv
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/HartsMatrixBitMap.sv
-set_global_assignment -name BDF_FILE RTL/VGA/HART_DISPLAY.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/objects_mux.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/VGA_Controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/NumbersBitMap.sv
@@ -351,20 +365,5 @@ set_global_assignment -name CDF_FILE output_files/Chain2.cdf
 set_global_assignment -name SIGNALTAP_FILE output_files/stp2.stp
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/GoldsMatrixBitMap.sv
 set_global_assignment -name BDF_FILE RTL/VGA/Gold_DISPLAY.bdf
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/RockMatrixBitMap.sv
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=0000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=61" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=2048" -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[17] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[18] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[19] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[22] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[24] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[26] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[28] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[29] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[30] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
-set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[31] -to auto_signaltap_0|gnd -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=2048" -section_id auto_signaltap_0
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name SLD_FILE db/stp2_auto_stripped.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

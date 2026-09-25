@@ -62,7 +62,7 @@ const logic [3:0] LEFT =	 4'b0010;
 const logic [3:0] BOTTOM =  4'b0001; 
 
 
-const int FIXED_Y = 96; // height from the top allowing a grid of 64 X 64 underneath
+const int FIXED_Y = 100; // miner is 64 tall -> rows 100..163 (below the $ and timer icons), wheels on the rail at y=164
 
 enum  logic [2:0] {IDLE_ST,         	// initial state
 						 MOVE_ST, 				// moving no colision 
