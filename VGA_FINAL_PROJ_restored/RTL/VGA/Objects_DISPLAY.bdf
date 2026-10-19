@@ -307,7 +307,7 @@ agreement for further details.
 	(annotation_block (parameter)(rect -1848 -968 -1593 -892))
 )
 (symbol
-	(rect -1328 -920 -1080 -744)
+	(rect -1304 -944 -1056 -768)
 	(text "ObjectsMatrixBitMap" (rect 5 0 105 12)(font "Arial" ))
 	(text "objects_bitmap" (rect 8 160 82 172)(font "Arial" ))
 	(port
@@ -392,25 +392,9 @@ agreement for further details.
 	)
 )
 (connector
-	(text "newLevel" (rect -1342 -792 -1295 -775)(font "Intel Clear" ))
-	(pt -1344 -776)
-	(pt -1328 -776)
-)
-(connector
 	(text "newLevel" (rect -1366 -688 -1319 -671)(font "Intel Clear" ))
 	(pt -1368 -672)
 	(pt -1360 -672)
-)
-(connector
-	(text "collectPulse" (rect -1078 -872 -1019 -855)(font "Intel Clear" ))
-	(pt -1080 -856)
-	(pt -1000 -856)
-)
-(connector
-	(text "collectValue[5..0]" (rect -1078 -856 -995 -839)(font "Intel Clear" ))
-	(pt -1080 -840)
-	(pt -1000 -840)
-	(bus)
 )
 (connector
 	(text "collectPulse" (rect -998 -768 -939 -751)(font "Intel Clear" ))
@@ -433,132 +417,8 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt -1968 -736)
-	(pt -1960 -736)
-	(bus)
-)
-(connector
-	(pt -1968 -800)
-	(pt -1960 -800)
-)
-(connector
-	(pt -1960 -800)
-	(pt -1952 -800)
-)
-(connector
-	(pt -1968 -784)
-	(pt -1960 -784)
-)
-(connector
-	(pt -1960 -784)
-	(pt -1944 -784)
-)
-(connector
-	(pt -1968 -768)
-	(pt -1960 -768)
-	(bus)
-)
-(connector
-	(pt -1960 -768)
-	(pt -1936 -768)
-	(bus)
-)
-(connector
-	(pt -1960 -720)
-	(pt -1952 -720)
-	(bus)
-)
-(connector
-	(pt -1952 -720)
-	(pt -1920 -720)
-	(bus)
-)
-(connector
 	(pt -1352 -704)
 	(pt -1368 -704)
-)
-(connector
-	(text "resetN" (rect -1390 -888 -1360 -871)(font "Intel Clear" ))
-	(pt -1416 -872)
-	(pt -1328 -872)
-)
-(connector
-	(text "clk" (rect -1390 -904 -1376 -887)(font "Intel Clear" ))
-	(pt -1328 -888)
-	(pt -1416 -888)
-)
-(connector
-	(pt -1352 -792)
-	(pt -1328 -792)
-)
-(connector
-	(pt -952 -832)
-	(pt -952 -888)
-)
-(connector
-	(pt -960 -816)
-	(pt -960 -872)
-	(bus)
-)
-(connector
-	(text "objectsOffsetX[10..0]" (rect -1616 -872 -1517 -855)(font "Intel Clear" ))
-	(pt -1584 -856)
-	(pt -1328 -856)
-	(bus)
-)
-(connector
-	(text "objectsOffsetY[10..0]" (rect -1616 -856 -1517 -839)(font "Intel Clear" ))
-	(pt -1576 -840)
-	(pt -1328 -840)
-	(bus)
-)
-(connector
-	(text "objectsInsideGrid" (rect -1616 -840 -1537 -823)(font "Intel Clear" ))
-	(pt -1568 -824)
-	(pt -1328 -824)
-)
-(connector
-	(pt -1352 -704)
-	(pt -1352 -792)
-)
-(connector
-	(text "objectsDrawingRequest" (rect -1078 -904 -968 -887)(font "Intel Clear" ))
-	(pt -952 -888)
-	(pt -1080 -888)
-)
-(connector
-	(text "objectsRGB[7..0]" (rect -1054 -888 -977 -871)(font "Intel Clear" ))
-	(pt -960 -872)
-	(pt -1080 -872)
-	(bus)
-)
-(connector
-	(pt -1960 -736)
-	(pt -1960 -752)
-	(bus)
-)
-(connector
-	(pt -1968 -752)
-	(pt -1960 -752)
-	(bus)
-)
-(connector
-	(pt -1952 -800)
-	(pt -1952 -816)
-)
-(connector
-	(pt -1944 -784)
-	(pt -1944 -800)
-)
-(connector
-	(pt -1936 -768)
-	(pt -1936 -784)
-	(bus)
-)
-(connector
-	(pt -1928 -752)
-	(pt -1928 -768)
-	(bus)
 )
 (connector
 	(pt -1584 -816)
@@ -575,64 +435,155 @@ agreement for further details.
 	(pt -1592 -784)
 )
 (connector
-	(pt -1920 -720)
-	(pt -1920 -736)
-	(bus)
-)
-(connector
-	(pt -1584 -856)
-	(pt -1584 -816)
-	(bus)
-)
-(connector
-	(pt -1576 -840)
-	(pt -1576 -800)
-	(bus)
-)
-(connector
-	(pt -1568 -824)
-	(pt -1568 -784)
-)
-(connector
-	(pt -1960 -752)
-	(pt -1928 -752)
-	(bus)
-)
-(connector
-	(text "clk" (rect -1958 -832 -1944 -815)(font "Intel Clear" ))
-	(pt -1952 -816)
+	(text "clk" (rect -1916 -832 -1902 -815)(font "Intel Clear" ))
+	(pt -1920 -816)
 	(pt -1816 -816)
 )
 (connector
-	(text "resetN" (rect -1958 -816 -1928 -799)(font "Intel Clear" ))
-	(pt -1944 -800)
+	(text "clk" (rect -1956 -816 -1942 -799)(font "Intel Clear" ))
+	(pt -1960 -800)
+	(pt -1952 -800)
+)
+(connector
+	(text "resetN" (rect -1916 -816 -1886 -799)(font "Intel Clear" ))
+	(pt -1920 -800)
 	(pt -1816 -800)
 )
 (connector
-	(text "pixelX[10..0]" (rect -1958 -800 -1899 -783)(font "Intel Clear" ))
-	(pt -1936 -784)
+	(text "resetN" (rect -1956 -800 -1926 -783)(font "Intel Clear" ))
+	(pt -1960 -784)
+	(pt -1952 -784)
+)
+(connector
+	(text "pixelX[10..0]" (rect -1916 -800 -1857 -783)(font "Intel Clear" ))
+	(pt -1920 -784)
 	(pt -1816 -784)
 	(bus)
 )
 (connector
-	(text "pixelY[10..0]" (rect -1958 -784 -1899 -767)(font "Intel Clear" ))
-	(pt -1928 -768)
+	(text "pixelX[10..0]" (rect -1956 -784 -1897 -767)(font "Intel Clear" ))
+	(pt -1960 -768)
+	(pt -1952 -768)
+	(bus)
+)
+(connector
+	(text "pixelY[10..0]" (rect -1916 -784 -1857 -767)(font "Intel Clear" ))
+	(pt -1920 -768)
 	(pt -1816 -768)
 	(bus)
 )
 (connector
-	(pt -1928 -752)
+	(text "pixelY[10..0]" (rect -1956 -768 -1897 -751)(font "Intel Clear" ))
+	(pt -1960 -752)
+	(pt -1952 -752)
+	(bus)
+)
+(connector
+	(text "topLeftX[10..0]" (rect -1916 -768 -1846 -751)(font "Intel Clear" ))
+	(pt -1920 -752)
 	(pt -1816 -752)
 	(bus)
 )
 (connector
+	(text "topLeftX[10..0]" (rect -1964 -752 -1894 -735)(font "Intel Clear" ))
+	(pt -1968 -736)
+	(pt -1960 -736)
+	(bus)
+)
+(connector
+	(text "topLeftY[10..0]" (rect -1916 -752 -1846 -735)(font "Intel Clear" ))
 	(pt -1920 -736)
 	(pt -1816 -736)
 	(bus)
 )
-(junction (pt -1960 -800))
-(junction (pt -1960 -784))
-(junction (pt -1960 -768))
-(junction (pt -1960 -752))
-(junction (pt -1952 -720))
-(junction (pt -1928 -752))
+(connector
+	(text "topLeftY[10..0]" (rect -1948 -736 -1878 -719)(font "Intel Clear" ))
+	(pt -1952 -720)
+	(pt -1944 -720)
+	(bus)
+)
+(connector
+	(text "newLevel" (rect -1318 -816 -1271 -799)(font "Intel Clear" ))
+	(pt -1320 -800)
+	(pt -1304 -800)
+)
+(connector
+	(text "collectPulse" (rect -1054 -896 -995 -879)(font "Intel Clear" ))
+	(pt -1056 -880)
+	(pt -976 -880)
+)
+(connector
+	(text "collectValue[5..0]" (rect -1054 -880 -971 -863)(font "Intel Clear" ))
+	(pt -1056 -864)
+	(pt -976 -864)
+	(bus)
+)
+(connector
+	(text "resetN" (rect -1366 -912 -1336 -895)(font "Intel Clear" ))
+	(pt -1392 -896)
+	(pt -1304 -896)
+)
+(connector
+	(text "clk" (rect -1366 -928 -1352 -911)(font "Intel Clear" ))
+	(pt -1304 -912)
+	(pt -1392 -912)
+)
+(connector
+	(pt -1352 -816)
+	(pt -1304 -816)
+)
+(connector
+	(pt -952 -832)
+	(pt -952 -912)
+)
+(connector
+	(pt -960 -816)
+	(pt -960 -896)
+	(bus)
+)
+(connector
+	(text "objectsOffsetX[10..0]" (rect -1592 -896 -1493 -879)(font "Intel Clear" ))
+	(pt -1584 -880)
+	(pt -1304 -880)
+	(bus)
+)
+(connector
+	(text "objectsOffsetY[10..0]" (rect -1592 -880 -1493 -863)(font "Intel Clear" ))
+	(pt -1576 -864)
+	(pt -1304 -864)
+	(bus)
+)
+(connector
+	(text "objectsInsideGrid" (rect -1592 -864 -1513 -847)(font "Intel Clear" ))
+	(pt -1568 -848)
+	(pt -1304 -848)
+)
+(connector
+	(pt -1352 -704)
+	(pt -1352 -816)
+)
+(connector
+	(text "objectsDrawingRequest" (rect -1054 -928 -944 -911)(font "Intel Clear" ))
+	(pt -952 -912)
+	(pt -1056 -912)
+)
+(connector
+	(text "objectsRGB[7..0]" (rect -1030 -912 -953 -895)(font "Intel Clear" ))
+	(pt -960 -896)
+	(pt -1056 -896)
+	(bus)
+)
+(connector
+	(pt -1584 -816)
+	(pt -1584 -880)
+	(bus)
+)
+(connector
+	(pt -1576 -800)
+	(pt -1576 -864)
+	(bus)
+)
+(connector
+	(pt -1568 -784)
+	(pt -1568 -848)
+)

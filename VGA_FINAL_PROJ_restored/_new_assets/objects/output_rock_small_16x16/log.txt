@@ -1,0 +1,6 @@
+File: rock_small
+Time: 2026-10-19 22:22:59.074575
+Mode: 8-bit
+Resolution: 16x16
+Scale: 4 (from 256x256)
+Output dir: _new_assets\objects\output_rock_small_16x16
