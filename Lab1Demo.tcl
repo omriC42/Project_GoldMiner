@@ -69,9 +69,9 @@ if {$make_assignments} {
 	set_global_assignment -name USE_SIGNALTAP_FILE output_files/stp2.stp
 	set_global_assignment -name BDF_FILE RTL/VGA/TOP_VGA_DEMO_KBD.bdf
 	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_controller.sv
-	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/smiley_move.sv
-	set_global_assignment -name BDF_FILE RTL/VGA/Smiley_Block_T.bdf
-	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/smileyBitMap.sv
+	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/miner_move.sv
+	set_global_assignment -name BDF_FILE RTL/VGA/Miner_Block_T.bdf
+	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/minerBitMap.sv
 	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/square_object.sv
 	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/back_ground_draw.sv
 	set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/square_Hart_object.sv

@@ -41,15 +41,15 @@ agreement for further details.
 	(port
 		(pt 0 64)
 		(input)
-		(text "smileyDrawingRequest" (rect 0 0 92 12)(font "Arial" ))
-		(text "smileyDrawingRequest" (rect 21 59 113 71)(font "Arial" ))
+		(text "minerDrawingRequest" (rect 0 0 92 12)(font "Arial" ))
+		(text "minerDrawingRequest" (rect 21 59 113 71)(font "Arial" ))
 		(line (pt 0 64)(pt 16 64)(line_width 1))
 	)
 	(port
 		(pt 0 80)
 		(input)
-		(text "smileyRGB[7..0]" (rect 0 0 67 12)(font "Arial" ))
-		(text "smileyRGB[7..0]" (rect 21 75 88 87)(font "Arial" ))
+		(text "minerRGB[7..0]" (rect 0 0 67 12)(font "Arial" ))
+		(text "minerRGB[7..0]" (rect 21 75 88 87)(font "Arial" ))
 		(line (pt 0 80)(pt 16 80)(line_width 3))
 	)
 	(port

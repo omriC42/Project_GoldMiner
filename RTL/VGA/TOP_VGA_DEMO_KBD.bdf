@@ -622,8 +622,8 @@ agreement for further details.
 	(port
 		(pt 0 144)
 		(input)
-		(text "collision_Smiley_Hart" (rect 0 0 128 19)(font "Intel Clear" (font_size 8)))
-		(text "collision_Smiley_Hart" (rect 21 139 149 158)(font "Intel Clear" (font_size 8)))
+		(text "collision_Miner_Hart" (rect 0 0 128 19)(font "Intel Clear" (font_size 8)))
+		(text "collision_Miner_Hart" (rect 21 139 149 158)(font "Intel Clear" (font_size 8)))
 		(line (pt 0 144)(pt 16 144))
 	)
 	(port
@@ -646,7 +646,7 @@ agreement for further details.
 )
 (symbol
 	(rect -5024 160 -4776 352)
-	(text "Smiley_Block_T" (rect 5 0 100 19)(font "Intel Clear" (font_size 8)))
+	(text "Miner_Block_T" (rect 5 0 100 19)(font "Intel Clear" (font_size 8)))
 	(text "inst1" (rect 8 171 30 188)(font "Intel Clear" ))
 	(port
 		(pt 0 32)
@@ -707,15 +707,15 @@ agreement for further details.
 	(port
 		(pt 248 32)
 		(output)
-		(text "smileyDR" (rect 0 0 56 19)(font "Intel Clear" (font_size 8)))
-		(text "smileyDR" (rect 171 27 227 46)(font "Intel Clear" (font_size 8)))
+		(text "minerDR" (rect 0 0 56 19)(font "Intel Clear" (font_size 8)))
+		(text "minerDR" (rect 171 27 227 46)(font "Intel Clear" (font_size 8)))
 		(line (pt 248 32)(pt 232 32))
 	)
 	(port
 		(pt 248 48)
 		(output)
-		(text "smileyRGB[7..0]" (rect 0 0 95 19)(font "Intel Clear" (font_size 8)))
-		(text "smileyRGB[7..0]" (rect 132 43 227 62)(font "Intel Clear" (font_size 8)))
+		(text "minerRGB[7..0]" (rect 0 0 95 19)(font "Intel Clear" (font_size 8)))
+		(text "minerRGB[7..0]" (rect 132 43 227 62)(font "Intel Clear" (font_size 8)))
 		(line (pt 248 48)(pt 232 48)(line_width 3))
 	)
 	(parameter
@@ -1078,15 +1078,15 @@ agreement for further details.
 	(port
 		(pt 0 64)
 		(input)
-		(text "smileyDrawingRequest" (rect 0 0 113 12)(font "Arial" ))
-		(text "smileyDrawingRequest" (rect 21 59 134 71)(font "Arial" ))
+		(text "minerDrawingRequest" (rect 0 0 113 12)(font "Arial" ))
+		(text "minerDrawingRequest" (rect 21 59 134 71)(font "Arial" ))
 		(line (pt 0 64)(pt 16 64))
 	)
 	(port
 		(pt 0 80)
 		(input)
-		(text "smileyRGB[7..0]" (rect 0 0 82 12)(font "Arial" ))
-		(text "smileyRGB[7..0]" (rect 21 75 103 87)(font "Arial" ))
+		(text "minerRGB[7..0]" (rect 0 0 82 12)(font "Arial" ))
+		(text "minerRGB[7..0]" (rect 21 75 103 87)(font "Arial" ))
 		(line (pt 0 80)(pt 16 80)(line_width 3))
 	)
 	(port
@@ -1271,8 +1271,8 @@ agreement for further details.
 	(port
 		(pt 0 80)
 		(input)
-		(text "drawing_request_smiley" (rect 0 0 118 12)(font "Arial" ))
-		(text "drawing_request_smiley" (rect 21 75 139 87)(font "Arial" ))
+		(text "drawing_request_miner" (rect 0 0 118 12)(font "Arial" ))
+		(text "drawing_request_miner" (rect 21 75 139 87)(font "Arial" ))
 		(line (pt 0 80)(pt 16 80))
 	)
 	(port
@@ -1597,8 +1597,8 @@ agreement for further details.
 	(port
 		(pt 0 144)
 		(input)
-		(text "collision_Smiley_Hart" (rect 0 0 128 19)(font "Intel Clear" (font_size 8)))
-		(text "collision_Smiley_Hart" (rect 21 139 149 158)(font "Intel Clear" (font_size 8)))
+		(text "collision_Miner_Hart" (rect 0 0 128 19)(font "Intel Clear" (font_size 8)))
+		(text "collision_Miner_Hart" (rect 21 139 149 158)(font "Intel Clear" (font_size 8)))
 		(line (pt 0 144)(pt 16 144))
 	)
 	(port
@@ -1745,7 +1745,7 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "collision_Smiley_Hart" (rect -4606 -24 -4503 -7)(font "Intel Clear" ))
+	(text "collision_Miner_Hart" (rect -4606 -24 -4503 -7)(font "Intel Clear" ))
 	(pt -4624 -8)
 	(pt -4504 -8)
 )
@@ -1931,12 +1931,12 @@ agreement for further details.
 	(pt -4872 464)
 )
 (connector
-	(text "smileyDR" (rect -4982 464 -4936 481)(font "Intel Clear" ))
+	(text "minerDR" (rect -4982 464 -4936 481)(font "Intel Clear" ))
 	(pt -4992 480)
 	(pt -4872 480)
 )
 (connector
-	(text "smileyRGB[7..0]" (rect -4980 480 -4904 497)(font "Intel Clear" ))
+	(text "minerRGB[7..0]" (rect -4980 480 -4904 497)(font "Intel Clear" ))
 	(pt -4992 496)
 	(pt -4872 496)
 	(bus)
@@ -2175,7 +2175,7 @@ agreement for further details.
 	(pt -4424 184)
 )
 (connector
-	(text "smileyDR" (rect -4526 184 -4480 201)(font "Intel Clear" ))
+	(text "minerDR" (rect -4526 184 -4480 201)(font "Intel Clear" ))
 	(pt -4544 200)
 	(pt -4424 200)
 )
@@ -2307,12 +2307,12 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "smileyDR" (rect -4766 176 -4720 193)(font "Intel Clear" ))
+	(text "minerDR" (rect -4766 176 -4720 193)(font "Intel Clear" ))
 	(pt -4776 192)
 	(pt -4688 192)
 )
 (connector
-	(text "smileyRGB[7..0]" (rect -4774 192 -4698 209)(font "Intel Clear" ))
+	(text "minerRGB[7..0]" (rect -4774 192 -4698 209)(font "Intel Clear" ))
 	(pt -4776 208)
 	(pt -4688 208)
 	(bus)
@@ -2370,7 +2370,7 @@ agreement for further details.
 (text "The MIF Background" (rect -5032 -800 -4848 -777)(font "Intel Clear" (font_size 12)(bold)))
 (text "The keyboard interface" (rect -4624 -640 -4416 -617)(font "Intel Clear" (font_size 12)(bold)))
 (text "The Background and Hearts" (rect -4896 -376 -4648 -353)(font "Intel Clear" (font_size 12)(bold)))
-(text "Smileyface moving and drawing" (rect -5136 88 -4850 111)(font "Intel Clear" (font_size 12)(bold)))
+(text "Miner moving and drawing" (rect -5136 88 -4850 111)(font "Intel Clear" (font_size 12)(bold)))
 (text "The objects_mux - to be updated" (rect -5144 400 -4848 423)(font "Intel Clear" (font_size 12)(bold)))
 (text "The game_controller - to be updated" (rect -4504 88 -4175 111)(font "Intel Clear" (font_size 12)(bold)))
 (text "Add here the \"square_object\" and  \"random\" modules" (rect -4704 696 -4223 719)(font "Intel Clear" (font_size 12)(bold)))

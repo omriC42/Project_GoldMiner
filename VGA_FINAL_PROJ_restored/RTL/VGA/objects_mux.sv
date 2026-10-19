@@ -10,9 +10,9 @@
 module	objects_mux	(	
 					input		logic	clk,
 					input		logic	resetN,
-		   // smiley 
-					input		logic	smileyDrawingRequest,
-					input		logic	[7:0] smileyRGB, 
+		   // miner 
+					input		logic	minerDrawingRequest,
+					input		logic	[7:0] minerRGB, 
 					     
 		  // dust behind the mine cart (under the miner, not part of any collision)
 					input    logic dustDrawingRequest,
@@ -23,8 +23,8 @@ module	objects_mux	(
 					input		logic	[7:0] timerRGB,
 
 		  // Gold field (gold + rocks, drawn by GoldsMatrixBitMap)
-					input    logic GoldDrawingRequest, 
-					input		logic	[7:0] goldRGB,   
+					input    logic objectsDrawingRequest, 
+					input		logic	[7:0] objectsRGB,   
 					
 		  // background 
 					input		logic	[7:0] backGroundRGB, 
@@ -41,14 +41,14 @@ begin
 	end
 	
 	else begin
-		if (smileyDrawingRequest == 1'b1 )   
-			RGBOut <= smileyRGB;  //first priority 
+		if (minerDrawingRequest == 1'b1 )   
+			RGBOut <= minerRGB;  //first priority 
 		else if (dustDrawingRequest == 1'b1)
 			RGBOut <= dustRGB;
 		else if (timerDrawingRequest == 1'b1)
 			RGBOut <= timerRGB;
- 		else if (GoldDrawingRequest == 1'b1)
-			RGBOut <= goldRGB;
+ 		else if (objectsDrawingRequest == 1'b1)
+			RGBOut <= objectsRGB;
 		else if (BGDrawingRequest == 1'b1)
 			RGBOut <= backGroundRGB ;
 		else RGBOut <= RGB_MIF ;// last priority 

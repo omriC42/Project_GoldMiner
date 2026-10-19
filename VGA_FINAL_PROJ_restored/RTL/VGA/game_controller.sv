@@ -7,7 +7,7 @@ module	game_controller	(
 			input	logic	clk,
 			input	logic	resetN,
 			input	logic	startOfFrame,  // short pulse every start of frame
-			input	logic	drawing_request_smiley,
+			input	logic	drawing_request_miner,
 			input	logic	drawing_request_boarders,
 
 			output logic collision,      // active in case of collision between two objects
@@ -16,7 +16,7 @@ module	game_controller	(
 
 logic flag ; // a semaphore to set the output only once per frame regardless of number of collisions
 
-assign collision = (drawing_request_smiley && drawing_request_boarders);
+assign collision = (drawing_request_miner && drawing_request_boarders);
 
 always_ff@(posedge clk or negedge resetN)
 begin

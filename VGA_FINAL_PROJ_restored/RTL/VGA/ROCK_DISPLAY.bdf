@@ -307,8 +307,8 @@ agreement for further details.
 	(port
 		(pt 0 128)
 		(input)
-		(text "collision_Smiley_Hart" (rect 0 0 106 12)(font "Arial" ))
-		(text "collision_Smiley_Hart" (rect 21 123 127 135)(font "Arial" ))
+		(text "collision_Miner_Hart" (rect 0 0 106 12)(font "Arial" ))
+		(text "collision_Miner_Hart" (rect 21 123 127 135)(font "Arial" ))
 		(line (pt 0 128)(pt 16 128))
 	)
 	(port

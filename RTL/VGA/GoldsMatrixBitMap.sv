@@ -10,7 +10,7 @@ module	GoldsMatrixBitMap	(
 					input logic	[10:0] offsetY,
 					input	logic	InsideRectangle, // input that the pixel is within the grid area
 					input logic random_hart, // unused
-					input logic collision_Smiley_Hart, // collision from miner hook/smiley
+					input logic collision_Miner_Hart, // collision from miner hook/miner
 
 					output	logic	drawingRequest, // output that the pixel should be displayed 
 					output	logic	[7:0] RGBout  // rgb value from the bitmap (3-3-2 format)
@@ -86,7 +86,7 @@ begin
 		RGBout <= TRANSPARENT_ENCODING ; // default 
 		
 		// Clear object from grid cell on collision with miner's hook
-		if (collision_Smiley_Hart && InsideRectangle) begin
+		if (collision_Miner_Hart && InsideRectangle) begin
 			MazeBitMapMask[offsetY_MSB][offsetX_MSB] <= 3'd0;
 		end
 		

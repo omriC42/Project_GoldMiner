@@ -65,7 +65,7 @@ begin
 		
 		// Borders and color strip DISABLED (Sep 2026) so the background picture (VGA_BG.mif)
 		// shows clean. boardersDrawReq now stays 0, so the mux always shows the picture here.
-		// The miner is still kept on screen by the X limits in smiley_move.
+		// The miner is still kept on screen by the X limits in miner_move.
 		// To bring them back, remove the /* and */ below.
 /*
 		if (   

@@ -11,9 +11,9 @@ module	objects_mux	(
 //		--------	Clock Input	 	
 					input		logic	clk,
 					input		logic	resetN,
-		   // smiley 
-					input		logic	smileyDrawingRequest, // two set of inputs per unit
-					input		logic	[7:0] smileyRGB, 
+		   // miner 
+					input		logic	minerDrawingRequest, // two set of inputs per unit
+					input		logic	[7:0] minerRGB, 
 					     
 		  // add the box for numbers here 
 			
@@ -38,8 +38,8 @@ begin
 	end
 	
 	else begin
-		if (smileyDrawingRequest == 1'b1 )   
-			RGBOut <= smileyRGB;  //first priority 
+		if (minerDrawingRequest == 1'b1 )   
+			RGBOut <= minerRGB;  //first priority 
 		 
 //--- add logic for box here ------------------------------------------------------		
 

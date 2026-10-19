@@ -76,8 +76,8 @@ agreement for further details.
 	(port
 		(pt 0 144)
 		(input)
-		(text "collision_Smiley_Hart" (rect 0 0 128 19)(font "Intel Clear" (font_size 8)))
-		(text "collision_Smiley_Hart" (rect 21 139 149 158)(font "Intel Clear" (font_size 8)))
+		(text "collision_Miner_Hart" (rect 0 0 128 19)(font "Intel Clear" (font_size 8)))
+		(text "collision_Miner_Hart" (rect 21 139 149 158)(font "Intel Clear" (font_size 8)))
 		(line (pt 0 144)(pt 16 144))
 	)
 	(port

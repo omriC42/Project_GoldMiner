@@ -136,7 +136,7 @@ agreement for further details.
 	(input)
 	(rect 984 520 1192 536)
 	(text "INPUT" (rect 165 0 193 10)(font "Arial" (font_size 6)))
-	(text "collision_Smiley_Hart" (rect 5 0 111 12)(font "Arial" ))
+	(text "collision_Miner_Hart" (rect 5 0 111 12)(font "Arial" ))
 	(pt 208 8)
 	(drawing
 		(line (pt 124 12)(pt 149 12))
@@ -229,8 +229,8 @@ agreement for further details.
 	(port
 		(pt 0 128)
 		(input)
-		(text "collision_Smiley_Hart" (rect 0 0 106 12)(font "Arial" ))
-		(text "collision_Smiley_Hart" (rect 21 123 127 135)(font "Arial" ))
+		(text "collision_Miner_Hart" (rect 0 0 106 12)(font "Arial" ))
+		(text "collision_Miner_Hart" (rect 21 123 127 135)(font "Arial" ))
 		(line (pt 0 128)(pt 16 128))
 	)
 	(port

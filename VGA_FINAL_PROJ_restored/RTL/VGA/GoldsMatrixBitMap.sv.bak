@@ -11,7 +11,7 @@ module	HartsMatrixBitMap	(
 					input logic	[10:0] offsetY,
 					input	logic	InsideRectangle, //input that the pixel is within a bracket 
 					input logic random_hart,
-					input logic collision_Smiley_Hart,
+					input logic collision_Miner_Hart,
 
 					output	logic	drawingRequest, //output that the pixel should be dispalyed 
 					output	logic	[7:0] RGBout  //rgb value from the bitmap 
@@ -148,7 +148,7 @@ begin
 	end
 	else begin
 		RGBout <= TRANSPARENT_ENCODING ; // default 
-		if (collision_Smiley_Hart)
+		if (collision_Miner_Hart)
 			MazeBitMapMask[offsetY_MSB][offsetX_MSB] <= 4'h00;  // clear entry 
 		
 		if (InsideRectangle == 1'b1 )	

@@ -9,8 +9,7 @@ module	GoldsMatrixBitMap	(
 					input logic	[10:0] offsetX,// offset from top left position 
 					input logic	[10:0] offsetY,
 					input	logic	InsideRectangle, // input that the pixel is within the grid area
-					input logic random_hart, // unused
-					input logic collision_Miner_Gold, // collision from miner hook/smiley
+					input logic collision_Hook_Object, // collision from miner hook/miner
 					input logic newLevel, // one clock pulse from game_hud: level won -> build a new layout
 
 					output	logic	drawingRequest, // output that the pixel should be displayed 
@@ -21,8 +20,8 @@ module	GoldsMatrixBitMap	(
 
 localparam logic [7:0] TRANSPARENT_ENCODING = 8'hFF ;// RGB value representing a transparent pixel 
 
-localparam  int TILE_NUMBER_OF_X_BITS = 6;  // 2^6 = 64 pixels per cell_idx width
-localparam  int TILE_NUMBER_OF_Y_BITS = 6;  // 2^6 = 64 pixels per cell_idx height
+localparam  int TILE_NUMBER_OF_X_BITS = 6;  // 2^6 = 64 pixels per cell width
+localparam  int TILE_NUMBER_OF_Y_BITS = 6;  // 2^6 = 64 pixels per cell height
 
 localparam  int MAZE_NUMBER_OF__X_BITS = 3;  // 2^3 = 8 columns (8*64 = 512 pixels wide)
 localparam  int MAZE_NUMBER_OF__Y_BITS = 2;  // 2^2 = 4 rows
@@ -100,13 +99,13 @@ end
 // Quartus replace the grid registers with latches (warnings 13004/13310).
 logic loadLayout;
 logic clearCell;   // the hook touches an object on the current pixel
-assign clearCell = collision_Miner_Gold && InsideRectangle && (offsetY_MSB != 2'b00)
+assign clearCell = collision_Hook_Object && InsideRectangle && (offsetY_MSB != 2'b00)
                    && (MazeBitMapMask[offsetY_MSB][offsetX_MSB] != 3'd0);
 
 always_ff @(posedge clk)
 begin
 	if (loadLayout || newLevel) begin
-			// Row 0 is ALWAYS empty (smiley/miner area)
+			// Row 0 is ALWAYS empty (miner/miner area)
 			for (int c = 0; c < NUM_COLS; c++)
 				MazeBitMapMask[0][c] <= 3'd0;
 		

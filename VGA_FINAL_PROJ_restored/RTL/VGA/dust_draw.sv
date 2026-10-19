@@ -21,7 +21,7 @@ module dust_draw (
     input  logic               startOfFrame,
     input  logic        [10:0] pixelX,      // current VGA pixel
     input  logic        [10:0] pixelY,
-    input  logic signed [10:0] minerX,      // miner top-left (from smiley_move)
+    input  logic signed [10:0] minerX,      // miner top-left (from miner_move)
     input  logic signed [10:0] minerY,
     output logic               drawingRequest,
     output logic         [7:0] RGBout
