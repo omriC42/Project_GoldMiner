@@ -52,7 +52,7 @@ set_location_assignment PIN_V25 -to SW[5] ; #SW[5]
 set_location_assignment PIN_AC28 -to SW[6] ;# SW[6]
 set_location_assignment PIN_AD30 -to SW[7] ;#SW[7]
 set_location_assignment PIN_AC29 -to SW[8] ;#SW[8]
-set_location_assignment PIN_AA30 -to SW[9] ;#ENABLE_SOF --if want to stop smiley move with sw9
+set_location_assignment PIN_AA30 -to SW[9] ;#ENABLE_SOF --if want to stop miner move with sw9
 
 
 #============================================================

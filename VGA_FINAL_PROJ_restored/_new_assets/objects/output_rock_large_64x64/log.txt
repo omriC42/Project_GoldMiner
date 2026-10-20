@@ -1,0 +1,6 @@
+File: rock_large
+Time: 2026-10-19 22:22:59.087060
+Mode: 8-bit
+Resolution: 64x64
+Scale: 2 (from 256x256)
+Output dir: _new_assets\objects\output_rock_large_64x64

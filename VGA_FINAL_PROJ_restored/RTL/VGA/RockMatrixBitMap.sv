@@ -11,7 +11,7 @@ module	RockMatrixBitMap	(
 					input logic	[10:0] offsetY,
 					input	logic	InsideRectangle, //input that the pixel is within a bracket 
 					input logic random_hart,
-					input logic collision_Smiley_Hart,
+					input logic collision_Miner_Hart,
 
 					output	logic	drawingRequest, //output that the pixel should be dispalyed 
 					output	logic	[7:0] RGBout  //rgb value from the bitmap 
@@ -56,14 +56,14 @@ localparam  int MAZE_HEIGHT_Y = 1 << MAZE_NUMBER_OF__Y_BITS ;
 logic [0:(MAZE_HEIGHT_Y-1)][0:(MAZE_WIDTH_X-1)] [3:0]  MazeBitMapMask ;  
 
 logic [0:(MAZE_HEIGHT_Y-1)][0:(MAZE_WIDTH_X-1)] [3:0]   MazeDefaultBitMapMask= // defult table to load on reset 
-{{64'h00001110000011100},
- {64'h00010001101100010},
- {64'h00001000010000100},
- {64'h00000100000001000},
- {64'h00000010000010000},
- {64'h00000001000100000},
- {64'h00000000101000000},
- {64'h00000000010000000}};
+{{64'h00000000000000000},
+ {64'h00000000000000000},
+ {64'h00000000000000000},
+ {64'h00000000000000000},
+ {64'h00000000000000000},
+ {64'h00000000000000000},
+ {64'h00000000000000000},
+ {64'h00000000000000000}};
 
 
  
@@ -148,7 +148,7 @@ begin
 	end
 	else begin
 		RGBout <= TRANSPARENT_ENCODING ; // default 
-		if (collision_Smiley_Hart)
+		if (collision_Miner_Hart)
 			MazeBitMapMask[offsetY_MSB][offsetX_MSB] <= 4'h00;  // clear entry 
 		
 		if (InsideRectangle == 1'b1 )	

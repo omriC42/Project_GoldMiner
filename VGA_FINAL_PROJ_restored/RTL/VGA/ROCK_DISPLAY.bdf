@@ -165,7 +165,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect -1840 -840 -1616 -696)
+	(rect -1864 -840 -1640 -696)
 	(text "square_object" (rect 5 0 73 12)(font "Arial" ))
 	(text "inst28" (rect 8 128 36 145)(font "Intel Clear" ))
 	(port
@@ -256,10 +256,10 @@ agreement for further details.
 	(drawing
 		(rectangle (rect 16 16 208 128))
 	)
-	(annotation_block (parameter)(rect -1872 -960 -1617 -884))
+	(annotation_block (parameter)(rect -1896 -960 -1641 -884))
 )
 (symbol
-	(rect -1296 -904 -1048 -728)
+	(rect -1304 -904 -1056 -728)
 	(text "RockMatrixBitMap" (rect 5 0 93 12)(font "Arial" ))
 	(text "inst" (rect 8 160 25 172)(font "Arial" ))
 	(port
@@ -307,36 +307,44 @@ agreement for further details.
 	(port
 		(pt 0 128)
 		(input)
-		(text "collision_Smiley_Hart" (rect 0 0 106 12)(font "Arial" ))
-		(text "collision_Smiley_Hart" (rect 21 123 127 135)(font "Arial" ))
+		(text "collision_Miner_Hart" (rect 0 0 106 12)(font "Arial" ))
+		(text "collision_Miner_Hart" (rect 21 123 127 135)(font "Arial" ))
 		(line (pt 0 128)(pt 16 128))
 	)
 	(port
 		(pt 248 32)
 		(output)
 		(text "drawingRequest" (rect 0 0 77 12)(font "Arial" ))
-		(text "drawingRequest" (rect 162 27 239 39)(font "Arial" ))
+		(text "drawingRequest" (rect 162 27 227 39)(font "Arial" ))
 		(line (pt 248 32)(pt 232 32))
 	)
 	(port
 		(pt 248 48)
 		(output)
 		(text "RGBout[7..0]" (rect 0 0 64 12)(font "Arial" ))
-		(text "RGBout[7..0]" (rect 173 43 237 55)(font "Arial" ))
+		(text "RGBout[7..0]" (rect 173 43 227 55)(font "Arial" ))
 		(line (pt 248 48)(pt 232 48)(line_width 3))
 	)
 	(drawing
 		(rectangle (rect 16 16 232 160))
 	)
 )
-(connector
-	(text "HART_SELECT" (rect -1368 -768 -1299 -751)(font "Intel Clear" ))
-	(pt -1384 -696)
-	(pt -1400 -696)
-)
-(connector
-	(pt -1400 -632)
-	(pt -1352 -632)
+(symbol
+	(rect -1408 -640 -1376 -608)
+	(text "GND" (rect 8 16 29 26)(font "Arial" (font_size 6)))
+	(text "inst1" (rect 3 21 25 38)(font "Intel Clear" )(invisible))
+	(port
+		(pt 16 0)
+		(output)
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(line (pt 16 8)(pt 16 0))
+	)
+	(drawing
+		(line (pt 8 8)(pt 16 16))
+		(line (pt 16 16)(pt 24 8))
+		(line (pt 8 8)(pt 24 8))
+	)
 )
 (connector
 	(pt -944 -832)
@@ -345,69 +353,6 @@ agreement for further details.
 (connector
 	(pt -960 -816)
 	(pt -944 -816)
-	(bus)
-)
-(connector
-	(text "resetN" (rect -1358 -872 -1328 -855)(font "Intel Clear" ))
-	(pt -1384 -856)
-	(pt -1296 -856)
-)
-(connector
-	(pt -1384 -792)
-	(pt -1296 -792)
-)
-(connector
-	(pt -1384 -696)
-	(pt -1384 -792)
-)
-(connector
-	(text "clk" (rect -1358 -888 -1344 -871)(font "Intel Clear" ))
-	(pt -1296 -872)
-	(pt -1384 -872)
-)
-(connector
-	(pt -1352 -632)
-	(pt -1352 -776)
-)
-(connector
-	(pt -1352 -776)
-	(pt -1296 -776)
-)
-(connector
-	(pt -952 -832)
-	(pt -952 -872)
-)
-(connector
-	(pt -960 -816)
-	(pt -960 -856)
-	(bus)
-)
-(connector
-	(text "BoxHartTopLeftX[10..0]" (rect -1584 -856 -1474 -839)(font "Intel Clear" ))
-	(pt -1584 -840)
-	(pt -1296 -840)
-	(bus)
-)
-(connector
-	(text "BoxHartTopLeftY[10..0]" (rect -1584 -840 -1474 -823)(font "Intel Clear" ))
-	(pt -1576 -824)
-	(pt -1296 -824)
-	(bus)
-)
-(connector
-	(text "boxHartDrawingRequest" (rect -1584 -824 -1470 -807)(font "Intel Clear" ))
-	(pt -1568 -808)
-	(pt -1296 -808)
-)
-(connector
-	(text "HartDrwingRequest" (rect -1046 -888 -954 -871)(font "Intel Clear" ))
-	(pt -952 -872)
-	(pt -1048 -872)
-)
-(connector
-	(text "hartRGB[7..0]" (rect -1022 -872 -959 -855)(font "Intel Clear" ))
-	(pt -960 -856)
-	(pt -1048 -856)
 	(bus)
 )
 (connector
@@ -462,22 +407,81 @@ agreement for further details.
 	(bus)
 )
 (connector
+	(text "resetN" (rect -1366 -872 -1336 -855)(font "Intel Clear" ))
+	(pt -1392 -856)
+	(pt -1304 -856)
+)
+(connector
+	(pt -1384 -792)
+	(pt -1304 -792)
+)
+(connector
+	(pt -1384 -696)
+	(pt -1384 -792)
+)
+(connector
+	(text "clk" (rect -1366 -888 -1352 -871)(font "Intel Clear" ))
+	(pt -1304 -872)
+	(pt -1392 -872)
+)
+(connector
+	(pt -1352 -776)
+	(pt -1304 -776)
+)
+(connector
+	(pt -952 -832)
+	(pt -952 -872)
+)
+(connector
+	(pt -960 -816)
+	(pt -960 -856)
+	(bus)
+)
+(connector
+	(text "BoxHartTopLeftX[10..0]" (rect -1592 -856 -1482 -839)(font "Intel Clear" ))
+	(pt -1584 -840)
+	(pt -1304 -840)
+	(bus)
+)
+(connector
+	(text "BoxHartTopLeftY[10..0]" (rect -1592 -840 -1482 -823)(font "Intel Clear" ))
+	(pt -1576 -824)
+	(pt -1304 -824)
+	(bus)
+)
+(connector
+	(text "boxHartDrawingRequest" (rect -1592 -824 -1478 -807)(font "Intel Clear" ))
+	(pt -1568 -808)
+	(pt -1304 -808)
+)
+(connector
+	(text "HartDrwingRequest" (rect -1054 -888 -962 -871)(font "Intel Clear" ))
+	(pt -1056 -872)
+	(pt -952 -872)
+)
+(connector
+	(text "hartRGB[7..0]" (rect -1030 -872 -967 -855)(font "Intel Clear" ))
+	(pt -1056 -856)
+	(pt -960 -856)
+	(bus)
+)
+(connector
 	(pt -1952 -800)
 	(pt -1952 -808)
 )
 (connector
-	(text "clk" (rect -1982 -824 -1968 -807)(font "Intel Clear" ))
+	(text "clk" (rect -2006 -824 -1992 -807)(font "Intel Clear" ))
 	(pt -1952 -808)
-	(pt -1840 -808)
+	(pt -1864 -808)
 )
 (connector
 	(pt -1944 -784)
 	(pt -1944 -792)
 )
 (connector
-	(text "resetN" (rect -1982 -808 -1952 -791)(font "Intel Clear" ))
+	(text "resetN" (rect -2006 -808 -1976 -791)(font "Intel Clear" ))
 	(pt -1944 -792)
-	(pt -1840 -792)
+	(pt -1864 -792)
 )
 (connector
 	(pt -1936 -768)
@@ -485,9 +489,9 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "pixelX[10..0]" (rect -1982 -792 -1923 -775)(font "Intel Clear" ))
+	(text "pixelX[10..0]" (rect -2006 -792 -1947 -775)(font "Intel Clear" ))
 	(pt -1936 -776)
-	(pt -1840 -776)
+	(pt -1864 -776)
 	(bus)
 )
 (connector
@@ -496,9 +500,9 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "pixelY[10..0]" (rect -1982 -776 -1923 -759)(font "Intel Clear" ))
+	(text "pixelY[10..0]" (rect -2006 -776 -1947 -759)(font "Intel Clear" ))
 	(pt -1928 -760)
-	(pt -1840 -760)
+	(pt -1864 -760)
 	(bus)
 )
 (connector
@@ -508,7 +512,7 @@ agreement for further details.
 )
 (connector
 	(pt -1960 -744)
-	(pt -1840 -744)
+	(pt -1864 -744)
 	(bus)
 )
 (connector
@@ -518,7 +522,7 @@ agreement for further details.
 )
 (connector
 	(pt -1920 -728)
-	(pt -1840 -728)
+	(pt -1864 -728)
 	(bus)
 )
 (connector
@@ -536,18 +540,31 @@ agreement for further details.
 	(pt -1568 -776)
 )
 (connector
-	(pt -1616 -808)
+	(pt -1640 -808)
 	(pt -1584 -808)
 	(bus)
 )
 (connector
-	(pt -1616 -792)
+	(pt -1640 -792)
 	(pt -1576 -792)
 	(bus)
 )
 (connector
-	(pt -1616 -776)
+	(pt -1640 -776)
 	(pt -1568 -776)
+)
+(connector
+	(pt -1352 -640)
+	(pt -1392 -640)
+)
+(connector
+	(pt -1352 -776)
+	(pt -1352 -640)
+)
+(connector
+	(text "<<__$DEF_ALIAS7822>>" (rect -1344 -680 -1226 -663)(font "Intel Clear" )(invisible))
+	(pt -1384 -696)
+	(pt -1400 -696)
 )
 (junction (pt -1960 -800))
 (junction (pt -1960 -784))

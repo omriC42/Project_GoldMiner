@@ -1,0 +1,6 @@
+File: gold_medium
+Time: 2026-10-19 22:22:59.063630
+Mode: 8-bit
+Resolution: 32x32
+Scale: 3 (from 256x256)
+Output dir: _new_assets\objects\output_gold_medium_32x32

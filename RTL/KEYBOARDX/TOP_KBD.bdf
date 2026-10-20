@@ -261,7 +261,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect 584 280 784 408)
+	(rect 600 280 800 408)
 	(text "KBDINTF" (rect 5 0 59 19)(font "Intel Clear" (font_size 8)))
 	(text "inst" (rect 8 107 24 124)(font "Intel Clear" ))
 	(port
@@ -438,40 +438,6 @@ agreement for further details.
 	)
 )
 (connector
-	(text "clk" (rect 518 296 532 313)(font "Intel Clear" ))
-	(pt 504 312)
-	(pt 584 312)
-)
-(connector
-	(text "resetN" (rect 514 312 544 329)(font "Intel Clear" ))
-	(pt 504 328)
-	(pt 584 328)
-)
-(connector
-	(pt 504 344)
-	(pt 584 344)
-)
-(connector
-	(pt 504 360)
-	(pt 584 360)
-)
-(connector
-	(text "keyCode[8..0]" (rect 792 296 858 313)(font "Intel Clear" ))
-	(pt 784 312)
-	(pt 872 312)
-	(bus)
-)
-(connector
-	(text "make" (rect 810 312 837 329)(font "Intel Clear" ))
-	(pt 784 328)
-	(pt 872 328)
-)
-(connector
-	(text "brake" (rect 811 328 838 345)(font "Intel Clear" ))
-	(pt 784 344)
-	(pt 872 344)
-)
-(connector
 	(text "clk" (rect 191 496 205 513)(font "Intel Clear" ))
 	(pt 168 512)
 	(pt 216 512)
@@ -542,5 +508,39 @@ agreement for further details.
 (connector
 	(pt 448 672)
 	(pt 664 672)
+)
+(connector
+	(text "keyCode[8..0]" (rect 808 296 874 313)(font "Intel Clear" ))
+	(pt 800 312)
+	(pt 888 312)
+	(bus)
+)
+(connector
+	(text "make" (rect 826 312 853 329)(font "Intel Clear" ))
+	(pt 800 328)
+	(pt 888 328)
+)
+(connector
+	(text "brake" (rect 827 328 854 345)(font "Intel Clear" ))
+	(pt 800 344)
+	(pt 888 344)
+)
+(connector
+	(text "clk" (rect 534 296 548 313)(font "Intel Clear" ))
+	(pt 504 312)
+	(pt 600 312)
+)
+(connector
+	(text "resetN" (rect 530 312 560 329)(font "Intel Clear" ))
+	(pt 504 328)
+	(pt 600 328)
+)
+(connector
+	(pt 504 344)
+	(pt 600 344)
+)
+(connector
+	(pt 504 360)
+	(pt 600 360)
 )
 (text "// (c) Technion IIT, Department of Electrical Engineering 2025" (rect 152 176 511 195)(font "Intel Clear" (font_size 8)))

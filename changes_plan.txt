@@ -1,0 +1,40 @@
+This document explains the logic changes made to `GoldsMatrixBitMap.sv` and `RockMatrixBitMap.sv` to adopt the multi-tile object sizing and randomization from the `bomber man` project, while keeping the original `GoldMiner` graphics.
+
+### 1. The "Objects of Different Sizes" Logic (2x2 and 3x3 Chunks)
+
+In your original implementation, the objects were constrained to a single 32x32 pixel tile. To simulate sizes, you were scaling down the images within the 32x32 frame (e.g., leaving transparent padding to make a 24x24 or 16x16 rock). 
+
+Your friend's approach instead allows an object to span **multiple** 32x32 tiles on the screen by grouping them together.
+Here is how it works:
+- The screen is divided into a grid, defined by `MazeDefaultBitMapMask` (which is 16 tiles wide and 16 or 8 tiles high depending on the module).
+- To create a large 3x3 object (which is 96x96 pixels in total), we place a specific pattern of numbers in the mask:
+  Row 1: `3`, `7`, `4`
+  Row 2: `8`, `9`, `A`
+  Row 3: `5`, `B`, `6`
+- In the `always_comb` block, the system calculates `is3x3` and `is2x2`. When the VGA scanner hits any of these specific numbers, it mathematically looks at the surrounding cells in the matrix to verify if the full `3x3` or `2x2` pattern exists.
+- Once verified, it calculates a "base" coordinate (`baseX3`, `baseY3`). This is the top-left corner of the object.
+- **The Graphics:** When drawing (`drawingRequest`), the system encounters any of these numbers (`4'h3` through `4'hB`) and draws `object_colors[2]` (your original large 32x32 graphic). Visually, this creates a cluster of 4 or 9 identical rocks/golds tiled closely together, giving the appearance of a massive obstacle!
+
+### 2. The Collision Logic Update
+
+When your player (`Miner`) collides with an object, the `collision_Miner_Hart` signal goes high. 
+If we only erased the single tile you touched, the rest of the 3x3 object would remain on the screen looking broken. 
+To fix this, we modified the `always_ff` block:
+- If `is3x3` is true, we force all 9 tiles (e.g., `MazeBitMapMask[baseY3+0][baseX3+0]` to `[baseY3+2][baseX3+2]`) to `4'h0`.
+- If `is2x2` is true, we force all 4 tiles to `4'h0`.
+This ensures the entire chunk disappears gracefully when hit.
+
+### 3. The Randomization Factor
+
+Your friend's codebase statically defined levels, but you wanted a randomization factor for the layout. 
+To accomplish this without tearing up the game controller architecture, we leveraged the existing `random_hart` signal. 
+- `random_hart` is a fast-toggling 1-bit signal coming from the top-level game controller. 
+- Inside `GoldsMatrixBitMap.sv` and `RockMatrixBitMap.sv`, the `MazeDefaultBitMapMask` is now an array containing **two different configurations** of the maze layout (Index 0 and Index 1).
+- On game reset (`!resetN`), the module does: `MazeBitMapMask <= MazeDefaultBitMapMask[random_hart];`
+- Because `random_hart` is constantly changing rapidly in the background, exactly when you hit reset acts as a "coin flip", randomly selecting one of the two configurations for the Golds and Rocks. This adds replayability and unpredictability to the map generation!
+
+### QA and Testing
+To QA this setup, compile the project in Quartus and deploy it to the DE10-Lite kit. 
+1. Watch the screen on reset. You should see different variations of the map load when you restart the game.
+2. Observe the giant 2x2 and 3x3 clustered objects.
+3. Collide with a giant object and ensure the entire cluster disappears at once.
