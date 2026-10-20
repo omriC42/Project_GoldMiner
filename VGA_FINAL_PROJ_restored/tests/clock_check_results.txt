@@ -1,0 +1,19 @@
+[VGA] clocks per line  = 833 (counter runs 0..832 inclusive; nominal 832)
+[VGA] lines per frame  = 521 (counter runs 0..520 inclusive; nominal 520)
+[VGA] startOfFrame period = 433993 clocks, all equal: True
+[VGA] startOfFrame rate   = 72.58 Hz  (code comments assume 30 Hz -> x2.42)
+
+[Updated-upstream variant (retract NOT gated by startOfFrame)]
+  swing: 15 deg per frame -> full 0->180->0 cycle = 24 frames = 331 ms  (3.0 swings/s)
+  swing angular speed = 1089 deg/s
+  shoot: +5 px/frame = 363 px/s; 40->400 px in 992 ms
+  retract 400->40 px: 2.29 us
+
+[Stashed variant (retract gated by startOfFrame)]
+  swing: 15 deg per frame -> full 0->180->0 cycle = 24 frames = 331 ms  (3.0 swings/s)
+  swing angular speed = 1089 deg/s
+  shoot: +5 px/frame = 363 px/s; 40->400 px in 992 ms
+  retract 400->40 px: 992 ms
+
+[miner, for comparison] INITIAL_X_SPEED=40/64 px per frame = 45 px/s
+[if frames were 30 Hz] swing cycle = 800 ms, shoot = 150 px/s

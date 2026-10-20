@@ -1,0 +1,8 @@
+steps x64: swing 65 shoot 176 retract 265
+T2 full swing 120 frames = 1.65 s (218 deg/s), max jump 2 idx
+T3 shoot speed 200.3 px/s
+T3 floor: Yend=479 R=315
+T4 retract speed 297.6 px/s
+T4 back to swing, R=40
+T8 right wall Xend=637
+T8 left wall Xend=0

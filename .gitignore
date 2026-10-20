@@ -12,9 +12,14 @@
 #============================================================================
 db/
 incremental_db/
-output_files/
 hc_output/
 greybox_tmp/
+# output_files: ignore the compile results, but KEEP SignalTap (.stp) and the programmer chains (.cdf)
+# ("**/" = in every folder; a plain "output_files/" would hide the .stp too)
+**/output_files/*
+!**/output_files/*.stp
+!**/output_files/*.cdf
+c5_pin_model_dump.txt
 
 #============================================================================
 # User-Specific Workspace Settings
@@ -22,6 +27,7 @@ greybox_tmp/
 *.qws
 *.wsf
 *.bak
+
 #============================================================================
 # Programming and Report Artifacts
 #============================================================================
@@ -30,6 +36,19 @@ greybox_tmp/
 *.rpt
 *.summary
 *.pin
+
+#============================================================================
+# ModelSim simulation output (re-created by every "do run_*.do")
+#============================================================================
+**/tests/lib_*/
+**/tests/work/
+**/tests/frames/
+**/tests/waveforms/
+**/sim/lib_*/
+**/sim/frames/
+*.wlf
+transcript
+test_windows.do
 
 #============================================================================
 # Explicit Whitelist

@@ -1,0 +1,4 @@
+# Step 3.5 - standalone hook speed test (Gold Miner project)
+QUARTUS_VERSION = "17.0"
+DATE = "19:30:00  October 19, 2026"
+PROJECT_REVISION = "hook_speed_test"

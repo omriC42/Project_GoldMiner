@@ -7,6 +7,8 @@
 // updated to state machine Dudy March 2023 
 // update the hit and collision algoritm - Eyal MAR 2024
 // good practice code - Dudy MAR 2025
+// Oct 2026 (hook integration Step 5): input hookBusy locks the miner while the hook is out
+//   (keys ignored, speed forced to 0); output minerMoving = key 4 or key 6 held (no shooting while moving).
 
 module	miner_move	(	
  
@@ -17,6 +19,8 @@ module	miner_move	(
 					input	 logic toggle_x_key,      //toggle X   
 					input  logic collision,         //collision if miner hits an object
 					input  logic [2:0] HitEdgeCode, 
+					input  logic hookBusy,          // 1 while the hook is out -> miner locked
+					output logic minerMoving,       // 1 while key 4 or key 6 is held
 					output logic signed 	[10:0] topLeftX, // output the top left corner 
 					output logic signed	[10:0] topLeftY  // can be negative , if the object is partliy outside 
 					
@@ -174,6 +178,11 @@ begin : fsm_sync_proc
 
 				Yspeed <= 0 ;
 				hit_reg <= 5'b00000;						
+				// hook is out: the miner must not move at all (overrides everything above)
+				if (hookBusy) begin
+					Xspeed       <= 0;
+					target_speed <= 0;
+				end
 				SM_Motion <= POSITION_CHANGE_ST ; 
 		end 
 
@@ -213,6 +222,8 @@ begin : fsm_sync_proc
 
 end // end fsm_sync
 
+
+assign minerMoving = Y_direction_key || toggle_x_key;   // key 4 or key 6 held
 
 //return from FIXED point trunc back to prame size parameters 
   

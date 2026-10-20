@@ -212,6 +212,22 @@ agreement for further details.
 		(line (pt 78 12)(pt 82 8))
 	)
 )
+(pin
+	(output)
+	(rect -944 -728 -768 -712)
+	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
+	(text "collectType[2..0]" (rect 90 0 172 12)(font "Arial" ))
+	(pt 0 8)
+	(drawing
+		(line (pt 0 8)(pt 52 8))
+		(line (pt 52 4)(pt 78 4))
+		(line (pt 52 12)(pt 78 12))
+		(line (pt 52 12)(pt 52 4))
+		(line (pt 78 4)(pt 82 8))
+		(line (pt 82 8)(pt 78 12))
+		(line (pt 78 12)(pt 82 8))
+	)
+)
 (symbol
 	(rect -1816 -848 -1592 -704)
 	(text "square_object" (rect 5 0 73 12)(font "Arial" ))
@@ -387,6 +403,13 @@ agreement for further details.
 		(text "collectValue[5..0]" (rect 173 75 257 87)(font "Arial" ))
 		(line (pt 248 80)(pt 232 80)(line_width 3))
 	)
+	(port
+		(pt 248 96)
+		(output)
+		(text "collectType[2..0]" (rect 0 0 82 12)(font "Arial" ))
+		(text "collectType[2..0]" (rect 145 91 227 103)(font "Arial" ))
+		(line (pt 248 96)(pt 232 96)(line_width 3))
+	)
 	(drawing
 		(rectangle (rect 16 16 232 160))
 	)
@@ -405,6 +428,18 @@ agreement for further details.
 	(text "collectValue[5..0]" (rect -998 -752 -915 -735)(font "Intel Clear" ))
 	(pt -1000 -736)
 	(pt -944 -736)
+	(bus)
+)
+(connector
+	(text "collectType[2..0]" (rect -1054 -864 -952 -847)(font "Intel Clear" ))
+	(pt -1056 -848)
+	(pt -976 -848)
+	(bus)
+)
+(connector
+	(text "collectType[2..0]" (rect -998 -736 -896 -719)(font "Intel Clear" ))
+	(pt -1000 -720)
+	(pt -944 -720)
 	(bus)
 )
 (connector
