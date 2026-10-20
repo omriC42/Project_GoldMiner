@@ -1145,7 +1145,7 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect -4536 -200 -4240 -8)
+	(rect -4520 -200 -4224 -8)
 	(text "Objects_DISPLAY" (rect 5 0 110 19)(font "Intel Clear" (font_size 8)))
 	(text "inst27" (rect 8 171 36 188)(font "Intel Clear" ))
 	(port
@@ -2052,41 +2052,14 @@ agreement for further details.
 	(pt -4200 656)
 )
 (connector
-	(text "newLevel" (rect -4614 -56 -4567 -39)(font "Intel Clear" ))
-	(pt -4616 -40)
-	(pt -4536 -40)
+	(text "objectCollected" (rect -4222 -152 -4148 -135)(font "Intel Clear" ))
+	(pt -4224 -136)
+	(pt -4144 -136)
 )
 (connector
-	(text "objectCollected" (rect -4238 -152 -4164 -135)(font "Intel Clear" ))
-	(pt -4240 -136)
-	(pt -4160 -136)
-)
-(connector
-	(text "objectValue[5..0]" (rect -4238 -136 -4158 -119)(font "Intel Clear" ))
-	(pt -4240 -120)
-	(pt -4160 -120)
-	(bus)
-)
-(connector
-	(text "clk" (rect -4576 -184 -4562 -167)(font "Intel Clear" ))
-	(pt -4672 -168)
-	(pt -4536 -168)
-)
-(connector
-	(text "gameResetN" (rect -4582 -168 -4521 -151)(font "Intel Clear" ))
-	(pt -4672 -152)
-	(pt -4536 -152)
-)
-(connector
-	(text "pixelX[10..0]" (rect -4624 -152 -4565 -135)(font "Intel Clear" ))
-	(pt -4536 -136)
-	(pt -4664 -136)
-	(bus)
-)
-(connector
-	(text "pixelY[10..0]" (rect -4608 -136 -4549 -119)(font "Intel Clear" ))
-	(pt -4536 -120)
-	(pt -4672 -120)
+	(text "objectValue[5..0]" (rect -4222 -136 -4142 -119)(font "Intel Clear" ))
+	(pt -4224 -120)
+	(pt -4144 -120)
 	(bus)
 )
 (connector
@@ -2095,28 +2068,19 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt -4696 -88)
-	(pt -4536 -88)
-	(bus)
-)
-(connector
-	(pt -4624 -56)
-	(pt -4536 -56)
-)
-(connector
 	(text "collision_Hook_Object" (rect -4648 -44 -4631 62)(font "Intel Clear" )(vertical))
 	(pt -4624 8)
 	(pt -4624 -56)
 )
 (connector
-	(text "objectsDrawingRequest" (rect -4232 -184 -4122 -167)(font "Intel Clear" ))
-	(pt -4136 -168)
-	(pt -4240 -168)
+	(text "objectsDrawingRequest" (rect -4216 -184 -4106 -167)(font "Intel Clear" ))
+	(pt -4120 -168)
+	(pt -4224 -168)
 )
 (connector
-	(text "objectsRGB[7..0]" (rect -4189 -168 -4112 -151)(font "Intel Clear" ))
-	(pt -4240 -152)
-	(pt -4080 -152)
+	(text "objectsRGB[7..0]" (rect -4173 -168 -4096 -151)(font "Intel Clear" ))
+	(pt -4224 -152)
+	(pt -4064 -152)
 	(bus)
 )
 (connector
@@ -2125,9 +2089,45 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt -4704 -72)
-	(pt -4536 -72)
+	(text "clk" (rect -4560 -184 -4546 -167)(font "Intel Clear" ))
+	(pt -4656 -168)
+	(pt -4520 -168)
+)
+(connector
+	(text "gameResetN" (rect -4566 -168 -4505 -151)(font "Intel Clear" ))
+	(pt -4656 -152)
+	(pt -4520 -152)
+)
+(connector
+	(text "pixelX[10..0]" (rect -4608 -152 -4549 -135)(font "Intel Clear" ))
+	(pt -4648 -136)
+	(pt -4520 -136)
 	(bus)
+)
+(connector
+	(text "pixelY[10..0]" (rect -4592 -136 -4533 -119)(font "Intel Clear" ))
+	(pt -4656 -120)
+	(pt -4520 -120)
+	(bus)
+)
+(connector
+	(pt -4696 -88)
+	(pt -4520 -88)
+	(bus)
+)
+(connector
+	(pt -4704 -72)
+	(pt -4520 -72)
+	(bus)
+)
+(connector
+	(pt -4624 -56)
+	(pt -4520 -56)
+)
+(connector
+	(text "newLevel" (rect -4598 -56 -4551 -39)(font "Intel Clear" ))
+	(pt -4600 -40)
+	(pt -4520 -40)
 )
 (junction (pt -5000 912))
 (junction (pt -4152 920))

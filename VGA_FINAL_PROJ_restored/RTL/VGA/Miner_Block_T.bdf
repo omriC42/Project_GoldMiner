@@ -516,9 +516,9 @@ agreement for further details.
 	(annotation_block (parameter)(rect 376 584 633 698))
 )
 (symbol
-	(rect 736 1040 960 1216)
+	(rect 736 1040 960 1248)
 	(text "dust_draw" (rect 5 0 54 12)(font "Arial" ))
-	(text "inst7" (rect 8 160 31 172)(font "Arial" ))
+	(text "inst7" (rect 8 192 31 204)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -569,6 +569,20 @@ agreement for further details.
 		(line (pt 0 128)(pt 16 128)(line_width 3))
 	)
 	(port
+		(pt 0 144)
+		(input)
+		(text "leftKey" (rect 0 0 38 12)(font "Arial" ))
+		(text "leftKey" (rect 21 139 59 151)(font "Arial" ))
+		(line (pt 0 144)(pt 16 144))
+	)
+	(port
+		(pt 0 160)
+		(input)
+		(text "rightKey" (rect 0 0 43 12)(font "Arial" ))
+		(text "rightKey" (rect 21 155 64 167)(font "Arial" ))
+		(line (pt 0 160)(pt 16 160))
+	)
+	(port
 		(pt 224 32)
 		(output)
 		(text "drawingRequest" (rect 0 0 77 12)(font "Arial" ))
@@ -583,8 +597,18 @@ agreement for further details.
 		(line (pt 224 48)(pt 208 48)(line_width 3))
 	)
 	(drawing
-		(rectangle (rect 16 16 208 160))
+		(rectangle (rect 16 16 208 192))
 	)
+)
+(connector
+	(text "Y_direction_key" (rect 658 1168 734 1185)(font "Intel Clear" ))
+	(pt 656 1184)
+	(pt 736 1184)
+)
+(connector
+	(text "toggle_x_key" (rect 658 1184 720 1201)(font "Intel Clear" ))
+	(pt 656 1200)
+	(pt 736 1200)
 )
 (connector
 	(text "clk" (rect 658 1056 672 1073)(font "Intel Clear" ))
