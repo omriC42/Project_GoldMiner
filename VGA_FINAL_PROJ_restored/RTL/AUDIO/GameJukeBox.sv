@@ -37,19 +37,19 @@ always_comb begin
     len    = '{default: 4'd0};         // length 0 everywhere = "end" unless written below
     beatCs = 6'(SOUND_BEAT_SLOW_CS);
     case (sound_t'(melodySelect))
-        SND_CATCH: begin                                   // "clunk": a quick drop
+        SND_CATCH: begin                                   // hook shot sound
             beatCs = 6'(SOUND_BEAT_FAST_CS);
             frq[0] = sol;   len[0] = 4'd2;
             frq[1] = do_;   len[1] = 4'd3;
         end
-        SND_MONEY: begin                                   // "cha-ching": rising chord
+        SND_MONEY: begin                                   // object acquired sound
             beatCs = 6'(SOUND_BEAT_FAST_CS);
             frq[0] = do_;   len[0] = 4'd1;
             frq[1] = mi;    len[1] = 4'd1;
             frq[2] = sol;   len[2] = 4'd1;
             frq[3] = do_H;  len[3] = 4'd4;
         end
-        SND_LEVEL: begin                                   // fanfare "ta-ta-ta-taa ... ta-TAAA"
+        SND_LEVEL: begin                                   // win sound
             beatCs = 6'(SOUND_BEAT_SLOW_CS);
             frq[0] = do_;     len[0] = 4'd2;
             frq[1] = mi;      len[1] = 4'd2;
@@ -59,7 +59,7 @@ always_comb begin
             frq[5] = sol;     len[5] = 4'd2;
             frq[6] = do_H;    len[6] = 4'd6;
         end
-        SND_GAMEOVER: begin                                // sad "wah-wah-wah-waaah"
+        SND_GAMEOVER: begin                                // lose sound
             beatCs = 6'(SOUND_BEAT_SLOW_CS);
             frq[0] = sol;   len[0] = 4'd4;
             frq[1] = faD;   len[1] = 4'd4;

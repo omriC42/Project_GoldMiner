@@ -329,22 +329,17 @@ set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/square_object.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/back_ground_draw.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/objects_mux.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/VGA_Controller.sv
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/NumbersBitMap.sv
-set_global_assignment -name QIP_FILE RTL/VGA/valX.qip
 set_global_assignment -name TCL_SCRIPT_FILE constraints/pin.tcl
 set_global_assignment -name BDF_FILE RTL/KEYBOARDX/TOP_KBD.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/KEYBOARDX/keyPad_decoder.sv
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/KEYBOARDX/simple_up_counter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/KEYBOARDX/random.sv
 set_global_assignment -name QXP_FILE KBDINTF.qxp
 set_global_assignment -name CDF_FILE output_files/Chain1.cdf
 set_global_assignment -name SDC_FILE DE10_Standard_Audio.sdc
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/Seg7/SEG7.SV
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/Mili_sec_counter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/melody_player_1.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/GameJukeBox.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/game_sound.sv
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/JukeBox1.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/SinTable.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/addr_counter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/prescaler.sv
@@ -536,5 +531,5 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_COUNTER_PIPELINE=
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id catch_check
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id catch_check
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id catch_check
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name SLD_FILE db/stp2_auto_stripped.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
