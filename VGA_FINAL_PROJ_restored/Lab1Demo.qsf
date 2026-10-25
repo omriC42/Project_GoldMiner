@@ -257,15 +257,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to AUDOUT[7]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[0]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[1]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[2]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[3]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[4]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[5]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[6]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to BG_RGB[7]
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to boardersDrawReq
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK_50
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[1]
@@ -318,7 +309,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/carried_draw.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/hook_block.sv
 set_global_assignment -name SEARCH_PATH RTL/VGA
 set_global_assignment -name BDF_FILE RTL/VGA/TOP_VGA_DEMO_KBD.bdf
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/miner_move.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/dust_draw.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/hud_digit.sv
@@ -326,7 +316,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_hud.sv
 set_global_assignment -name BDF_FILE RTL/VGA/Miner_Block_T.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/minerBitMap.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/square_object.sv
-set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/back_ground_draw.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/objects_mux.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/VGA_Controller.sv
 set_global_assignment -name TCL_SCRIPT_FILE constraints/pin.tcl

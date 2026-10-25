@@ -166,38 +166,6 @@ agreement for further details.
 	)
 )
 (pin
-	(output)
-	(rect -3208 -216 -3032 -200)
-	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
-	(text "BG_RGB[7..0]" (rect 90 0 160 12)(font "Arial" ))
-	(pt 0 8)
-	(drawing
-		(line (pt 0 8)(pt 52 8))
-		(line (pt 52 4)(pt 78 4))
-		(line (pt 52 12)(pt 78 12))
-		(line (pt 52 12)(pt 52 4))
-		(line (pt 78 4)(pt 82 8))
-		(line (pt 82 8)(pt 78 12))
-		(line (pt 78 12)(pt 82 8))
-	)
-)
-(pin
-	(output)
-	(rect -3208 -200 -3032 -184)
-	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
-	(text "boardersDrawReq" (rect 90 0 177 12)(font "Arial" ))
-	(pt 0 8)
-	(drawing
-		(line (pt 0 8)(pt 52 8))
-		(line (pt 52 4)(pt 78 4))
-		(line (pt 52 12)(pt 78 12))
-		(line (pt 52 12)(pt 52 4))
-		(line (pt 78 4)(pt 82 8))
-		(line (pt 82 8)(pt 78 12))
-		(line (pt 78 12)(pt 82 8))
-	)
-)
-(pin
 	(bidir)
 	(rect -3808 816 -3632 832)
 	(text "BIDIR" (rect 1 0 25 10)(font "Arial" (font_size 6)))
@@ -1179,67 +1147,6 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect -3552 -240 -3328 -128)
-	(text "back_ground_draw" (rect 5 0 95 12)(font "Arial" ))
-	(text "inst4" (rect 8 96 30 113)(font "Intel Clear" ))
-	(port
-		(pt 0 32)
-		(input)
-		(text "clk" (rect 0 0 14 12)(font "Arial" ))
-		(text "clk" (rect 21 27 35 39)(font "Arial" ))
-		(line (pt 0 32)(pt 16 32))
-	)
-	(port
-		(pt 0 48)
-		(input)
-		(text "resetN" (rect 0 0 33 12)(font "Arial" ))
-		(text "resetN" (rect 21 43 54 55)(font "Arial" ))
-		(line (pt 0 48)(pt 16 48))
-	)
-	(port
-		(pt 0 64)
-		(input)
-		(text "pixelX[10..0]" (rect 0 0 60 12)(font "Arial" ))
-		(text "pixelX[10..0]" (rect 21 59 81 71)(font "Arial" ))
-		(line (pt 0 64)(pt 16 64)(line_width 3))
-	)
-	(port
-		(pt 0 80)
-		(input)
-		(text "pixelY[10..0]" (rect 0 0 62 12)(font "Arial" ))
-		(text "pixelY[10..0]" (rect 21 75 83 87)(font "Arial" ))
-		(line (pt 0 80)(pt 16 80)(line_width 3))
-	)
-	(port
-		(pt 224 32)
-		(output)
-		(text "BG_RGB[7..0]" (rect 0 0 70 12)(font "Arial" ))
-		(text "BG_RGB[7..0]" (rect 144 27 214 39)(font "Arial" ))
-		(line (pt 224 32)(pt 208 32)(line_width 3))
-	)
-	(port
-		(pt 224 48)
-		(output)
-		(text "boardersDrawReq" (rect 0 0 87 12)(font "Arial" ))
-		(text "boardersDrawReq" (rect 130 43 217 55)(font "Arial" ))
-		(line (pt 224 48)(pt 208 48))
-	)
-	(parameter
-		"COLOR_MATRIX_TOP_Y"
-		"30"
-		""
-		(type "PARAMETER_SIGNED_DEC")	)
-	(parameter
-		"COLOR_MATRIX_LEFT_X"
-		"30"
-		""
-		(type "PARAMETER_SIGNED_DEC")	)
-	(drawing
-		(rectangle (rect 16 16 208 96))
-	)
-	(annotation_block (parameter)(rect -3576 -320 -3333 -263))
-)
-(symbol
 	(rect -4184 -12 -3888 276)
 	(text "hook_block" (rect 5 0 72 19)(font "Intel Clear" (font_size 8)))
 	(text "inst41" (rect 8 267 36 284)(font "Intel Clear" ))
@@ -1815,6 +1722,23 @@ agreement for further details.
 		(line (pt 8 8)(pt 24 8))
 	)
 )
+(symbol
+	(rect -4672 664 -4640 696)
+	(text "GND" (rect 8 16 29 26)(font "Arial" (font_size 6)))
+	(text "inst48" (rect 3 21 32 33)(font "Arial" )(invisible))
+	(port
+		(pt 16 0)
+		(output)
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(line (pt 16 8)(pt 16 0))
+	)
+	(drawing
+		(line (pt 8 8)(pt 16 16))
+		(line (pt 16 16)(pt 24 8))
+		(line (pt 8 8)(pt 24 8))
+	)
+)
 (connector
 	(text "starKey" (rect -4134 -512 -4098 -495)(font "Intel Clear" ))
 	(pt -4136 -496)
@@ -2295,42 +2219,6 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "clk" (rect -3737 -232 -3723 -215)(font "Intel Clear" ))
-	(pt -3552 -216)
-	(pt -3744 -216)
-)
-(connector
-	(pt -3552 -216)
-	(pt -3552 -208)
-)
-(connector
-	(text "resetN" (rect -3632 -208 -3602 -191)(font "Intel Clear" ))
-	(pt -3648 -192)
-	(pt -3552 -192)
-)
-(connector
-	(text "pixelX[10..0]" (rect -3622 -192 -3562 -180)(font "Arial" ))
-	(pt -3648 -176)
-	(pt -3552 -176)
-	(bus)
-)
-(connector
-	(text "pixelY[10..0]" (rect -3622 -176 -3560 -164)(font "Arial" ))
-	(pt -3648 -160)
-	(pt -3552 -160)
-	(bus)
-)
-(connector
-	(pt -3328 -208)
-	(pt -3208 -208)
-	(bus)
-)
-(connector
-	(text "boardersDrawReq" (rect -3318 -208 -3234 -191)(font "Intel Clear" ))
-	(pt -3328 -192)
-	(pt -3208 -192)
-)
-(connector
 	(text "objectsDrawingRequest" (rect -4342 196 -4232 213)(font "Intel Clear" ))
 	(pt -4344 212)
 	(pt -4184 212)
@@ -2594,17 +2482,6 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "BG_RGB[7..0]" (rect -4611 632 -4547 649)(font "Intel Clear" ))
-	(pt -4528 648)
-	(pt -4640 648)
-	(bus)
-)
-(connector
-	(text "boardersDrawReq" (rect -4638 648 -4554 665)(font "Intel Clear" ))
-	(pt -4640 664)
-	(pt -4528 664)
-)
-(connector
 	(text "MIF_VGA[7..0]" (rect -4630 664 -4562 681)(font "Intel Clear" ))
 	(pt -4528 680)
 	(pt -4632 680)
@@ -2767,6 +2644,10 @@ agreement for further details.
 	(pt -3208 328)
 	(pt -3192 328)
 )
+(connector
+	(pt -4656 664)
+	(pt -4528 664)
+)
 (junction (pt -3208 328))
 (text "// (c) Technion IIT, Department of Electrical Engineering 2025" (rect -4832 -896 -4473 -877)(font "Intel Clear" (font_size 8)))
 (text "KEY \"8\"  is Y_direction" (rect -5048 240 -4946 257)(font "Intel Clear" ))
@@ -2782,9 +2663,9 @@ agreement for further details.
 (text "RTL/VGA/Objects_DISPLAY.bdf" (rect -5064 -88 -4877 -69)(font "Intel Clear" (font_size 8)))
 (text "RTL/VGA/Objects_DISPLAY.bdf" (rect -4512 -248 -4325 -229)(font "Intel Clear" (font_size 8)))
 (text "objects (gold + rocks)" (rect -4904 -328 -4712 -305)(font "Intel Clear" (font_size 12)(bold)))
-(text "The background " (rect -3824 -304 -3673 -281)(font "Intel Clear" (font_size 12)(bold)))
 (text "minerLock = hook out OR game over (Step 10)" (rect -5456 304 -5239 321)(font "Intel Clear" ))
 (text "Starting screens" (rect -3552 -840 -3407 -817)(font "Intel Clear" (font_size 12)(bold)))
+(text "background is ALWAYS the MIF picture (BGDrawingRequest = 0; back_ground_draw removed in Step 13.3)" (rect -4960 744 -4400 761)(font "Intel Clear" ))
 (rectangle (rect -5032 768 -3552 1008)(color 0 0 0)(line_width 3))
 (rectangle (rect -5064 -24 -4472 272)(color 0 0 0)(line_width 3))
 (rectangle (rect -4648 -648 -3944 -408)(color 0 0 0)(line_width 3))
@@ -2793,6 +2674,5 @@ agreement for further details.
 (rectangle (rect -3648 -8 -2984 496)(color 0 0 0)(line_width 3))
 (rectangle (rect -4808 432 -3688 744)(color 0 0 0)(line_width 3))
 (rectangle (rect -4648 -832 -3944 -656)(color 0 0 0)(line_width 3))
-(rectangle (rect -3832 -344 -3016 -56)(color 0 0 0)(line_width 3))
 (rectangle (rect -4456 -40 -3776 296)(color 0 0 0)(line_width 3))
 (rectangle (rect -3712 -840 -3192 -360)(color 0 0 0)(line_width 3))
