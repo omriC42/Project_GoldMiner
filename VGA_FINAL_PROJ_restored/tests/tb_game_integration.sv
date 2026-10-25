@@ -1,6 +1,6 @@
 // tb_game_integration.sv - Step 8.5: the hook inside the GAME, played like a player would.
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.8)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.10)
 // Checklist: tests/CHECKLIST_step85_integration.md
 //
 // The REAL modules, wired exactly like TOP_VGA_DEMO_KBD.bdf / Miner_Block_T.bdf / Objects_DISPLAY.bdf:
@@ -25,8 +25,10 @@
 // T6 hook back -> miner free again (the same held key 4 now moves it)
 // T7 a second catch: score adds up, key 2 during the pull-back is ignored
 // 8.5.9 CARRY: the caught object is drawn on the rope during the pull-back (T5: every carried
-//    pixel reaches the screen, centred D px below the claw), and the score is added only when the
+//    pixel reaches the screen), and the score is added only when the
 //    hook is back at the top (T5/T7: unchanged at the catch, +value on arrival, ONE deliverPulse).
+// 8.10 (hook fix, Oct 25 2026): the carried object hangs STRAIGHT DOWN in the claw - centred on the
+//    tip in x, first visible row CARRY_OFFSET_PX below the tip (carried_draw.sv), at every rope angle.
 // 8.6 (Step 10) wired like TOP_VGA_DEMO_KBD: game_hud gameOver -> hook_block freeze and (OR hookBusy)
 //    -> miner lock; game_hud newLevel -> hook_block newLevel. Keys * (gameOverKey) and + (nextLevelKey).
 // T9  keypad + while pulling an object back: new level -> hook home empty at once, object NOT counted,
@@ -123,12 +125,12 @@ hook_block hb (
 // =====================================================================================
 // SCORE  (= game_hud inst28)
 // =====================================================================================
-logic hudDR; logic [7:0] hudRGB; logic timeUp, levelWon;
+logic hudDR; logic [7:0] hudRGB; logic levelWon;
 game_hud hud (
     .clk, .resetN, .pixelX, .pixelY,
     .collectPulse(hookDeliver), .collectValue(hookDeliverValue), .gameOverKey(keyStar), .nextLevelKey(keyPlus),
     .difficulty(setDiff), .timeSel(setTime), .cheatsOn(setCheats),
-    .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
+    .drawingRequest(hudDR), .RGBout(hudRGB), .gameOver, .levelWon, .newLevel);
 // Step 10: the miner stands still while the hook is out OR the game is over (OR2 inst43 in the TOP)
 assign minerLock = hookBusy || gameOver;
 
@@ -194,7 +196,7 @@ int  n_carry_px = 0, n_carry_seen = 0, carry_x0, carry_x1, carry_y0, carry_y1;
 logic carry_d = 0; logic [7:0] carryRGB_d = 0; int pxd1 = 0, pyd1 = 0, pxd2 = 0, pyd2 = 0;
 always @(posedge clk) begin
     pxd1 <= pixelX; pyd1 <= pixelY;
-    carry_d <= hb.carryDR && !hb.tipDR; carryRGB_d <= hookRGB;
+    carry_d <= hb.carryDR && !hb.tipDR && (scan_kind == "FULL FRAME"); carryRGB_d <= hookRGB;   // only pixels drawn IN the full scan
     if (scan_kind == "FULL FRAME") begin
         if (hb.carryDR && !hb.tipDR) begin
             n_carry_px++;
@@ -207,15 +209,10 @@ end
 task automatic carry_reset();
     n_carry_px = 0; n_carry_seen = 0; carry_x0 = 9999; carry_x1 = -1; carry_y0 = 9999; carry_y1 = -1;
 endtask
-function automatic int carry_dist(input int t);   // claw tip -> sprite centre along the rope (hook_params)
-    case (t) 1, 4: return CARRY_OFFSET_PX + 8; 2, 5: return CARRY_OFFSET_PX + 16; 3, 6: return CARRY_OFFSET_PX + 32;
-             default: return 0; endcase
-endfunction
-function automatic int carry_top(input int t);    // tip -> first opaque row of the hanging sprite
-    // = D - half + first opaque row of the sprite (object_sprites.svh: 1, 3, 3, 2, 4, 7)
-    case (t) 1: return CARRY_OFFSET_PX + 1; 2: return CARRY_OFFSET_PX + 3; 3: return CARRY_OFFSET_PX + 3;
-             4: return CARRY_OFFSET_PX + 2; 5: return CARRY_OFFSET_PX + 4; 6: return CARRY_OFFSET_PX + 7;
-             default: return 0; endcase
+function automatic int carry_top(input int t);    // tip -> first visible row of the hanging object
+    // carried_draw (hook fix): top = tip + CARRY_OFFSET_PX - topPad, so the first VISIBLE row is
+    // always CARRY_OFFSET_PX below the tip, for every object
+    return (t >= 1 && t <= 6) ? CARRY_OFFSET_PX : 0;
 endfunction
 realtime t_start [0:15];
 realtime t_end   [0:15];
@@ -411,7 +408,7 @@ int  f, w, x_before, x_at_shot, r_peak, score_before, r_a2, r_b2, mask_copy [1:3
 bit  x_constant, x_still, others_same, r_down;
 
 initial begin
-    $display("\n##### tb_game_integration VERSION 8.8 (2026-10-25, settings inputs = game_params defaults) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
+    $display("\n##### tb_game_integration VERSION 8.10 (2026-10-25, carried object hangs straight down in the claw - hook fix) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
     $display("   hook_params: swing %0d deg/s (%0d..%0d deg), shoot %0d px/s, empty pull-back %0d px/s",
              SWING_DEG_PER_SEC, SWING_MIN_DEG, SWING_MAX_DEG, SHOOT_PX_PER_SEC, RETRACT_EMPTY_PX_PER_SEC);
     $display("   game_params: difficulty %s, level 1 target %0d (+%0d per level), %0d s per level", diff_now.name(),
@@ -498,12 +495,12 @@ initial begin
     carry_reset();
     snapshot("frames/game_3_caught.bmp");
     check(n_carry_px > 0 && n_carry_seen == n_carry_px,
-          $sformatf("the caught object is drawn on the rope: %0d pixels, %0d of them on the screen (RGBOut)", n_carry_px, n_carry_seen));
+          $sformatf("the caught object is drawn in the claw: %0d pixels, %0d of them on the screen (RGBOut)", n_carry_px, n_carry_seen));
     // (the bottom may be cut by the screen edge for a low large object, so the TOP edge is checked)
     check(n_carry_px > 0 && (carry_x0 + carry_x1) / 2 - hb.Xend <= 3 && hb.Xend - (carry_x0 + carry_x1) / 2 <= 3 &&
           carry_y0 - (hb.Yend + carry_top(tgt_obj)) <= 1 && (hb.Yend + carry_top(tgt_obj)) - carry_y0 <= 1,
-          $sformatf("object hangs BELOW the claw on the rope: x centre %0d (claw %0d +-3), top y %0d (expected %0d = tip + %0d), centre %0d px down the rope",
-                    (carry_x0 + carry_x1) / 2, hb.Xend, carry_y0, hb.Yend + carry_top(tgt_obj), carry_top(tgt_obj), carry_dist(tgt_obj)));
+          $sformatf("object hangs straight down in the claw: x centre %0d (claw %0d +-3), top y %0d (expected %0d = tip + %0d)",
+                    (carry_x0 + carry_x1) / 2, hb.Xend, carry_y0, hb.Yend + carry_top(tgt_obj), carry_top(tgt_obj)));
     exp_pull_px_s = expected_pull(tgt_obj);
     pull_back_measured(f, x_still);
     if (!x_still || minerX != x_at_shot) x_constant = 0;
