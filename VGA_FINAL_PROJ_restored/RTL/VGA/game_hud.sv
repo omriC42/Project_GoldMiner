@@ -45,7 +45,6 @@ module game_hud (
     input  logic        cheatsOn,       // settings: 1 = keypad + and * work
     output logic        drawingRequest,
     output logic  [7:0] RGBout,
-    output logic        timeUp,         // clock shows 0:00
     output logic        gameOver,       // 1 from game over until reset (LEDR3)
     output logic        levelWon,       // 1 for 2 seconds after moving to a new level (LEDR4)
     output logic        newLevel        // one clock pulse when a level is won
@@ -301,7 +300,6 @@ begin
     end
 end
 
-assign timeUp   = (secondsLeft == 7'd0);
 assign gameOver = (state == GAME_OVER_ST);
 assign levelWon = (state == PLAYING) && (level > 7'd1) && (secondsLeft + 7'd2 >= startSeconds);
 

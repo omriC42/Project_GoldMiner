@@ -1154,13 +1154,6 @@ agreement for further details.
 		(line (pt 224 48)(pt 208 48)(line_width 3))
 	)
 	(port
-		(pt 224 64)
-		(output)
-		(text "timeUp" (rect 0 0 35 12)(font "Arial" ))
-		(text "timeUp" (rect 175 59 210 71)(font "Arial" ))
-		(line (pt 224 64)(pt 208 64))
-	)
-	(port
 		(pt 224 80)
 		(output)
 		(text "gameOver" (rect 0 0 51 12)(font "Arial" ))
@@ -1589,15 +1582,9 @@ agreement for further details.
 		(text "melodyEnded" (rect 163 59 230 71)(font "Arial" ))
 		(line (pt 240 64)(pt 224 64))
 	)
-	(parameter
-		"SIMULATION_MODE"
-		"0"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
 		(rectangle (rect 16 16 224 96))
 	)
-	(annotation_block (parameter)(rect -4968 736 -4736 776))
 )
 (symbol
 	(rect -3568 -800 -3312 -608)

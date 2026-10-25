@@ -1,6 +1,6 @@
 // tb_hook_weight.sv - Step 9: weight + game_params.sv (the moved parameters still work)
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.7)
+// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.8)
 // Checklist: tests/CHECKLIST_step9_weight.md
 //
 // Every expected number below is read from game_params.sv / hook_params.sv, so after you change
@@ -67,11 +67,11 @@ hook_block hb (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .mi
                .catchType, .difficulty(hbDiff), .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
                .deliverPulse(dPulse), .deliverValue(dValue));
 // score at the top (9.5): the score HUD gets its dollars from the hook, like TOP_VGA_DEMO_KBD
-logic hsDR, hsTimeUp, hsGameOver, hsLevelWon, hsNewLevel; logic [7:0] hsRGB;
+logic hsDR, hsGameOver, hsLevelWon, hsNewLevel; logic [7:0] hsRGB;
 game_hud hudScore (.clk, .resetN, .pixelX(11'd0), .pixelY(11'd0),
     .collectPulse(dPulse), .collectValue(dValue), .gameOverKey(1'b0), .nextLevelKey(1'b0),
     .difficulty(2'(game_params::DIFFICULTY)), .timeSel(DEF_TIME), .cheatsOn(1'b0),
-    .drawingRequest(hsDR), .RGBout(hsRGB), .timeUp(hsTimeUp), .gameOver(hsGameOver), .levelWon(hsLevelWon),
+    .drawingRequest(hsDR), .RGBout(hsRGB), .gameOver(hsGameOver), .levelWon(hsLevelWon),
     .newLevel(hsNewLevel));
 int top_score; assign top_score = hudScore.dollars;
 int n_deliver = 0, sum_deliver = 0, n_hsLevel = 0;
@@ -101,24 +101,24 @@ logic hp [0:2] = '{0, 0, 0};                 // collectPulse per difficulty HUD
 logic [5:0] hv [0:2] = '{0, 0, 0};           // collectValue per difficulty HUD
 logic ck [0:2] = '{0, 0, 0};                 // cheat key (keypad +) per difficulty HUD
 logic cheatN = 1;                            // 9.7: hudN's cheatsOn input (T6 turns it off)
-logic hudDR, timeUp, gameOver, levelWon, newLevel; logic [7:0] hudRGB;
+logic hudDR, gameOver, levelWon, newLevel; logic [7:0] hudRGB;
 game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hud (.clk, .resetN, .pixelX(11'd0), .pixelY(11'd0),
     .collectPulse(1'b0), .collectValue(6'd0), .gameOverKey(1'b0), .nextLevelKey(1'b0),
     .difficulty(2'(game_params::DIFFICULTY)), .timeSel(DEF_TIME), .cheatsOn(1'b0),
-    .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
+    .drawingRequest(hudDR), .RGBout(hudRGB), .gameOver, .levelWon, .newLevel);
 logic nlE, nlN, nlH, goE, goN, goH;
 game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hudE (.clk, .resetN,
     .pixelX(11'd0), .pixelY(11'd0), .collectPulse(hp[0]), .collectValue(hv[0]), .gameOverKey(1'b0),
     .nextLevelKey(ck[0]), .difficulty(2'd0), .timeSel(DEF_TIME), .cheatsOn(1'b1),
-    .drawingRequest(), .RGBout(), .timeUp(), .gameOver(goE), .levelWon(), .newLevel(nlE));
+    .drawingRequest(), .RGBout(), .gameOver(goE), .levelWon(), .newLevel(nlE));
 game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hudN (.clk, .resetN,
     .pixelX(11'd0), .pixelY(11'd0), .collectPulse(hp[1]), .collectValue(hv[1]), .gameOverKey(1'b0),
     .nextLevelKey(ck[1]), .difficulty(2'd1), .timeSel(DEF_TIME), .cheatsOn(cheatN),
-    .drawingRequest(), .RGBout(), .timeUp(), .gameOver(goN), .levelWon(), .newLevel(nlN));
+    .drawingRequest(), .RGBout(), .gameOver(goN), .levelWon(), .newLevel(nlN));
 game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hudH (.clk, .resetN,
     .pixelX(11'd0), .pixelY(11'd0), .collectPulse(hp[2]), .collectValue(hv[2]), .gameOverKey(1'b0),
     .nextLevelKey(ck[2]), .difficulty(2'd2), .timeSel(DEF_TIME), .cheatsOn(1'b1),
-    .drawingRequest(), .RGBout(), .timeUp(), .gameOver(goH), .levelWon(), .newLevel(nlH));
+    .drawingRequest(), .RGBout(), .gameOver(goH), .levelWon(), .newLevel(nlH));
 
 // =====================================================================================
 // wave helpers
@@ -398,7 +398,7 @@ bit ok_all;
 int c;
 
 initial begin
-    $display("\n##### tb_hook_weight VERSION 9.7 (2026-10-25, settings inputs: difficulty, time, cheats, gold share) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
+    $display("\n##### tb_hook_weight VERSION 9.8 (2026-10-25, Step 13.2: timeUp output removed) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
     $display("   game_params: difficulty %s, %0d s per level, targets EASY %0d+%0d, NORMAL %0d+%0d, HARD %0d+%0d per level",
              diff_now.name(), game_params::DEFAULT_SECONDS,
              game_params::TARGET_START_EASY, game_params::TARGET_STEP_EASY, game_params::TARGET_START_NORMAL,

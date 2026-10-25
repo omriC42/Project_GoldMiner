@@ -1,6 +1,6 @@
 // tb_game_hud.sv - Step 12: game_hud without dividers and without functions
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_hud.do        (expect VERSION 12.1)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_hud.do        (expect VERSION 12.2)
 // Checklist: tests/CHECKLIST_step12_hud.md
 //
 // game_hud now keeps every number twice: binary (to compare) and as decimal digits (to draw),
@@ -33,20 +33,20 @@ logic        collectPulse = 0, gameOverKey = 0, nextLevelKey = 0;
 logic  [5:0] collectValue = 0;
 logic  [1:0] hDiff = 2'(game_params::DIFFICULTY), hTime = 2'(game_params::DEFAULT_TIME_SEL);   // settings (Step 14)
 logic        hCheats = 1;
-logic        hudDR, timeUp, gameOver, levelWon, newLevel;
+logic        hudDR, gameOver, levelWon, newLevel;
 logic  [7:0] hudRGB;
 // the game's HUD (real clock: its time does not run out in this test)
 game_hud hud (.clk, .resetN, .pixelX, .pixelY, .collectPulse, .collectValue, .gameOverKey, .nextLevelKey,
               .difficulty(hDiff), .timeSel(hTime), .cheatsOn(hCheats),
-              .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
+              .drawingRequest(hudDR), .RGBout(hudRGB), .gameOver, .levelWon, .newLevel);
 // T3: the LONG time (timeSel 2 = 90 s), 1 "second" = 5000 clocks (long enough to scan the clock area); no score / keys
-logic        cDR, cTimeUp, cGameOver, cLevelWon, cNewLevel;
+logic        cDR, cGameOver, cLevelWon, cNewLevel;
 logic  [7:0] cRGB;
 logic        clockRun = 0;                      // its reset: held until T3
 game_hud #(.CLOCK_HZ(5000)) hudC (.clk, .resetN(clockRun), .pixelX, .pixelY,
               .collectPulse(1'b0), .collectValue(6'd0), .gameOverKey(1'b0), .nextLevelKey(1'b0),
               .difficulty(2'd1), .timeSel(2'd2), .cheatsOn(1'b0),
-              .drawingRequest(cDR), .RGBout(cRGB), .timeUp(cTimeUp), .gameOver(cGameOver),
+              .drawingRequest(cDR), .RGBout(cRGB), .gameOver(cGameOver),
               .levelWon(cLevelWon), .newLevel(cNewLevel));
 
 // ---------------- wave helpers ----------------
@@ -207,7 +207,7 @@ int  vals_bad, exp_t, exp_s, n_nl = 0;
 always @(posedge clk) if (newLevel) n_nl++;
 
 initial begin
-    $display("\n##### tb_game_hud VERSION 12.1 (2026-10-25, + settings inputs: difficulty, time, cheats) - if not the version Claude announced, run the full  do run_game_hud.do  #####");
+    $display("\n##### tb_game_hud VERSION 12.2 (2026-10-25, Step 13.2: timeUp output removed) - if not the version Claude announced, run the full  do run_game_hud.do  #####");
     repeat (3) @(negedge clk);
     resetN = 1;
     repeat (5) @(negedge clk);
