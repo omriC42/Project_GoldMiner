@@ -4,15 +4,15 @@ editor if you plan to continue editing the block that represents it in
 the Block Editor! File corruption is VERY likely to occur.
 */
 /*
-hook_block.bsf - symbol for RTL/VGA/hook_block.sv (Gold Miner hook, Step 7: goldDR in, hookCatch out; Oct 2026: deliverPulse/deliverValue out).
+hook_block.bsf - symbol for RTL/VGA/hook_block.sv (Gold Miner hook, Step 7: goldDR in, hookCatch out; Oct 2026: deliverPulse/deliverValue out; Step 10: newLevel in).
 If this symbol is ever lost: open hook_block.sv in Quartus and use
 File > Create/Update > Create Symbol Files for Current File.
 */
 (header "symbol" (version "1.2"))
 (symbol
-	(rect 16 16 312 272)
+	(rect 16 16 312 288)
 	(text "hook_block" (rect 5 0 70 19)(font "Intel Clear" (font_size 8)))
-	(text "inst" (rect 8 235 24 252)(font "Intel Clear" ))
+	(text "inst" (rect 8 251 24 268)(font "Intel Clear" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -105,6 +105,13 @@ File > Create/Update > Create Symbol Files for Current File.
 		(line (pt 0 224)(pt 16 224))
 	)
 	(port
+		(pt 0 240)
+		(input)
+		(text "newLevel" (rect 0 0 54 19)(font "Intel Clear" (font_size 8)))
+		(text "newLevel" (rect 21 235 75 254)(font "Intel Clear" (font_size 8)))
+		(line (pt 0 240)(pt 16 240))
+	)
+	(port
 		(pt 296 32)
 		(output)
 		(text "hookDR" (rect 0 0 44 19)(font "Intel Clear" (font_size 8)))
@@ -161,6 +168,6 @@ File > Create/Update > Create Symbol Files for Current File.
 		(line (pt 296 144)(pt 280 144)(line_width 3))
 	)
 	(drawing
-		(rectangle (rect 16 16 280 240))
+		(rectangle (rect 16 16 280 256))
 	)
 )

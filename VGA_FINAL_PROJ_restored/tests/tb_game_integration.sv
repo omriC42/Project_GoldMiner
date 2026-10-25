@@ -1,6 +1,6 @@
 // tb_game_integration.sv - Step 8.5: the hook inside the GAME, played like a player would.
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.5.9)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.7.1)
 // Checklist: tests/CHECKLIST_step85_integration.md
 //
 // The REAL modules, wired exactly like TOP_VGA_DEMO_KBD.bdf / Miner_Block_T.bdf / Objects_DISPLAY.bdf:
@@ -27,6 +27,15 @@
 // 8.5.9 CARRY: the caught object is drawn on the rope during the pull-back (T5: every carried
 //    pixel reaches the screen, centred D px below the claw), and the score is added only when the
 //    hook is back at the top (T5/T7: unchanged at the catch, +value on arrival, ONE deliverPulse).
+// 8.6 (Step 10) wired like TOP_VGA_DEMO_KBD: game_hud gameOver -> hook_block freeze and (OR hookBusy)
+//    -> miner lock; game_hud newLevel -> hook_block newLevel. Keys * (gameOverKey) and + (nextLevelKey).
+// T9  keypad + while pulling an object back: new level -> hook home empty at once, object NOT counted,
+//     score 0, level 2, new layout of 8 objects, the miner stays where it is.
+// 8.7 (Step 11) game_sound wired like the TOP (catch = gold field collectPulse, money = deliverPulse,
+//     newLevel, gameOver). Checked: T5 catch then money in that order, T9 only the level sound (the
+//     dropped object makes no money sound), T10 the game over sound exactly once.
+// T10 keypad * in the middle of a shot: GAME OVER -> hook, miner and dust frozen; keys 2/4 do nothing;
+//     score and gold field unchanged.
 // Step 9: every catch also MEASURES the pull-back speed and compares it with game_params.sv
 // Dust (Oct 2026, partner's 6-picture dust): T2 dust on the correct side while walking and gone after
 //   the round ends, T5 NO dust round starts while the hook is out, T6 dust again when free,
@@ -47,12 +56,15 @@ always #5 clk = ~clk;
 
 logic [10:0] pixelX = 0, pixelY = 0;
 logic key2 = 0, key4 = 0, key6 = 0;            // keypad keys (keyIsPressed[2], [4], [6])
+logic keyStar = 0, keyPlus = 0;               // keypad * (game over shortcut) and + (next level cheat)
+logic gameOver;                               // game_hud -> hook freeze + miner lock (Step 10)
 
 // =====================================================================================
 // MINER  (= Smiley_Block_T)
 // =====================================================================================
 logic signed [10:0] minerX, minerY;
 logic minerMoving, hookBusy;
+logic minerLock;                          // = hookBusy OR gameOver (OR2 inst43 in the TOP)
 logic dustLeftKey, dustRightKey;          // = miner movingLeft / movingRight -> dust_draw leftKey / rightKey
 logic [2:0] HitEdgeCode;
 logic [10:0] smOffX, smOffY; logic smRecDR; logic [7:0] smRecRGB;
@@ -63,7 +75,7 @@ miner_move #(.INITIAL_X(280), .INITIAL_Y(32), .INITIAL_X_SPEED(60), .INITIAL_Y_S
     .clk, .resetN, .startOfFrame(sof),
     .Y_direction_key(key4), .toggle_x_key(key6),
     .collision(1'b0), .HitEdgeCode,
-    .hookBusy, .minerMoving, .movingLeft(dustLeftKey), .movingRight(dustRightKey),
+    .hookBusy(minerLock), .minerMoving, .movingLeft(dustLeftKey), .movingRight(dustRightKey),
     .topLeftX(minerX), .topLeftY(minerY));
 square_object #(.OBJECT_WIDTH_X(64), .OBJECT_HEIGHT_Y(64), .OBJECT_COLOR(8'h00)) minerBox (
     .clk, .resetN, .pixelX, .pixelY, .topLeftX(minerX), .topLeftY(minerY),
@@ -101,18 +113,30 @@ logic hookDeliver; logic [5:0] hookDeliverValue;     // score at the top (TOP: h
 hook_block hb (
     .clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY,
     .minerX, .minerY, .minerMoving, .shoot_key(key2),
-    .tipCollision(1'b0), .goldDR, .freeze(1'b0), .catchType(goldType),
+    .tipCollision(1'b0), .goldDR, .freeze(gameOver), .newLevel, .catchType(goldType),
     .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
     .deliverPulse(hookDeliver), .deliverValue(hookDeliverValue));
 
 // =====================================================================================
 // SCORE  (= game_hud inst28)
 // =====================================================================================
-logic hudDR; logic [7:0] hudRGB; logic timeUp, gameOver, levelWon;
+logic hudDR; logic [7:0] hudRGB; logic timeUp, levelWon;
 game_hud hud (
     .clk, .resetN, .pixelX, .pixelY,
-    .collectPulse(hookDeliver), .collectValue(hookDeliverValue), .gameOverKey(1'b0), .nextLevelKey(1'b0),
+    .collectPulse(hookDeliver), .collectValue(hookDeliverValue), .gameOverKey(keyStar), .nextLevelKey(keyPlus),
     .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
+// Step 10: the miner stands still while the hook is out OR the game is over (OR2 inst43 in the TOP)
+assign minerLock = hookBusy || gameOver;
+
+// =====================================================================================
+// SOUND EVENTS  (= game_sound inst44; melody_player_1 + AUDIO are tested in tb_game_sound)
+// =====================================================================================
+logic soundStart; logic [3:0] soundSelect;
+game_sound gsnd (.clk, .resetN, .catchPulse(goldCollected), .moneyPulse(hookDeliver), .newLevel, .gameOver,
+                 .startSound(soundStart), .soundSelect);
+int  snd_log [0:15];        // sounds started since the last snd_clear (game_params::sound_t numbers)
+int  snd_n = 0;
+always @(posedge clk) if (soundStart) begin snd_log[snd_n] = soundSelect; if (snd_n < 15) snd_n++; end
 
 // =====================================================================================
 // SCREEN  (= objects_mux inst9)
@@ -189,8 +213,8 @@ function automatic int carry_top(input int t);    // tip -> first opaque row of 
              4: return CARRY_OFFSET_PX + 2; 5: return CARRY_OFFSET_PX + 4; 6: return CARRY_OFFSET_PX + 7;
              default: return 0; endcase
 endfunction
-realtime t_start [0:8];
-realtime t_end   [0:8];
+realtime t_start [0:15];
+realtime t_end   [0:15];
 task automatic begin_test(input int n, input string name);
     if (test_no > 0) t_end[test_no] = $realtime;
     test_no = n; $sformat(test_name, "%s", name); t_start[n] = $realtime;
@@ -383,7 +407,7 @@ int  f, w, x_before, x_at_shot, r_peak, score_before, r_a2, r_b2, mask_copy [1:3
 bit  x_constant, x_still, others_same, r_down;
 
 initial begin
-    $display("\n##### tb_game_integration VERSION 8.5.9 (2026-10-25, object carried on the rope, score at the top) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
+    $display("\n##### tb_game_integration VERSION 8.7.1 (2026-10-25, HUD without dividers) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
     $display("   hook_params: swing %0d deg/s (%0d..%0d deg), shoot %0d px/s, empty pull-back %0d px/s",
              SWING_DEG_PER_SEC, SWING_MIN_DEG, SWING_MAX_DEG, SHOOT_PX_PER_SEC, RETRACT_EMPTY_PX_PER_SEC);
     $display("   game_params: difficulty %s, level 1 target %0d (+%0d per level), %0d s per level", diff_now.name(),
@@ -437,7 +461,7 @@ initial begin
     begin_test(4, "T4 aim by timing + shoot = catch");
     mask_copy = '{default:0};
     for (int row = 1; row < 4; row++) for (int col = 0; col < 8; col++) mask_copy[row][col] = gbm.MazeBitMapMask[row][col];
-    n_hookCatch = 0; n_collect = 0; n_deliver = 0; score_before = score;
+    n_hookCatch = 0; n_collect = 0; n_deliver = 0; score_before = score; snd_n = 0;
     shoot_when_down(w);
     check(hookState == 2'd1 && hookBusy, $sformatf("waited %0d frames for 90 deg, key 2 -> SHOOT at %0d deg, hookBusy = 1", w, angle_deg));
     snapshot("frames/game_2_shot.bmp");
@@ -488,6 +512,8 @@ initial begin
     repeat (5) @(negedge clk);
     check(n_deliver == 1 && last_deliver == tgt_value && score == score_before + tgt_value,
           $sformatf("hook at the top: ONE deliverPulse, value %0d -> score %0d -> %0d on the HUD", last_deliver, score_before, score));
+    check(snd_n == 2 && snd_log[0] == int'(game_params::SND_CATCH) && snd_log[1] == int'(game_params::SND_MONEY),
+          $sformatf("sounds of this catch: %0d started - first %0d (CATCH = 1), then %0d (MONEY = 2)", snd_n, snd_log[0], snd_log[1]));
 
     // ------------------------------------------------------------ T6
     begin_test(6, "T6 miner free again");
@@ -542,10 +568,59 @@ initial begin
     check(!dust.dustOn, "20 more frames against the wall: still no dust");
     @(negedge clk) key6 = 0;
 
+    // ------------------------------------------------------------ T9 (Step 10)
+    begin_test(9, "T9 new level drops the object");
+    pick_target();
+    walk_to(tgt_cx, f);
+    n_hookCatch = 0; n_deliver = 0;
+    shoot_when_down(w);
+    f = 0; while (hookState == 2'd1 && f < 400) begin game_frame(); f++; end
+    frames(3);                                    // pulling the object back now
+    x_before = minerX; r_peak = hb.R; score_before = score; snd_n = 0;
+    @(negedge clk) keyPlus = 1; repeat (3) @(negedge clk); keyPlus = 0;   // keypad + = next level
+    repeat (5) @(negedge clk);
+    check(n_hookCatch > 0 && r_peak > MIN_R && hookState == 2'd0 && hb.R == MIN_R && !hb.caught && !hookBusy,
+          $sformatf("keypad + while pulling back (R %0d): hook at once back at the top, empty, hookBusy 0", r_peak));
+    frames(10);
+    check(n_deliver == 0 && score == 0 && hud.level == 2 && count_objects() == 8 && minerX == x_before,
+          $sformatf("object LOST (no deliverPulse, score %0d -> %0d), level %0d, %0d new objects, miner stayed at x %0d (%0d)",
+                    score_before, score, hud.level, count_objects(), x_before, minerX));
+    check(snd_n == 1 && snd_log[0] == int'(game_params::SND_LEVEL),
+          $sformatf("sound: only the level fanfare (%0d sound(s), first %0d, LEVEL = 3) - no money sound for the lost object", snd_n, snd_log[0]));
+    snapshot("frames/game_7_newlevel.bmp");
+
+    // ------------------------------------------------------------ T10 (Step 10)
+    begin_test(10, "T10 game over freezes everything");
+    shoot_when_down(w);
+    frames(5);                                    // in the middle of a shot
+    mask_copy = '{default:0};
+    for (int row = 1; row < 4; row++) for (int col = 0; col < 8; col++) mask_copy[row][col] = gbm.MazeBitMapMask[row][col];
+    snd_n = 0;
+    @(negedge clk) keyStar = 1; repeat (3) @(negedge clk); keyStar = 0;   // keypad * = game over
+    repeat (3) @(negedge clk);
+    r_peak = hb.R; w = hb.u_move.angle_fp; x_before = minerX; score_before = score; n_hookCatch = 0;
+    @(negedge clk) key4 = 1;                      // try to walk ...
+    frames(10);
+    @(negedge clk) key2 = 1; repeat (3) @(negedge clk); key2 = 0;   // ... and to shoot again
+    frames(30);
+    check(hud.gameOver && hookState == 2'd1 && hb.R == r_peak && hb.u_move.angle_fp == w,
+          $sformatf("GAME OVER: hook frozen in the middle of the shot (R stays %0d, angle unchanged, still SHOOT)", hb.R));
+    check(minerX == x_before && miner.Xspeed == 0 && !dust.dustOn,
+          $sformatf("key 4 held for 40 frames: miner stays at x %0d, speed 0, no dust", minerX));
+    others_same = 1;
+    for (int row = 1; row < 4; row++) for (int col = 0; col < 8; col++)
+        if (gbm.MazeBitMapMask[row][col] != mask_copy[row][col]) others_same = 0;
+    check(score == score_before && n_hookCatch == 0 && others_same,
+          $sformatf("score stays %0d, no catch, gold field unchanged", score));
+    check(snd_n == 1 && snd_log[0] == int'(game_params::SND_GAMEOVER),
+          $sformatf("sound: the game over tune exactly once in 40 frames (%0d sound(s), first %0d, GAMEOVER = 4)", snd_n, snd_log[0]));
+    snapshot("frames/game_8_gameover.bmp");
+    @(negedge clk) key4 = 0;
+
     // ------------------------------------------------------------ end
-    t_end[8] = $realtime; test_no = 0;
+    t_end[10] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
-    write_windows_file(8);
+    write_windows_file(10);
     $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
              nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
     $display("Images: tests/frames/game_*.bmp   Simulation PAUSED (not closed). zt <n> zooms on test n.\n");

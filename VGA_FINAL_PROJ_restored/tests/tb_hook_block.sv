@@ -1,6 +1,6 @@
 // tb_hook_block.sv - Step 4: the hook_block wrapper (hook_move + hook_draw + new rules)
 //
-// Run:  ModelSim -> cd <project>/tests  ->  do run_hook_block.do      (expect VERSION 4.4)
+// Run:  ModelSim -> cd <project>/tests  ->  do run_hook_block.do      (expect VERSION 4.5)
 // Checklist: tests/CHECKLIST_step4_hook_block.md
 //
 // Tests the NEW things in the wrapper:
@@ -14,6 +14,10 @@
 //     (claw drawn over it, it never shows on tipDR), and exactly ONE deliverPulse with the right
 //     value comes when the hook is back up. T8 empty pull-back: no carry, no delivery.
 //     T9 nothing is carried while SHOOTING.
+//   * Step 10 (4.5): T10 freeze (= game over) in the middle of a shot, claw on gold: NO catch, nothing
+//     moves, key 2 ignored; after unfreeze the shot goes on. T11 newLevel while pulling an object
+//     back: hook straight home empty, NO deliverPulse (the object is lost), nothing on the claw;
+//     the next catch works normally.
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
 // stimulus on the falling edge.
 
@@ -26,7 +30,7 @@ always #5 clk = ~clk;
 
 logic [10:0] pixelX = 0, pixelY = 0;
 logic signed [10:0] minerX = 11'sd280, minerY = 11'sd100;   // game start position
-logic minerMoving = 0, shoot_key = 0, tipCollision = 0, freeze = 0;
+logic minerMoving = 0, shoot_key = 0, tipCollision = 0, freeze = 0, newLevel = 0;
 logic [2:0] catchType = 0;
 logic hookDR, tipDR, hookBusy;
 logic [7:0] hookRGB;
@@ -36,9 +40,11 @@ logic hookCatch, deliverPulse;
 logic [5:0] deliverValue;
 int   n_deliver = 0, last_deliver = -1;
 always @(posedge clk) if (deliverPulse) begin n_deliver++; last_deliver = deliverValue; end
+int   n_hookCatch = 0;
+always @(posedge clk) if (hookCatch) n_hookCatch++;
 
 hook_block dut (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
-                .minerMoving, .shoot_key, .tipCollision, .goldDR(goldDR_tb), .freeze, .catchType,
+                .minerMoving, .shoot_key, .tipCollision, .goldDR(goldDR_tb), .freeze, .newLevel, .catchType,
                 .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
                 .deliverPulse, .deliverValue);
 
@@ -180,7 +186,7 @@ endtask
 int n_before, fr;
 
 initial begin
-    $display("\n##### tb_hook_block VERSION 4.4 (2026-10-25, carry + score at the top) - if not the version Claude announced, run the full  do run_hook_block.do  #####");
+    $display("\n##### tb_hook_block VERSION 4.5 (2026-10-25, game over freeze + new level) - if not the version Claude announced, run the full  do run_hook_block.do  #####");
 
     // ------------------------------------------------------------ T1
     begin_test(1, "T1 reset");
@@ -298,10 +304,51 @@ initial begin
     @(negedge clk) tipCollision = 1; @(negedge clk) tipCollision = 0;
     fr = 0; while (hookState != 2'd0 && fr < 2000) begin frames(1); fr++; end
 
+    // ------------------------------------------------------------ T10 (Step 10)
+    begin_test(10, "T10 freeze = game over");
+    press(shoot_key); frames(15);
+    @(negedge clk) freeze = 1;
+    n_before = n_hookCatch; maxR = dut.R; dx0 = dut.u_move.angle_fp;
+    @(negedge clk) begin catchType = 3'd3; goldDR_tb = 1; pixelX = dut.Xend; pixelY = dut.Yend; end   // claw on gold
+    repeat (6) @(negedge clk);
+    goldDR_tb = 0;
+    repeat (3) @(negedge clk);
+    check(n_hookCatch == n_before && !dut.caught && hookState == 2'd1,
+          $sformatf("frozen claw on gold: NO hookCatch (%0d), nothing caught, still SHOOT", n_hookCatch - n_before));
+    press(shoot_key); frames(20);
+    check(dut.R == maxR && dut.u_move.angle_fp == dx0 && hookState == 2'd1,
+          $sformatf("20 frames frozen: rope stays %0d px, angle unchanged, key 2 ignored", dut.R));
+    @(negedge clk) begin freeze = 0; catchType = 3'd0; end
+    frames(5);
+    check(dut.R > maxR && hookState == 2'd1, $sformatf("unfreeze: the shot goes on (R %0d -> %0d)", maxR, dut.R));
+    @(negedge clk) tipCollision = 1; @(negedge clk) tipCollision = 0;
+    fr = 0; while (hookState != 2'd0 && fr < 2000) begin frames(1); fr++; end
+
+    // ------------------------------------------------------------ T11 (Step 10)
+    begin_test(11, "T11 new level drops the object");
+    n_before = n_deliver;
+    catch_object(3);                                         // large gold = slowest pull-back
+    frames(5);
+    maxR = dut.R;
+    @(negedge clk) newLevel = 1; @(negedge clk) newLevel = 0;   // 1-clock pulse (game_hud newLevel)
+    check(maxR > MIN_R && hookState == 2'd0 && dut.R == MIN_R && !dut.caught && !dut.carryShow && !hookBusy,
+          $sformatf("newLevel while pulling gold back (R %0d): at once SWING, R = %0d, hook empty, hookBusy 0", maxR, dut.R));
+    frames(10);
+    scan_carry();
+    check(n_deliver == n_before && n_carry == 0,
+          $sformatf("the object is LOST: no deliverPulse (%0d), nothing on the claw (%0d px)", n_deliver - n_before, n_carry));
+    @(negedge clk) catchType = 3'd0;
+    catch_object(1);
+    fr = 0; while (hookState != 2'd0 && fr < 2000) begin frames(1); fr++; end
+    repeat (3) @(negedge clk);
+    check(n_deliver == n_before + 1 && last_deliver == value_of(1),
+          $sformatf("next catch after the new level works: ONE deliverPulse, value %0d", last_deliver));
+    @(negedge clk) catchType = 3'd0;
+
     // ------------------------------------------------------------ end
-    t_end[9] = $realtime; test_no = 0;
+    t_end[11] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
-    write_windows_file(9);
+    write_windows_file(11);
     $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
              nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
     $display("Images: tests/frames/block_*.bmp   Simulation PAUSED (not closed). zt <n> zooms on test n.\n");

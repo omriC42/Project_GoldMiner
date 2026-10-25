@@ -1,5 +1,5 @@
 # run_hook_catch.do - Step 7: catching gold with the claw, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_hook_catch.do        (expect VERSION 7.4)
+# Usage:  cd <project>/tests   then   do run_hook_catch.do        (expect VERSION 7.4.1)
 # To run again after ANY file change: the full  do run_hook_catch.do  (it recompiles).
 onbreak {resume}
 file mkdir frames

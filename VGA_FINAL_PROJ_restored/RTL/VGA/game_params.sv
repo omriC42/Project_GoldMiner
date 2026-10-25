@@ -31,6 +31,15 @@ package game_params;
       HARD   = 2'd2
   } difficulty_t;
 
+  // game sounds (Step 11): the number game_sound sends to melody_player_1 (= GameJukeBox slot)
+  typedef enum logic [3:0] {
+      SND_NONE     = 4'd0,   // silence
+      SND_CATCH    = 4'd1,   // claw grabbed something
+      SND_MONEY    = 4'd2,   // the object reached the top, score goes up
+      SND_LEVEL    = 4'd3,   // level won (new level)
+      SND_GAMEOVER = 4'd4    // game over
+  } sound_t;
+
 
   // ======================= EDIT HERE =======================
 
@@ -85,6 +94,17 @@ package game_params;
   localparam int GOLD_PERCENT_EASY   = 70;
   localparam int GOLD_PERCENT_NORMAL = 50;
   localparam int GOLD_PERCENT_HARD   = 30;
+
+  // ---------------- sounds (Step 11: game_sound + GameJukeBox) ----------------
+  // 1 = the sound plays, 0 = that event is silent
+  localparam bit SOUND_CATCH_ON    = 1;
+  localparam bit SOUND_MONEY_ON    = 1;
+  localparam bit SOUND_LEVEL_ON    = 1;
+  localparam bit SOUND_GAMEOVER_ON = 1;
+  // tempo: length of ONE beat in 1/100 s (the notes themselves are in GameJukeBox.sv, in beats)
+  localparam int SOUND_BEAT_FAST_CS = 3;   // catch + money       (1 .. 63)
+  localparam int SOUND_BEAT_SLOW_CS = 6;   // level won + game over (1 .. 63)
+  localparam int SOUND_GAP_CS       = 2;   // silence after every note, 1/100 s (0 .. 31)
 
   // =========================================================
 

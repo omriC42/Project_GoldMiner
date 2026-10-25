@@ -1,5 +1,5 @@
 # Step 4 - hook_block wrapper: what to check BY EYE
-ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.4 -> expect 40 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.5 -> expect 46 PASS, 0 FAIL.
 
 | Test (zt n) | Look at | Expected |
 |---|---|---|
@@ -17,7 +17,9 @@ ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.4 -> 
 | T7 | deliverPulse (green) / deliverValue | ONE pulse when hookState returns to SWING, value = 12, 24, 36, 4, 8, 12 (game_params.sv) |
 | T8 | empty pull-back (tipCollision) | carryShow stays 0, n_carry 0, no deliverPulse |
 | T9 | during SHOOT | n_claw > 0, n_carry = 0 (nothing hangs on the claw on the way down) |
-Never: hookBusy = 1 while SWING; a shoot_req pulse while minerMoving = 1; a deliverPulse without a catch; two deliverPulses for one catch; chk_fail pulses.
+| T10 | freeze (magenta) high in the middle of a shot, goldDR pulses on the claw | hookCatch stays 0 (n_hookCatch does not move), R (orange) and angle flat for 20 frames, the key-2 pulse does nothing; after freeze drops R climbs again |
+| T11 | newLevel (orange) pulse while R falls slowly with large gold | on the next clock: hookState SWING, R = 40, caught 0, carryShow 0, hookBusy 0; NO deliverPulse afterwards; then a new catch (small gold) delivers 12 normally |
+Never: a hookCatch while freeze = 1; a deliverPulse after newLevel dropped the object; hookBusy = 1 while SWING; a shoot_req pulse while minerMoving = 1; a deliverPulse without a catch; two deliverPulses for one catch; chk_fail pulses.
 
 ## Quartus check of the MAIN project (Lab1Demo)
 Open Lab1Demo.qpf -> Processing -> Start -> Start Analysis & Synthesis (about 1-3 min).

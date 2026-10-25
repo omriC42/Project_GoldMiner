@@ -1,5 +1,5 @@
 # Step 9 - weight + game_params.sv: what to check BY EYE
-ModelSim: cd tests -> do run_hook_weight.do -> first line VERSION 9.5 -> expect 65 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_hook_weight.do -> first line VERSION 9.6 -> expect 65 PASS, 0 FAIL.
 All expected numbers are read from game_params.sv / hook_params.sv: after you change a number,
 run this test again - it checks the new number and that it still fits.
 

@@ -1,5 +1,5 @@
 # run_hook_weight.do - Step 9: weight + game_params.sv, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_hook_weight.do        (expect VERSION 9.5)
+# Usage:  cd <project>/tests   then   do run_hook_weight.do        (expect VERSION 9.6)
 # Run it again after you change game_params.sv: it checks your NEW numbers.
 onbreak {resume}
 catch {quit -sim}
@@ -7,7 +7,7 @@ set LIB lib_hook_weight
 if {![file exists $LIB/_info]} {catch {file delete -force $LIB}; vlib $LIB}
 vlog -work $LIB -sv +incdir+../RTL/VGA ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv \
      ../RTL/VGA/hook_draw.sv ../RTL/VGA/carried_draw.sv ../RTL/VGA/hook_block.sv ../RTL/VGA/ObjectsMatrixBitMap.sv \
-     ../RTL/VGA/game_hud.sv tb_hook_weight.sv
+     ../RTL/VGA/hud_digit.sv ../RTL/VGA/game_hud.sv tb_hook_weight.sv
 vsim -voptargs=+acc $LIB.tb_hook_weight
 radix define HookState {2'd0 "SWING", 2'd1 "SHOOT", 2'd2 "RETRACT", -default unsigned}
 radix define ObjType {3'd0 "nothing", 3'd1 "gold S", 3'd2 "gold M", 3'd3 "gold L", 3'd4 "rock S", 3'd5 "rock M", 3'd6 "rock L", -default unsigned}

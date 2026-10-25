@@ -38,6 +38,7 @@ add wave -noupdate -radix unsigned /tb_hook_move/frame_no
 add wave -noupdate -color Cyan /tb_hook_move/shoot_key
 add wave -noupdate -color Orange /tb_hook_move/tipCollision
 add wave -noupdate -color Magenta /tb_hook_move/freeze
+add wave -noupdate -color Orange  /tb_hook_move/restart
 add wave -noupdate -radix decimal /tb_hook_move/X0
 add wave -noupdate -radix decimal /tb_hook_move/Y0
 
@@ -80,4 +81,4 @@ proc zt {n} {
 wave zoom full
 echo ""
 echo "=== Simulation is PAUSED, nothing was closed. ==="
-echo "    zt 1..8 = zoom on a test,  zt 0 = whole run.  Green chk_pass / red chk_fail mark every check."
+echo "    zt 1..9 = zoom on a test,  zt 0 = whole run.  Green chk_pass / red chk_fail mark every check."

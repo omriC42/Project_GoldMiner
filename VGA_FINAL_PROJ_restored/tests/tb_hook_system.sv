@@ -39,7 +39,7 @@ logic [10:0] pixelX = 0, pixelY = 0;
 logic        drawingRequest, tipDR;
 logic [7:0]  RGBout;
 
-hook_move mv (.clk, .resetN, .startOfFrame(sof), .shoot_key, .tipCollision, .freeze,
+hook_move mv (.clk, .resetN, .startOfFrame(sof), .shoot_key, .tipCollision, .freeze, .restart(1'b0),
               .retractStep(10'(RETRACT_EMPTY_STEP_FP)),   // Step 9 port: empty-hook speed
               .X0, .Y0, .Xend, .Yend, .R, .hookState, .dirCos, .dirSin);
 
@@ -268,7 +268,7 @@ int  f, idx, minIdx, maxIdx, shot_idx, maxR, r_at_hit;
 bit  r_constant, angle_constant;
 
 initial begin
-    $display("\n##### tb_hook_system VERSION 3.5 (file date 2026-10-25, + dirCos/dirSin outputs) - if this is not the version Claude announced, run the full  do run_*.do  (restart does NOT recompile) #####");
+    $display("\n##### tb_hook_system VERSION 3.6 (file date 2026-10-25, hook_move restart port) - if this is not the version Claude announced, run the full  do run_*.do  (restart does NOT recompile) #####");
     $display("\n===== tb_hook_system: hook_move + hook_draw together (images: %0d) =====", SAVE_IMAGES);
 
     // ------------------------------------------------------------ T1

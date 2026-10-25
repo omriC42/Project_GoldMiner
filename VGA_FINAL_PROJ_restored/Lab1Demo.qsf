@@ -321,6 +321,7 @@ set_global_assignment -name BDF_FILE RTL/VGA/TOP_VGA_DEMO_KBD.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/miner_move.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/dust_draw.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/hud_digit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_hud.sv
 set_global_assignment -name BDF_FILE RTL/VGA/Miner_Block_T.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/minerBitMap.sv
@@ -341,6 +342,8 @@ set_global_assignment -name SDC_FILE DE10_Standard_Audio.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/Seg7/SEG7.SV
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/Mili_sec_counter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/melody_player_1.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/GameJukeBox.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/game_sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/JukeBox1.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/SinTable.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/AUDIO/addr_counter.sv

@@ -22,6 +22,12 @@
 //    When the pull-back ends (RETRACT -> SWING) with something on the hook, deliverPulse (1 clock)
 //    + deliverValue (its dollars, game_params.sv) go to game_hud -> the score goes up at the TOP.
 //    An empty pull-back (border / floor) delivers nothing.
+//  * Oct 2026 (Step 10): GAME OVER + NEW LEVEL.
+//    freeze (= game_hud gameOver): the hook stops where it is (hook_move) AND cannot catch
+//    (hookCatch is blocked), so nothing disappears from the gold field on the frozen screen.
+//    newLevel (1-clock pulse from game_hud): the hook goes straight back to the top, empty
+//    (hook_move restart). Whatever was on it is dropped WITHOUT a deliverPulse - an object
+//    still on the rope when the level ends is lost (decided with the user).
 
 module hook_block (
     input  logic               clk,
@@ -35,7 +41,8 @@ module hook_block (
     input  logic               shoot_key,     // key 2 (level, straight from the keyboard)
     input  logic               tipCollision,  // extra 'caught' input (tests); GND in the game
     input  logic               goldDR,        // GoldDrawingRequest from Gold_DISPLAY (2 clocks after its pixel)
-    input  logic               freeze,        // game over / time up (Step 10)
+    input  logic               freeze,        // game over (game_hud gameOver): hold + no catching
+    input  logic               newLevel,      // 1-clock pulse (game_hud): hook back to the top, empty
     input  logic        [2:0]  catchType,     // Gold_DISPLAY.collectType: code of the object just taken
 
     output logic               hookDR,        // rope or claw pixel   -> objects_mux
@@ -74,7 +81,7 @@ always_ff @(posedge clk or negedge resetN) begin
     end
     else begin
         tipDR_d   <= tipDR;
-        hookCatch <= tipDR_d && goldDR && (hookState == 2'd1);   // registered: clean for timing
+        hookCatch <= tipDR_d && goldDR && (hookState == 2'd1) && !freeze;   // registered: clean for timing
     end
 end
 
@@ -124,7 +131,7 @@ always_ff @(posedge clk or negedge resetN) begin
     end
     else begin
         hookCatch_d <= hookCatch;
-        if (hookState == 2'd0) begin              // back to swinging -> hook is empty again
+        if (newLevel || hookState == 2'd0) begin  // back to swinging / new level -> hook is empty again
             caught     <= 1'b0;
             caughtType <= OBJ_NONE;
         end
@@ -180,7 +187,7 @@ logic signed  [9:0] dirCos, dirSin;   // rope direction (for the carried object)
 
 hook_move u_move (
     .clk, .resetN, .startOfFrame,
-    .shoot_key(shoot_req), .tipCollision(tipCollision || hookCatch), .freeze,
+    .shoot_key(shoot_req), .tipCollision(tipCollision || hookCatch), .freeze, .restart(newLevel),
     .retractStep,
     .X0, .Y0, .Xend, .Yend, .R, .hookState, .dirCos, .dirSin
 );
@@ -226,6 +233,7 @@ always_comb begin
 end
 // RETRACT -> SWING with something on the hook = it arrived at the top -> one pulse with its value.
 // (on that clock 'caught' is still 1; it is cleared on the next clock because the state is SWING)
+// A new level also ends RETRACT, but it clears 'caught' on the same clock -> no pulse (object lost).
 logic [1:0] hookState_d;
 always_ff @(posedge clk or negedge resetN) begin
     if (!resetN) begin

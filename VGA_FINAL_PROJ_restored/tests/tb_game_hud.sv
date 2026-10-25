@@ -1,0 +1,300 @@
+// tb_game_hud.sv - Step 12: game_hud without dividers and without functions
+//
+// Run:  ModelSim -> cd <project>/tests -> do run_game_hud.do        (expect VERSION 12.0)
+// Checklist: tests/CHECKLIST_step12_hud.md
+//
+// game_hud now keeps every number twice: binary (to compare) and as decimal digits (to draw),
+// counted directly in decimal. This test checks:
+//  * a MONITOR on every clock: the digits always equal the binary number split with / and %
+//    (dollars -> dolH dolT dolO, level -> lvlT lvlO, target -> tgtH tgtT tgtO, seconds -> minD secT secO)
+//  * the PICTURE: the HUD band (and the GAME OVER band) is scanned pixel by pixel and compared with
+//    the OLD drawing code (digitAt / numberAt / gameOverTextAt with / and %), copied into this file
+//    as an independent reference model.
+// T1 after reset: digits + picture (score 0, target, level 1, clock START_SECONDS)
+// T2 score: 400 random values 1..63 -> binary = the model's sum (stops at 999), digits, 6 pictures
+// T3 clock: a second HUD with START_SECONDS = 119 and a 5000-clock "second": counts 119 -> 0,
+//    digits every clock, 7 pictures of the clock area (1:59, 1:40, 1:00, 0:59, 0:10, 0:09, 0:00)
+// T4 level: keypad + 100 times -> level 1..99 (stops at 99), target digits, 5 pictures
+// T5 GAME OVER: keypad * -> the GAME OVER band picture
+// Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
+// stimulus on the falling edge.
+
+`timescale 1ns/1ps
+module tb_game_hud;
+
+logic clk = 0, resetN = 0;
+always #5 clk = ~clk;
+
+logic [10:0] pixelX = 0, pixelY = 0;
+logic        collectPulse = 0, gameOverKey = 0, nextLevelKey = 0;
+logic  [5:0] collectValue = 0;
+logic        hudDR, timeUp, gameOver, levelWon, newLevel;
+logic  [7:0] hudRGB;
+// the game's HUD (real clock: its time does not run out in this test)
+game_hud hud (.clk, .resetN, .pixelX, .pixelY, .collectPulse, .collectValue, .gameOverKey, .nextLevelKey,
+              .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
+// T3: 119 seconds, 1 "second" = 5000 clocks (long enough to scan the clock area); no score / keys
+logic        cDR, cTimeUp, cGameOver, cLevelWon, cNewLevel;
+logic  [7:0] cRGB;
+logic        clockRun = 0;                      // its reset: held until T3
+game_hud #(.CLOCK_HZ(5000), .START_SECONDS(119)) hudC (.clk, .resetN(clockRun), .pixelX, .pixelY,
+              .collectPulse(1'b0), .collectValue(6'd0), .gameOverKey(1'b0), .nextLevelKey(1'b0),
+              .drawingRequest(cDR), .RGBout(cRGB), .timeUp(cTimeUp), .gameOver(cGameOver),
+              .levelWon(cLevelWon), .newLevel(cNewLevel));
+
+// ---------------- wave helpers ----------------
+logic [8*32:1] test_name = "start";
+int            test_no = 0;
+logic [8*64:1] chk_name = "";
+logic          chk_pass = 0, chk_fail = 0;
+int            nPass = 0, nFail = 0;
+realtime t_start [0:15];
+realtime t_end   [0:15];
+task automatic begin_test(input int n, input string name);
+    if (test_no > 0) t_end[test_no] = $realtime;
+    test_no = n; $sformat(test_name, "%s", name); t_start[n] = $realtime;
+    $display("\n[%0t] ---- T%0d %s ----", $time, n, name);
+endtask
+task automatic check(input bit ok, input string what);
+    $sformat(chk_name, "%s", what);
+    if (ok) begin nPass++; chk_pass = 1; $display("[%0t]   PASS  %s", $time, what); end
+    else    begin nFail++; chk_fail = 1; $display("[%0t]   FAIL  %s   <-----", $time, what); end
+    #20; chk_pass = 0; chk_fail = 0;
+endtask
+task automatic write_windows_file(input int last);
+    int fd;
+    fd = $fopen("test_windows.do", "w");
+    $fdisplay(fd, "set TW(0) {0 %0d}", longint'($realtime));
+    for (int i = 1; i <= last; i++) begin
+        $fdisplay(fd, "set TW(%0d) {%0d %0d}", i, longint'(t_start[i]), longint'(t_end[i]));
+        $fdisplay(fd, "catch {wave cursor add -time %0dns -name T%0d}", longint'(t_start[i]), i);
+    end
+    $fclose(fd);
+endtask
+
+// ---------------- MONITOR: digits = binary number split with / and % (every clock) ----------------
+int dig_checks = 0, dig_bad = 0;
+int dollars_i, level_i, target_i, secs_i, csecs_i;        // copies for the waves (int)
+assign dollars_i = hud.dollars;  assign level_i = hud.level;  assign target_i = hud.target;
+assign secs_i    = hud.secondsLeft;  assign csecs_i = hudC.secondsLeft;
+always @(posedge clk) if (resetN) begin
+    dig_checks++;
+    if (hud.dolH != dollars_i / 100 || hud.dolT != (dollars_i / 10) % 10 || hud.dolO != dollars_i % 10 ||
+        hud.lvlT != level_i / 10    || hud.lvlO != level_i % 10 ||
+        hud.tgtH != target_i / 100  || hud.tgtT != (target_i / 10) % 10 || hud.tgtO != target_i % 10 ||
+        hud.minD != secs_i / 60     || hud.secT != (secs_i % 60) / 10    || hud.secO != secs_i % 10) begin
+        if (dig_bad < 5) $display("   [%0t] DIGITS WRONG: $%0d=%0d%0d%0d  level %0d=%0d%0d  target %0d=%0d%0d%0d  time %0d=%0d:%0d%0d",
+            $time, dollars_i, hud.dolH, hud.dolT, hud.dolO, level_i, hud.lvlT, hud.lvlO,
+            target_i, hud.tgtH, hud.tgtT, hud.tgtO, secs_i, hud.minD, hud.secT, hud.secO);
+        dig_bad++;
+    end
+    if (clockRun && (hudC.minD != csecs_i / 60 || hudC.secT != (csecs_i % 60) / 10 || hudC.secO != csecs_i % 10)) begin
+        if (dig_bad < 5) $display("   [%0t] CLOCK DIGITS WRONG: %0d s = %0d:%0d%0d", $time, csecs_i, hudC.minD, hudC.secT, hudC.secO);
+        dig_bad++;
+    end
+end
+
+// ---------------- REFERENCE: the OLD drawing code (with / and %), unchanged ----------------
+localparam int DOLLAR_X = 56,  DOLLAR_Y = 14, TARGET_X = 56, TARGET_Y = 60;
+localparam int LEVEL_X  = 522, LEVEL_Y  = 12, CLOCK_X  = 530, CLOCK_Y = 52, GO_X = 108, GO_Y = 212;
+localparam int CHAR_W = 20, CHAR_H = 28, STEP = 24, BIG_W = 40, BIG_H = 56, BIG_STEP = 48, MSG_LEN = 9;
+localparam logic [0:9][0:6][4:0] FONT = {
+    5'b01110, 5'b10001, 5'b10011, 5'b10101, 5'b11001, 5'b10001, 5'b01110,
+    5'b00100, 5'b01100, 5'b00100, 5'b00100, 5'b00100, 5'b00100, 5'b01110,
+    5'b01110, 5'b10001, 5'b00001, 5'b00010, 5'b00100, 5'b01000, 5'b11111,
+    5'b11111, 5'b00010, 5'b00100, 5'b00010, 5'b00001, 5'b10001, 5'b01110,
+    5'b00010, 5'b00110, 5'b01010, 5'b10010, 5'b11111, 5'b00010, 5'b00010,
+    5'b11111, 5'b10000, 5'b11110, 5'b00001, 5'b00001, 5'b10001, 5'b01110,
+    5'b00110, 5'b01000, 5'b10000, 5'b11110, 5'b10001, 5'b10001, 5'b01110,
+    5'b11111, 5'b00001, 5'b00010, 5'b00100, 5'b01000, 5'b01000, 5'b01000,
+    5'b01110, 5'b10001, 5'b10001, 5'b01110, 5'b10001, 5'b10001, 5'b01110,
+    5'b01110, 5'b10001, 5'b10001, 5'b01111, 5'b00001, 5'b00010, 5'b01100 };
+localparam logic [0:6][0:6][4:0] LETTERS = {
+    5'b01110, 5'b10001, 5'b10000, 5'b10111, 5'b10001, 5'b10001, 5'b01111,
+    5'b01110, 5'b10001, 5'b10001, 5'b11111, 5'b10001, 5'b10001, 5'b10001,
+    5'b10001, 5'b11011, 5'b10101, 5'b10101, 5'b10001, 5'b10001, 5'b10001,
+    5'b11111, 5'b10000, 5'b10000, 5'b11110, 5'b10000, 5'b10000, 5'b11111,
+    5'b01110, 5'b10001, 5'b10001, 5'b10001, 5'b10001, 5'b10001, 5'b01110,
+    5'b10001, 5'b10001, 5'b10001, 5'b10001, 5'b10001, 5'b01010, 5'b00100,
+    5'b11110, 5'b10001, 5'b10001, 5'b11110, 5'b10100, 5'b10010, 5'b10001 };
+localparam logic [0:MSG_LEN-1][2:0] MESSAGE = {3'd0, 3'd1, 3'd2, 3'd3, 3'd7, 3'd4, 3'd5, 3'd3, 3'd6};
+function automatic bit digitAt(int x, int y, int X, int Y, int d);
+    if ((x >= X) && (x < X + CHAR_W) && (y >= Y) && (y < Y + CHAR_H)) return FONT[d][(y - Y) >> 2][4 - ((x - X) >> 2)];
+    return 0;
+endfunction
+function automatic bit numberAt(int x, int y, int X, int Y, int n);
+    int h, t, o;
+    h = n / 100; t = (n / 10) % 10; o = n % 10;
+    if (n >= 100)     return digitAt(x, y, X, Y, h) || digitAt(x, y, X + STEP, Y, t) || digitAt(x, y, X + 2*STEP, Y, o);
+    else if (n >= 10) return digitAt(x, y, X, Y, t) || digitAt(x, y, X + STEP, Y, o);
+    else              return digitAt(x, y, X, Y, o);
+endfunction
+function automatic bit gameOverTextAt(int x, int y);
+    bit hit; int X;
+    hit = 0;
+    if ((y >= GO_Y) && (y < GO_Y + BIG_H))
+        for (int i = 0; i < MSG_LEN; i++) begin
+            X = GO_X + i * BIG_STEP;
+            if ((x >= X) && (x < X + BIG_W) && (MESSAGE[i] != 3'd7)) hit = LETTERS[MESSAGE[i]][(y - GO_Y) >> 3][4 - ((x - X) >> 3)];
+        end
+    return hit;
+endfunction
+// the old picture for these values -> 8'hE0 (red text) or 8'hFF (transparent)
+function automatic logic [7:0] old_hud(int x, int y, int dol, int tgt, int lvl, int secs, bit go);
+    int m, s;
+    bit on;
+    m = (secs >= 60) ? 1 : 0;  s = (secs >= 60) ? secs - 60 : secs;
+    on = digitAt(x, y, CLOCK_X, CLOCK_Y, m) || digitAt(x, y, CLOCK_X + CHAR_W + 16, CLOCK_Y, s / 10)
+      || digitAt(x, y, CLOCK_X + CHAR_W + 16 + STEP, CLOCK_Y, s % 10)
+      || ((x >= CLOCK_X + CHAR_W + 6) && (x < CLOCK_X + CHAR_W + 10) &&
+          (((y >= CLOCK_Y + 4) && (y < CLOCK_Y + 12)) || ((y >= CLOCK_Y + 16) && (y < CLOCK_Y + 24))))
+      || numberAt(x, y, DOLLAR_X, DOLLAR_Y, dol) || numberAt(x, y, TARGET_X, TARGET_Y, tgt)
+      || numberAt(x, y, LEVEL_X, LEVEL_Y, lvl) || (go && gameOverTextAt(x, y));
+    return on ? 8'hE0 : 8'hFF;
+endfunction
+
+// ---------------- picture compare: rows y0..y1, all 640 columns (RGBout = 1 clock after its pixel) ----------------
+int pix_bad = 0, pix_red = 0;
+task automatic compare_band(input bit which_c, input int y0, input int y1, input int dol, input int tgt,
+                            input int lvl, input int secs, input bit go);
+    compare_region(which_c, 0, 639, y0, y1, dol, tgt, lvl, secs, go);
+endtask
+task automatic compare_region(input bit which_c, input int x0, input int x1, input int y0, input int y1,
+                              input int dol, input int tgt, input int lvl, input int secs, input bit go);
+    int px, py, total, w; logic [7:0] got, expv;
+    w = x1 - x0 + 1; px = -1; py = 0; total = w * (y1 - y0 + 1);
+    for (int n = 0; n <= total; n++) begin
+        @(negedge clk);
+        if (px >= 0) begin
+            got  = which_c ? cRGB : hudRGB;
+            expv = old_hud(px, py, dol, tgt, lvl, secs, go);
+            if (got !== expv) begin
+                if (pix_bad < 5) $display("   pixel (%0d,%0d): got %h, old code %h", px, py, got, expv);
+                pix_bad++;
+            end
+            if (got == 8'hE0) pix_red++;
+        end
+        if (n < total) begin px = x0 + n % w; py = y0 + n / w; pixelX = px; pixelY = py; end
+        else px = -1;
+    end
+endtask
+// the game's HUD as it is now, top band (y 0..95)
+task automatic picture_now(output int bad, output int red);
+    pix_bad = 0; pix_red = 0;
+    compare_band(0, 0, 95, hud.dollars, hud.target, hud.level, hud.secondsLeft, hud.gameOver);
+    bad = pix_bad; red = pix_red;
+endtask
+
+// ---------------- stimulus helpers ----------------
+task automatic collect(input int v);
+    @(negedge clk) begin collectPulse = 1; collectValue = 6'(v); end
+    @(negedge clk) begin collectPulse = 0; collectValue = 0; end
+endtask
+task automatic press_plus();
+    @(negedge clk) nextLevelKey = 1; repeat (2) @(negedge clk); nextLevelKey = 0; repeat (2) @(negedge clk);
+endtask
+
+int  bad, red, model, v, pics, pics_bad, red_total, bin_bad, seed, c, sat_seen;
+int  pic_at [0:5];
+
+initial begin
+    $display("\n##### tb_game_hud VERSION 12.0 (2026-10-25, HUD digits counted in decimal, no dividers / functions) - if not the version Claude announced, run the full  do run_game_hud.do  #####");
+    repeat (3) @(negedge clk);
+    resetN = 1;
+    repeat (5) @(negedge clk);
+
+    // ------------------------------------------------------------ T1
+    begin_test(1, "T1 after reset");
+    picture_now(bad, red);
+    check(dig_bad == 0 && hud.dolO == 0 && hud.lvlO == 1 && hud.minD == game_params::START_SECONDS / 60,
+          $sformatf("digits after reset: $%0d%0d%0d, level %0d%0d, target %0d%0d%0d, clock %0d:%0d%0d",
+                    hud.dolH, hud.dolT, hud.dolO, hud.lvlT, hud.lvlO, hud.tgtH, hud.tgtT, hud.tgtO, hud.minD, hud.secT, hud.secO));
+    check(bad == 0 && red > 0, $sformatf("HUD band = the old drawing code: %0d mismatches, %0d red pixels", bad, red));
+
+    // ------------------------------------------------------------ T2
+    begin_test(2, "T2 score: 400 values");
+    model = 0; bin_bad = 0; pics = 0; pics_bad = 0; red_total = 0; sat_seen = 0; seed = 12;
+    pic_at = '{0, 1, 7, 20, 150, 399};               // $9 (1 digit), $19 (2), $100 (3), then 999
+    for (int i = 0; i < 400; i++) begin
+        v = 1 + ($urandom(seed + i) % 63);            // 1..63
+        if (i < 10) v = 9 + i;                        // the first ones cross the tens: 9, 10, 11 ...
+        collect(v);
+        model = (model + v > 999) ? 999 : model + v;
+        if (model == 999) sat_seen++;
+        @(negedge clk);
+        if (int'(hud.dollars) != model) begin
+            if (bin_bad < 3) $display("   after +%0d: dollars %0d, model %0d", v, hud.dollars, model);
+            bin_bad++;
+        end
+        for (int k = 0; k < 6; k++) if (pic_at[k] == i) begin
+            picture_now(bad, red); pics++; if (bad != 0) pics_bad++; red_total += red;
+            $display("   picture at $%0d: %0d mismatches", hud.dollars, bad);
+        end
+    end
+    check(bin_bad == 0 && sat_seen > 0, $sformatf("400 values: dollars = the model's sum every time (%0d wrong), reached and kept 999 (%0d times)", bin_bad, sat_seen));
+    check(dig_bad == 0, $sformatf("digits = dollars split with / and %% on all %0d clocks so far (%0d wrong)", dig_checks, dig_bad));
+    check(pics_bad == 0, $sformatf("%0d pictures of the score (1, 2 and 3 digits, 999) = the old drawing code (%0d with mismatches)", pics, pics_bad));
+
+    // ------------------------------------------------------------ T3
+    begin_test(3, "T3 clock 119 -> 0");
+    @(negedge clk) clockRun = 1;                      // the 119-second HUD starts now
+    pics = 0; pics_bad = 0; c = 0; v = -1;
+    // the clock area (x 520..639, y 48..84 = 4440 pixels) is scanned right after the chosen seconds
+    // start, so the scan ends before the next second (5000 clocks)
+    while (c < 700000) begin
+        @(negedge clk); c++;
+        if (int'(hudC.secondsLeft) != v) begin
+            v = hudC.secondsLeft;
+            if (v inside {119, 100, 60, 59, 10, 9, 0}) begin
+                pix_bad = 0; pix_red = 0;
+                compare_region(1, 520, 639, 48, 84, 0, hudC.target, 1, v, 1'b0);
+                pics++; if (pix_bad != 0) pics_bad++;
+                $display("   clock picture at %0d s (%0d:%0d%0d): %0d mismatches, %0d red px", v, hudC.minD, hudC.secT, hudC.secO, pix_bad, pix_red);
+            end
+            if (v == 0) break;
+        end
+    end
+    check(hudC.secondsLeft == 0 && hudC.minD == 0 && hudC.secT == 0 && hudC.secO == 0 && dig_bad == 0,
+          $sformatf("119 s counted down to 0:00 in %0d clocks, digits right on every clock (%0d wrong)", c, dig_bad));
+    check(pics == 7 && pics_bad == 0, $sformatf("%0d clock pictures (1:59 ... 0:00) = the old drawing code (%0d with mismatches)", pics, pics_bad));
+
+    // ------------------------------------------------------------ T4
+    begin_test(4, "T4 level 1 -> 99");
+    pics = 0; pics_bad = 0;
+    for (int l = 2; l <= 101; l++) begin
+        press_plus();
+        if (l inside {2, 9, 10, 11, 42, 99, 101}) begin
+            picture_now(bad, red); pics++; if (bad != 0) pics_bad++;
+            $display("   picture at level %0d (target %0d): %0d mismatches", hud.level, hud.target, bad);
+        end
+    end
+    check(hud.level == 99 && hud.lvlT == 9 && hud.lvlO == 9 && dig_bad == 0,
+          $sformatf("+ pressed 100 times: level %0d (stops at 99), digits %0d%0d, target %0d = %0d%0d%0d, all digits right (%0d wrong)",
+                    hud.level, hud.lvlT, hud.lvlO, hud.target, hud.tgtH, hud.tgtT, hud.tgtO, dig_bad));
+    check(pics_bad == 0, $sformatf("%0d pictures of level + target = the old drawing code (%0d with mismatches)", pics, pics_bad));
+
+    // ------------------------------------------------------------ T5
+    begin_test(5, "T5 GAME OVER text");
+    @(negedge clk) gameOverKey = 1; @(negedge clk) gameOverKey = 0;
+    repeat (3) @(negedge clk);
+    pix_bad = 0; pix_red = 0;
+    compare_band(0, GO_Y - 2, GO_Y + BIG_H + 1, hud.dollars, hud.target, hud.level, hud.secondsLeft, 1'b1);
+    check(hud.gameOver && pix_bad == 0 && pix_red > 0,
+          $sformatf("GAME OVER band = the old drawing code: %0d mismatches, %0d red pixels", pix_bad, pix_red));
+
+    // ------------------------------------------------------------ end
+    t_end[5] = $realtime; test_no = 0;
+    $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
+    write_windows_file(5);
+    $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
+             nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
+    $display("Simulation PAUSED (not closed). zt <n> zooms on test n.\n");
+    $stop;
+end
+
+initial begin
+    #200_000_000;
+    $display("WATCHDOG: not finished after 200 ms sim time - paused here, check test_name");
+    $stop;
+end
+endmodule

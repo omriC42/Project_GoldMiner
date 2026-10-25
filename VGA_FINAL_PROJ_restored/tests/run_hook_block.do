@@ -1,5 +1,5 @@
 # run_hook_block.do - Step 4: hook_block wrapper, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_hook_block.do        (expect VERSION 4.4)
+# Usage:  cd <project>/tests   then   do run_hook_block.do        (expect VERSION 4.5)
 # To run again after ANY file change: the full  do run_hook_block.do  (it recompiles).
 # 'restart -f ; run -all' does NOT recompile.
 onbreak {resume}
@@ -30,6 +30,9 @@ add wave -noupdate -color Orange   /tb_hook_block/minerMoving
 add wave -noupdate -color Cyan     /tb_hook_block/shoot_key
 add wave -noupdate                 /tb_hook_block/tipCollision
 add wave -noupdate -color Magenta  /tb_hook_block/freeze
+add wave -noupdate -color Orange   /tb_hook_block/newLevel
+add wave -noupdate -color Red      /tb_hook_block/hookCatch
+add wave -noupdate -radix unsigned /tb_hook_block/n_hookCatch
 add wave -noupdate -radix unsigned /tb_hook_block/catchType
 add wave -noupdate -divider {INSIDE hook_block}
 add wave -noupdate -radix decimal  /tb_hook_block/origin_x
@@ -72,4 +75,4 @@ proc zt {n} {
 wave zoom full
 echo ""
 echo "=== Simulation is PAUSED, nothing was closed. ==="
-echo "    Images: frames/block_*.bmp   Checklist: CHECKLIST_step4_hook_block.md   zt 1..9 / zt 0"
+echo "    Images: frames/block_*.bmp   Checklist: CHECKLIST_step4_hook_block.md   zt 1..11 / zt 0"

@@ -65,19 +65,14 @@ localparam  int RAND_BITS_PER_OBJECT = 7 ; // 4 bits position + 1 bit gold/rock 
 
 logic [2:0] MazeBitMapMask [0:NUM_ROWS-1][0:NUM_COLS-1];  
 
-// ---- VALUES (dollars) --------------------------------------------------------
-// Set in game_params.sv (EDIT HERE section) - do not change them here.
-function automatic logic [5:0] objectValue(input logic [2:0] obj);
-	case (obj)
-		3'd1:    objectValue = 6'(game_params::GOLD_SMALL_VALUE);
-		3'd2:    objectValue = 6'(game_params::GOLD_MEDIUM_VALUE);
-		3'd3:    objectValue = 6'(game_params::GOLD_LARGE_VALUE);
-		3'd4:    objectValue = 6'(game_params::ROCK_SMALL_VALUE);
-		3'd5:    objectValue = 6'(game_params::ROCK_MEDIUM_VALUE);
-		3'd6:    objectValue = 6'(game_params::ROCK_LARGE_VALUE);
-		default: objectValue = 6'd0;
-	endcase
-endfunction
+// ---- which cell of a group gets the object (Step 12, Oct 2026: no "%" in the hardware) ----
+// 4 random bits (0..15) -> cell 0..CELLS_PER_OBJECT-1 of the group. A table of CONSTANTS:
+// Quartus works out the "%" while compiling, so no divider is built (the old "r % 3" built 8).
+localparam logic [3:0] CELL_OF_RANDOM [0:15] = '{
+    4'( 0 % CELLS_PER_OBJECT), 4'( 1 % CELLS_PER_OBJECT), 4'( 2 % CELLS_PER_OBJECT), 4'( 3 % CELLS_PER_OBJECT),
+    4'( 4 % CELLS_PER_OBJECT), 4'( 5 % CELLS_PER_OBJECT), 4'( 6 % CELLS_PER_OBJECT), 4'( 7 % CELLS_PER_OBJECT),
+    4'( 8 % CELLS_PER_OBJECT), 4'( 9 % CELLS_PER_OBJECT), 4'(10 % CELLS_PER_OBJECT), 4'(11 % CELLS_PER_OBJECT),
+    4'(12 % CELLS_PER_OBJECT), 4'(13 % CELLS_PER_OBJECT), 4'(14 % CELLS_PER_OBJECT), 4'(15 % CELLS_PER_OBJECT) };
 
 // 96-bit LFSR (taps 96,94,49,47 = maximal length). It runs freely all the time
 // and is sampled on the first clock after reset (and at every new level), so the
@@ -108,7 +103,7 @@ begin
 			// Place exactly one object per group of CELLS_PER_OBJECT cells in rows 1-3
 			for (int j = 0; j < NUM_OBJECTS; j++) begin
 				automatic logic [6:0] r       = rand_counter[j*RAND_BITS_PER_OBJECT +: RAND_BITS_PER_OBJECT];
-				automatic int         pos     = int'(r[3:0]) % CELLS_PER_OBJECT; // which cell_idx of the group gets the object
+				automatic int         pos     = int'(CELL_OF_RANDOM[r[3:0]]);    // which cell_idx of the group gets the object
 				automatic logic       is_gold = r[4];
 				automatic logic [1:0] size_opt = r[6:5];
 				automatic logic [2:0] obj_val;
@@ -164,6 +159,22 @@ assign inSmall  = (cellX >= SMALL_START)  && (cellX < SMALL_START  + 6'd16) &&
 assign inMedium = (cellX >= MEDIUM_START) && (cellX < MEDIUM_START + 6'd32) &&
                   (cellY >= MEDIUM_START) && (cellY < MEDIUM_START + 6'd32);
 
+// ---- VALUE (dollars) of the object in the current cell ----------------------------
+// Set in game_params.sv (EDIT HERE section) - do not change them here.
+// Step 12 (Oct 2026): a plain case instead of the old objectValue() function.
+logic [5:0] cellValue;
+always_comb begin
+	case (MazeBitMapMask[offsetY_MSB][offsetX_MSB])
+		3'd1:    cellValue = 6'(game_params::GOLD_SMALL_VALUE);
+		3'd2:    cellValue = 6'(game_params::GOLD_MEDIUM_VALUE);
+		3'd3:    cellValue = 6'(game_params::GOLD_LARGE_VALUE);
+		3'd4:    cellValue = 6'(game_params::ROCK_SMALL_VALUE);
+		3'd5:    cellValue = 6'(game_params::ROCK_MEDIUM_VALUE);
+		3'd6:    cellValue = 6'(game_params::ROCK_LARGE_VALUE);
+		default: cellValue = 6'd0;
+	endcase
+end
+
 always_ff@(posedge clk or negedge resetN)
 begin
 	if(!resetN) begin
@@ -181,7 +192,7 @@ begin
 		// report what the hook collected (only once: from the next clock the cell is empty)
 		collectPulse <= clearCell && !loadLayout && !newLevel;
 		if (clearCell) begin
-			collectValue <= objectValue(MazeBitMapMask[offsetY_MSB][offsetX_MSB]);
+			collectValue <= cellValue;
 			collectType  <= MazeBitMapMask[offsetY_MSB][offsetX_MSB];
 		end
 		

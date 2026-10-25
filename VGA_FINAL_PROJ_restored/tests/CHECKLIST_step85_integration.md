@@ -1,5 +1,5 @@
 # Step 8.5 - the hook inside the game: what to check BY EYE
-ModelSim: cd tests -> do run_game_integration.do -> first line VERSION 8.5.9 -> expect 39 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_game_integration.do -> first line VERSION 8.7.1 -> expect 47 PASS, 0 FAIL.
 Real modules: miner_move + miner sprite + dust (6 pictures, driven by the real motion movingLeft/movingRight), hook_block, gold field (square_object + GoldsMatrixBitMap),
 game_hud (score, fed by hook_block deliverPulse/deliverValue = score at the top, like the TOP), objects_mux. The testbench only presses keys 2/4/6 - nothing is forced.
 The gold layout is printed in the Transcript at T1 (same every run in simulation).
@@ -28,6 +28,12 @@ The gold layout is printed in the Transcript at T1 (same every run in simulation
 | 6 | dustLeftKey, dustOn, dustOnLeftSide | dustLeftKey rises with hookBusy falling, dustOn = 1, dustOnLeftSide = 0 (dust on the RIGHT of the cart) |
 | 7 | as T3-T5 | second target: walk, aim at 90, catch; score unchanged at the catch, steps up again when the hook is home (sum of both values); its pull-back speed is checked too |
 | 7 | key2 pulse during RETRACT | hookState stays RETRACT, R keeps going down - nothing restarts |
+| 9 | keyPlus (orange) while R falls with an object | ONE newLevel pulse -> on the next clock hookState SWING, R = 40, caught 0, hookBusy 0; NO hookDeliver afterwards; score 0, hud/level 2; the gold field shows a new layout; minerX does not change |
+| 10 | keyStar (red) in the middle of a shot | gameOver goes high and STAYS; R and angle_deg flat from then on, hookState stays SHOOT; minerLock = 1 |
+| 5 | soundStart / soundSelect (Step 11) | at the catch: soundStart with soundSelect 1 (CATCH); when the hook is home: soundStart with 2 (MONEY) |
+| 9 | soundStart / soundSelect | after keypad +: ONE soundStart with 3 (LEVEL), no 2 (MONEY) afterwards |
+| 10 | soundStart / soundSelect | after keypad *: ONE soundStart with 4 (GAMEOVER), nothing more while gameOver stays high |
+| 10 | key4 held + a key2 pulse while gameOver = 1 | minerX flat, minerXspeed 0, no dust; hookState unchanged; score unchanged; no hookCatch |
 
 Images (tests/frames):
 * game_1_start.bmp  - miner on the rail, short rope hanging below it, 8 objects, HUD score 0
@@ -36,9 +42,11 @@ Images (tests/frames):
 * game_4_after.bmp  - rope short again, miner moved a bit LEFT (T6), gray dust picture on the RIGHT of the cart (behind it)
 * game_5_second.bmp - second object hanging on the rope on its way back up
 * game_6_end.bmp    - 6 objects left, score = both values
+* game_7_newlevel.bmp - after keypad +: new layout (8 objects), short empty rope, score 0, level 2, miner where it was
+* game_8_gameover.bmp - GAME OVER text; the rope frozen half way down; nothing else moved
 Background is plain brown here (the real background picture ROM is not in the simulation).
 
-Never: a shot while key 4/6 is held; minerX changing while hookBusy = 1; two goldCollected for one catch; the score going up before the hook is home; the carried object leaving the rope;
+Never: anything moving after gameOver; a score added after a new level dropped the object; a shot while key 4/6 is held; minerX changing while hookBusy = 1; two goldCollected for one catch; the score going up before the hook is home; the carried object leaving the rope;
 an object disappearing that the claw did not touch; key 2 doing anything while the hook is out.
 
 ## Board (Lab1Demo after a full compile)

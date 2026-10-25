@@ -14,6 +14,8 @@
 //  empty hook or the weight of the caught object, see game_params.sv).
 // Oct 2026: outputs dirCos / dirSin = 256*cos / 256*sin of the current angle (the same table values
 //  used for the tip), so hook_block can hang the caught object along the rope (carried_draw).
+// Oct 2026 (Step 10): input restart (1-clock pulse, new level) -> the hook is put back at the top:
+//  SWING, shortest rope, pointing straight down, like after reset. It wins over freeze.
 //
 // Angle convention (screen coordinates, y grows downward):
 //   index 0 = 0 deg = pointing right, index 30 = 90 deg = straight down,
@@ -26,6 +28,7 @@ module hook_move (
     input  logic                shoot_key,     // keypad 2 (level) - edge detected inside
     input  logic                tipCollision,  // hook tip touched an object -> start retract
     input  logic                freeze,        // 1 = hold everything (pause / game over)
+    input  logic                restart,       // 1-clock pulse: new level -> back to the top, swinging
     input  logic        [9:0]   retractStep,   // pull-back per frame, pixels x64 (from hook_block)
     input  logic signed [10:0]  X0,            // rope origin (under the miner)
     input  logic signed [10:0]  Y0,
@@ -102,7 +105,13 @@ always_ff @(posedge clk or negedge resetN) begin
     else begin
         shoot_key_d <= shoot_key;
 
-        if (!freeze) begin
+        if (restart) begin                     // new level: back to the start (like reset)
+            state       <= S_SWING;
+            angle_fp    <= 13'(30 * FP);
+            swing_right <= 1'b0;
+            R_fp        <= 18'(MIN_R_FP);
+        end
+        else if (!freeze) begin
             case (state)
 
             // ---------- swing back and forth between 0 and 180 degrees ----------

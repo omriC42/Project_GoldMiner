@@ -1,6 +1,6 @@
 // tb_hook_weight.sv - Step 9: weight + game_params.sv (the moved parameters still work)
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.5)
+// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.6)
 // Checklist: tests/CHECKLIST_step9_weight.md
 //
 // Every expected number below is read from game_params.sv / hook_params.sv, so after you change
@@ -57,7 +57,7 @@ logic goldDR; assign goldDR = band_p2;
 logic hookDR, tipDR, hookBusy, hookCatch; logic [7:0] hookRGB; logic [1:0] hookState;
 logic dPulse; logic [5:0] dValue;             // 9.5: deliverPulse / deliverValue (score at the top)
 hook_block hb (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
-               .minerMoving(1'b0), .shoot_key, .tipCollision(1'b0), .goldDR, .freeze(1'b0),
+               .minerMoving(1'b0), .shoot_key, .tipCollision(1'b0), .goldDR, .freeze(1'b0), .newLevel(1'b0),
                .catchType, .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
                .deliverPulse(dPulse), .deliverValue(dValue));
 // score at the top (9.5): the score HUD gets its dollars from the hook, like TOP_VGA_DEMO_KBD
@@ -68,6 +68,7 @@ game_hud hudScore (.clk, .resetN, .pixelX(11'd0), .pixelY(11'd0),
     .newLevel(hsNewLevel));
 int top_score; assign top_score = hudScore.dollars;
 int n_deliver = 0, sum_deliver = 0, n_hsLevel = 0;
+int seen [1:6], val_found [1:6], n_layouts;      // T2 (9.6)
 always @(posedge clk) begin
     if (dPulse) begin n_deliver++; sum_deliver += dValue; end
     if (hsNewLevel) n_hsLevel++;      // must stay 0: levels change only when the clock runs out
@@ -75,10 +76,13 @@ end
 
 // =====================================================================================
 // GOLD FIELD (only its value table is used, T2)
+// Step 12 (9.6): the old objectValue() function is gone - T2 now reads the value (cellValue) of the
+// object in each cell of real random layouts, until all 6 kinds were seen.
 // =====================================================================================
 logic gDR, gPulse; logic [7:0] gRGB; logic [5:0] gValue; logic [2:0] gType;
-ObjectsMatrixBitMap gbm (.clk, .resetN, .offsetX(11'd0), .offsetY(11'd0), .InsideRectangle(1'b0),
-    .collision_Hook_Object(1'b0), .newLevel(1'b0),
+logic [10:0] gOffX = 0, gOffY = 0;  logic gNew = 0;
+ObjectsMatrixBitMap gbm (.clk, .resetN, .offsetX(gOffX), .offsetY(gOffY), .InsideRectangle(1'b0),
+    .collision_Hook_Object(1'b0), .newLevel(gNew),
     .drawingRequest(gDR), .RGBout(gRGB), .collectPulse(gPulse), .collectValue(gValue), .collectType(gType));
 
 // =====================================================================================
@@ -379,7 +383,7 @@ bit ok_all;
 int c;
 
 initial begin
-    $display("\n##### tb_hook_weight VERSION 9.5 (2026-10-25, score at the top) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
+    $display("\n##### tb_hook_weight VERSION 9.6 (2026-10-25, gold field values without a function) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
     $display("   game_params: difficulty %s, %0d s per level, targets EASY %0d+%0d, NORMAL %0d+%0d, HARD %0d+%0d per level",
              diff_now.name(), game_params::START_SECONDS,
              game_params::TARGET_START_EASY, game_params::TARGET_STEP_EASY, game_params::TARGET_START_NORMAL,
@@ -404,9 +408,25 @@ initial begin
 
     // ------------------------------------------------------------ T2
     begin_test(2, "T2 gold field values");
+    seen = '{default:0}; val_found = '{default:-1}; n_layouts = 0;
+    while (n_layouts < 60 && !(seen[1] && seen[2] && seen[3] && seen[4] && seen[5] && seen[6])) begin
+        @(negedge clk) gNew = 1; @(negedge clk) gNew = 0;      // a new random layout
+        repeat (2) @(negedge clk);
+        n_layouts++;
+        for (int row = 1; row < 4; row++) for (int col = 0; col < 8; col++) begin
+            @(negedge clk) begin gOffX = 11'(col * 64 + 32); gOffY = 11'(row * 64 + 32); end
+            @(negedge clk);
+            if (gbm.MazeBitMapMask[row][col] != 0) begin
+                seen[gbm.MazeBitMapMask[row][col]] = 1;
+                if (val_found[gbm.MazeBitMapMask[row][col]] == -1 || int'(gbm.cellValue) != value_param(gbm.MazeBitMapMask[row][col]))
+                    val_found[gbm.MazeBitMapMask[row][col]] = gbm.cellValue;
+            end
+        end
+    end
+    $display("   %0d random layouts scanned to see all 6 kinds", n_layouts);
     for (int t = 1; t <= 6; t++)
-        check(int'(gbm.objectValue(3'(t))) == value_param(t),
-              $sformatf("%s is worth %0d (game_params: %0d)", type_name(t), gbm.objectValue(3'(t)), value_param(t)));
+        check(seen[t] && val_found[t] == value_param(t),
+              $sformatf("%s is worth %0d in the gold field (game_params: %0d)", type_name(t), val_found[t], value_param(t)));
 
     // ------------------------------------------------------------ T3
     begin_test(3, "T3 pull-back table");
