@@ -312,6 +312,8 @@ set_global_assignment -name BDF_FILE RTL/VGA/TOP_VGA_DEMO_KBD.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/miner_move.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/dust_draw.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/hud_digit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/bcd_add3.sv
+set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/hud_number.sv
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/game_hud.sv
 set_global_assignment -name BDF_FILE RTL/VGA/Miner_Block_T.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/minerBitMap.sv

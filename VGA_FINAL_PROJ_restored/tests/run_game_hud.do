@@ -1,12 +1,12 @@
 # run_game_hud.do - Step 12: game_hud without dividers / functions, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_game_hud.do        (expect VERSION 12.1)
+# Usage:  cd <project>/tests   then   do run_game_hud.do        (expect VERSION 12.3)
 # To run again after ANY file change: the full  do run_game_hud.do  (it recompiles).
 onbreak {resume}
 catch {quit -sim}
 set LIB lib_game_hud
 if {![file exists $LIB/_info]} {catch {file delete -force $LIB}; vlib $LIB}
 vlog -work $LIB -sv ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hud_digit.sv \
-     ../RTL/VGA/game_hud.sv tb_game_hud.sv
+     ../RTL/VGA/bcd_add3.sv ../RTL/VGA/hud_number.sv ../RTL/VGA/game_hud.sv tb_game_hud.sv
 vsim -voptargs=+acc $LIB.tb_game_hud
 
 quietly WaveActivateNextPane {} 0

@@ -1,5 +1,5 @@
 # run_game_integration.do - Step 8.5: the hook inside the game (GUI mode, nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_game_integration.do        (expect VERSION 8.8)
+# Usage:  cd <project>/tests   then   do run_game_integration.do        (expect VERSION 8.11)
 # To run again after ANY file change: the full  do run_game_integration.do  (it recompiles).
 onbreak {resume}
 file mkdir frames
@@ -9,7 +9,7 @@ if {![file exists $LIB/_info]} {catch {file delete -force $LIB}; vlib $LIB}
 vlog -work $LIB -sv +incdir+../RTL/VGA ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv ../RTL/VGA/hook_draw.sv \
      ../RTL/VGA/carried_draw.sv ../RTL/VGA/hook_block.sv ../RTL/AUDIO/game_sound.sv ../RTL/VGA/miner_move.sv ../RTL/VGA/square_object.sv \
      ../RTL/VGA/minerBitMap.sv ../RTL/VGA/dust_draw.sv ../RTL/VGA/ObjectsMatrixBitMap.sv \
-     ../RTL/VGA/hud_digit.sv ../RTL/VGA/game_hud.sv ../RTL/VGA/objects_mux.sv tb_game_integration.sv
+     ../RTL/VGA/hud_digit.sv ../RTL/VGA/bcd_add3.sv ../RTL/VGA/hud_number.sv ../RTL/VGA/game_hud.sv ../RTL/VGA/objects_mux.sv tb_game_integration.sv
 vsim -voptargs=+acc $LIB.tb_game_integration
 radix define HookState {2'd0 "SWING", 2'd1 "SHOOT", 2'd2 "RETRACT", -default unsigned}
 quietly WaveActivateNextPane {} 0
@@ -30,7 +30,8 @@ add wave -noupdate -divider {GAME OVER + NEW LEVEL (Step 10)}
 add wave -noupdate -color Red      /tb_game_integration/gameOver
 add wave -noupdate -color Orange   /tb_game_integration/newLevel
 add wave -noupdate -color Magenta  /tb_game_integration/minerLock
-add wave -noupdate -radix unsigned /tb_game_integration/hud/level
+add wave -noupdate -radix unsigned /tb_game_integration/hud/lvlT
+add wave -noupdate -radix unsigned /tb_game_integration/hud/lvlO
 add wave -noupdate -divider {SOUND EVENTS (Step 11): 1 CATCH 2 MONEY 3 LEVEL 4 GAMEOVER}
 add wave -noupdate -color Orange   /tb_game_integration/soundStart
 add wave -noupdate -radix unsigned /tb_game_integration/soundSelect

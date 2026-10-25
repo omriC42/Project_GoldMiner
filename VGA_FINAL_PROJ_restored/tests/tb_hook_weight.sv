@@ -1,6 +1,6 @@
 // tb_hook_weight.sv - Step 9: weight + game_params.sv (the moved parameters still work)
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.8)
+// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.9)
 // Checklist: tests/CHECKLIST_step9_weight.md
 //
 // Every expected number below is read from game_params.sv / hook_params.sv, so after you change
@@ -73,7 +73,7 @@ game_hud hudScore (.clk, .resetN, .pixelX(11'd0), .pixelY(11'd0),
     .difficulty(2'(game_params::DIFFICULTY)), .timeSel(DEF_TIME), .cheatsOn(1'b0),
     .drawingRequest(hsDR), .RGBout(hsRGB), .gameOver(hsGameOver), .levelWon(hsLevelWon),
     .newLevel(hsNewLevel));
-int top_score; assign top_score = hudScore.dollars;
+int top_score; assign top_score = hudScore.dolH * 100 + hudScore.dolT * 10 + hudScore.dolO;   // B10: from the digits
 int n_deliver = 0, sum_deliver = 0, n_hsLevel = 0;
 int seen [1:6], val_found [1:6], n_layouts;      // T2 (9.6)
 always @(posedge clk) begin
@@ -134,10 +134,19 @@ int  R;           assign R = hb.R;
 int  caughtType;  assign caughtType = hb.caughtType;
 int  retractStep; assign retractStep = hb.retractStep;
 int  cur_diff = 0;                            // T5: which HUD is being played (0 EASY 1 NORMAL 2 HARD)
-int  seconds;     assign seconds = (cur_diff == 0) ? hudE.secondsLeft : (cur_diff == 1) ? hudN.secondsLeft : hudH.secondsLeft;
-int  score;       assign score   = (cur_diff == 0) ? hudE.dollars     : (cur_diff == 1) ? hudN.dollars     : hudH.dollars;
-int  level;       assign level   = (cur_diff == 0) ? hudE.level       : (cur_diff == 1) ? hudN.level       : hudH.level;
-int  target;      assign target  = (cur_diff == 0) ? hudE.target      : (cur_diff == 1) ? hudN.target      : hudH.target;
+// B10: game_hud keeps only decimal digits -> the numbers are made from them here
+int  sE, sN, sH, dE, dN, dH, lE, lN, lH, tE, tN, tH;
+assign sE = hudE.minD * 60 + hudE.secT * 10 + hudE.secO;  assign sN = hudN.minD * 60 + hudN.secT * 10 + hudN.secO;
+assign sH = hudH.minD * 60 + hudH.secT * 10 + hudH.secO;
+assign dE = hudE.dolH * 100 + hudE.dolT * 10 + hudE.dolO;  assign dN = hudN.dolH * 100 + hudN.dolT * 10 + hudN.dolO;
+assign dH = hudH.dolH * 100 + hudH.dolT * 10 + hudH.dolO;
+assign lE = hudE.lvlT * 10 + hudE.lvlO;  assign lN = hudN.lvlT * 10 + hudN.lvlO;  assign lH = hudH.lvlT * 10 + hudH.lvlO;
+assign tE = hudE.tgtH * 100 + hudE.tgtT * 10 + hudE.tgtO;  assign tN = hudN.tgtH * 100 + hudN.tgtT * 10 + hudN.tgtO;
+assign tH = hudH.tgtH * 100 + hudH.tgtT * 10 + hudH.tgtO;
+int  seconds;     assign seconds = (cur_diff == 0) ? sE : (cur_diff == 1) ? sN : sH;
+int  score;       assign score   = (cur_diff == 0) ? dE : (cur_diff == 1) ? dN : dH;
+int  level;       assign level   = (cur_diff == 0) ? lE : (cur_diff == 1) ? lN : lH;
+int  target;      assign target  = (cur_diff == 0) ? tE : (cur_diff == 1) ? tN : tH;
 int  target_digits;                           // what the screen shows: hundreds*100 + tens*10 + ones
 assign target_digits = (cur_diff == 0) ? hudE.tgtH*100 + hudE.tgtT*10 + hudE.tgtO :
                        (cur_diff == 1) ? hudN.tgtH*100 + hudN.tgtT*10 + hudN.tgtO :
@@ -398,7 +407,7 @@ bit ok_all;
 int c;
 
 initial begin
-    $display("\n##### tb_hook_weight VERSION 9.8 (2026-10-25, Step 13.2: timeUp output removed) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
+    $display("\n##### tb_hook_weight VERSION 9.9 (2026-10-25, B10: game_hud keeps decimal digits only) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
     $display("   game_params: difficulty %s, %0d s per level, targets EASY %0d+%0d, NORMAL %0d+%0d, HARD %0d+%0d per level",
              diff_now.name(), game_params::DEFAULT_SECONDS,
              game_params::TARGET_START_EASY, game_params::TARGET_STEP_EASY, game_params::TARGET_START_NORMAL,
@@ -468,8 +477,9 @@ initial begin
 
     // ------------------------------------------------------------ T5
     begin_test(5, "T5 game_hud: seconds + level targets");
-    check(hud.tStart == tgt_start(int'(game_params::DIFFICULTY)) && hud.tStep == tgt_step(int'(game_params::DIFFICULTY)),
-          $sformatf("the game's HUD (difficulty input %s): start %0d, step %0d", diff_now.name(), hud.tStart, hud.tStep));
+    check(hud.targetStart[11:8] * 100 + hud.targetStart[7:4] * 10 + hud.targetStart[3:0] == tgt_start(int'(game_params::DIFFICULTY)) &&
+          hud.targetStep[11:8]  * 100 + hud.targetStep[7:4]  * 10 + hud.targetStep[3:0]  == tgt_step(int'(game_params::DIFFICULTY)),
+          $sformatf("the game's HUD (difficulty input %s): start %0h, step %0h (decimal digits)", diff_now.name(), hud.targetStart, hud.targetStep));
     for (int d = 0; d < 3; d++) hud_play(d);
 
     // ------------------------------------------------------------ T6

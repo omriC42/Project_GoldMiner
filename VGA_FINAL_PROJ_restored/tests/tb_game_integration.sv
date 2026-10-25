@@ -1,6 +1,6 @@
 // tb_game_integration.sv - Step 8.5: the hook inside the GAME, played like a player would.
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.10)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.11)
 // Checklist: tests/CHECKLIST_step85_integration.md
 //
 // The REAL modules, wired exactly like TOP_VGA_DEMO_KBD.bdf / Miner_Block_T.bdf / Objects_DISPLAY.bdf:
@@ -171,7 +171,7 @@ int  angle_deg;  assign angle_deg = hb.u_move.angle_idx * ANGLE_STEP_DEG;
 int  ropeX0;     assign ropeX0    = hb.X0;
 int  ropeY0;     assign ropeY0    = hb.Y0;
 int  minerXspeed; assign minerXspeed = miner.Xspeed;
-int  score;      assign score     = hud.dollars;
+int  score;      assign score     = hud.dolH * 100 + hud.dolT * 10 + hud.dolO;   // B10: from the digits
 int  n_hookCatch = 0, n_collect = 0, last_value = -1, type_at_collect = -1;
 int  n_deliver = 0, last_deliver = -1;          // 8.5.9: hook_block deliverPulse (score at the top)
 real meas_pull_px_s = 0, exp_pull_px_s = 0;     // pull-back speed with the object (Step 9)
@@ -408,11 +408,11 @@ int  f, w, x_before, x_at_shot, r_peak, score_before, r_a2, r_b2, mask_copy [1:3
 bit  x_constant, x_still, others_same, r_down;
 
 initial begin
-    $display("\n##### tb_game_integration VERSION 8.10 (2026-10-25, carried object hangs straight down in the claw - hook fix) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
+    $display("\n##### tb_game_integration VERSION 8.11 (2026-10-25, B10: game_hud keeps decimal digits only) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
     $display("   hook_params: swing %0d deg/s (%0d..%0d deg), shoot %0d px/s, empty pull-back %0d px/s",
              SWING_DEG_PER_SEC, SWING_MIN_DEG, SWING_MAX_DEG, SHOOT_PX_PER_SEC, RETRACT_EMPTY_PX_PER_SEC);
-    $display("   game_params: difficulty %s, level 1 target %0d (+%0d per level), %0d s per level", diff_now.name(),
-             hud.tStart, hud.tStep, game_params::DEFAULT_SECONDS);
+    $display("   game_params: difficulty %s, level 1 target %0h (+%0h per level), %0d s per level", diff_now.name(),
+             hud.targetStart, hud.targetStep, game_params::DEFAULT_SECONDS);   // decimal digits: %h shows them
     repeat (3) @(negedge clk); resetN = 1;
     repeat (5) @(negedge clk);
 
@@ -583,9 +583,9 @@ initial begin
     check(n_hookCatch > 0 && r_peak > MIN_R && hookState == 2'd0 && hb.R == MIN_R && !hb.caught && !hookBusy,
           $sformatf("keypad + while pulling back (R %0d): hook at once back at the top, empty, hookBusy 0", r_peak));
     frames(10);
-    check(n_deliver == 0 && score == 0 && hud.level == 2 && count_objects() == 8 && minerX == x_before,
+    check(n_deliver == 0 && score == 0 && (hud.lvlT * 10 + hud.lvlO) == 2 && count_objects() == 8 && minerX == x_before,
           $sformatf("object LOST (no deliverPulse, score %0d -> %0d), level %0d, %0d new objects, miner stayed at x %0d (%0d)",
-                    score_before, score, hud.level, count_objects(), x_before, minerX));
+                    score_before, score, hud.lvlT * 10 + hud.lvlO, count_objects(), x_before, minerX));
     check(snd_n == 1 && snd_log[0] == int'(game_params::SND_LEVEL),
           $sformatf("sound: only the level fanfare (%0d sound(s), first %0d, LEVEL = 3) - no money sound for the lost object", snd_n, snd_log[0]));
     snapshot("frames/game_7_newlevel.bmp");

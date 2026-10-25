@@ -1,12 +1,12 @@
 // tb_game_hud.sv - Step 12: game_hud without dividers and without functions
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_hud.do        (expect VERSION 12.2)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_hud.do        (expect VERSION 12.3)
 // Checklist: tests/CHECKLIST_step12_hud.md
 //
-// game_hud now keeps every number twice: binary (to compare) and as decimal digits (to draw),
-// counted directly in decimal. This test checks:
-//  * a MONITOR on every clock: the digits always equal the binary number split with / and %
-//    (dollars -> dolH dolT dolO, level -> lvlT lvlO, target -> tgtH tgtT tgtO, seconds -> minD secT secO)
+// B10 (Oct 2026): game_hud keeps every number ONLY as decimal digits (dolH dolT dolO, lvlT lvlO,
+// tgtH tgtT tgtO, minD secT secO). The test turns them back into numbers (dollars_i = 100*H + 10*T + O ...)
+// and checks them against its own models. This test checks:
+//  * a MONITOR on every clock: every digit is a real decimal digit (0..9, tens of seconds 0..5)
 //  * the PICTURE: the HUD band (and the GAME OVER band) is scanned pixel by pixel and compared with
 //    the OLD drawing code (digitAt / numberAt / gameOverTextAt with / and %), copied into this file
 //    as an independent reference model.
@@ -79,24 +79,27 @@ task automatic write_windows_file(input int last);
     $fclose(fd);
 endtask
 
-// ---------------- MONITOR: digits = binary number split with / and % (every clock) ----------------
+// ---------------- MONITOR: every digit is a real decimal digit (every clock) ----------------
 int dig_checks = 0, dig_bad = 0;
-int dollars_i, level_i, target_i, secs_i, csecs_i;        // copies for the waves (int)
-assign dollars_i = hud.dollars;  assign level_i = hud.level;  assign target_i = hud.target;
-assign secs_i    = hud.secondsLeft;  assign csecs_i = hudC.secondsLeft;
+int dollars_i, level_i, target_i, secs_i, csecs_i;        // the numbers, made from the digits (int)
+int ctarget_i;
+assign dollars_i = hud.dolH * 100 + hud.dolT * 10 + hud.dolO;
+assign level_i   = hud.lvlT * 10 + hud.lvlO;
+assign target_i  = hud.tgtH * 100 + hud.tgtT * 10 + hud.tgtO;
+assign secs_i    = hud.minD * 60 + hud.secT * 10 + hud.secO;
+assign csecs_i   = hudC.minD * 60 + hudC.secT * 10 + hudC.secO;
+assign ctarget_i = hudC.tgtH * 100 + hudC.tgtT * 10 + hudC.tgtO;
 always @(posedge clk) if (resetN) begin
     dig_checks++;
-    if (hud.dolH != dollars_i / 100 || hud.dolT != (dollars_i / 10) % 10 || hud.dolO != dollars_i % 10 ||
-        hud.lvlT != level_i / 10    || hud.lvlO != level_i % 10 ||
-        hud.tgtH != target_i / 100  || hud.tgtT != (target_i / 10) % 10 || hud.tgtO != target_i % 10 ||
-        hud.minD != secs_i / 60     || hud.secT != (secs_i % 60) / 10    || hud.secO != secs_i % 10) begin
-        if (dig_bad < 5) $display("   [%0t] DIGITS WRONG: $%0d=%0d%0d%0d  level %0d=%0d%0d  target %0d=%0d%0d%0d  time %0d=%0d:%0d%0d",
-            $time, dollars_i, hud.dolH, hud.dolT, hud.dolO, level_i, hud.lvlT, hud.lvlO,
-            target_i, hud.tgtH, hud.tgtT, hud.tgtO, secs_i, hud.minD, hud.secT, hud.secO);
+    if (hud.dolH > 9 || hud.dolT > 9 || hud.dolO > 9 || hud.lvlT > 9 || hud.lvlO > 9 ||
+        hud.tgtH > 9 || hud.tgtT > 9 || hud.tgtO > 9 || hud.minD > 9 || hud.secT > 5 || hud.secO > 9) begin
+        if (dig_bad < 5) $display("   [%0t] DIGITS WRONG: $%0d%0d%0d  level %0d%0d  target %0d%0d%0d  time %0d:%0d%0d",
+            $time, hud.dolH, hud.dolT, hud.dolO, hud.lvlT, hud.lvlO,
+            hud.tgtH, hud.tgtT, hud.tgtO, hud.minD, hud.secT, hud.secO);
         dig_bad++;
     end
-    if (clockRun && (hudC.minD != csecs_i / 60 || hudC.secT != (csecs_i % 60) / 10 || hudC.secO != csecs_i % 10)) begin
-        if (dig_bad < 5) $display("   [%0t] CLOCK DIGITS WRONG: %0d s = %0d:%0d%0d", $time, csecs_i, hudC.minD, hudC.secT, hudC.secO);
+    if (clockRun && (hudC.minD > 9 || hudC.secT > 5 || hudC.secO > 9)) begin
+        if (dig_bad < 5) $display("   [%0t] CLOCK DIGITS WRONG: %0d:%0d%0d", $time, hudC.minD, hudC.secT, hudC.secO);
         dig_bad++;
     end
 end
@@ -188,7 +191,7 @@ endtask
 // the game's HUD as it is now, top band (y 0..95)
 task automatic picture_now(output int bad, output int red);
     pix_bad = 0; pix_red = 0;
-    compare_band(0, 0, 95, hud.dollars, hud.target, hud.level, hud.secondsLeft, hud.gameOver);
+    compare_band(0, 0, 95, dollars_i, target_i, level_i, secs_i, hud.gameOver);
     bad = pix_bad; red = pix_red;
 endtask
 
@@ -207,7 +210,7 @@ int  vals_bad, exp_t, exp_s, n_nl = 0;
 always @(posedge clk) if (newLevel) n_nl++;
 
 initial begin
-    $display("\n##### tb_game_hud VERSION 12.2 (2026-10-25, Step 13.2: timeUp output removed) - if not the version Claude announced, run the full  do run_game_hud.do  #####");
+    $display("\n##### tb_game_hud VERSION 12.3 (2026-10-25, B10: game_hud keeps decimal digits only) - if not the version Claude announced, run the full  do run_game_hud.do  #####");
     repeat (3) @(negedge clk);
     resetN = 1;
     repeat (5) @(negedge clk);
@@ -231,17 +234,17 @@ initial begin
         model = (model + v > 999) ? 999 : model + v;
         if (model == 999) sat_seen++;
         @(negedge clk);
-        if (int'(hud.dollars) != model) begin
-            if (bin_bad < 3) $display("   after +%0d: dollars %0d, model %0d", v, hud.dollars, model);
+        if (dollars_i != model) begin
+            if (bin_bad < 3) $display("   after +%0d: dollars %0d, model %0d", v, dollars_i, model);
             bin_bad++;
         end
         for (int k = 0; k < 6; k++) if (pic_at[k] == i) begin
             picture_now(bad, red); pics++; if (bad != 0) pics_bad++; red_total += red;
-            $display("   picture at $%0d: %0d mismatches", hud.dollars, bad);
+            $display("   picture at $%0d: %0d mismatches", dollars_i, bad);
         end
     end
     check(bin_bad == 0 && sat_seen > 0, $sformatf("400 values: dollars = the model's sum every time (%0d wrong), reached and kept 999 (%0d times)", bin_bad, sat_seen));
-    check(dig_bad == 0, $sformatf("digits = dollars split with / and %% on all %0d clocks so far (%0d wrong)", dig_checks, dig_bad));
+    check(dig_bad == 0, $sformatf("all digits are real decimal digits on all %0d clocks so far (%0d wrong)", dig_checks, dig_bad));
     check(pics_bad == 0, $sformatf("%0d pictures of the score (1, 2 and 3 digits, 999) = the old drawing code (%0d with mismatches)", pics, pics_bad));
 
     // ------------------------------------------------------------ T3
@@ -252,18 +255,18 @@ initial begin
     // start, so the scan ends before the next second (5000 clocks)
     while (c < 700000) begin
         @(negedge clk); c++;
-        if (int'(hudC.secondsLeft) != v) begin
-            v = hudC.secondsLeft;
+        if (csecs_i != v) begin
+            v = csecs_i;
             if (v inside {90, 60, 59, 10, 9, 0}) begin
                 pix_bad = 0; pix_red = 0;
-                compare_region(1, 520, 639, 48, 84, 0, hudC.target, 1, v, 1'b0);
+                compare_region(1, 520, 639, 48, 84, 0, ctarget_i, 1, v, 1'b0);
                 pics++; if (pix_bad != 0) pics_bad++;
                 $display("   clock picture at %0d s (%0d:%0d%0d): %0d mismatches, %0d red px", v, hudC.minD, hudC.secT, hudC.secO, pix_bad, pix_red);
             end
             if (v == 0) break;
         end
     end
-    check(hudC.secondsLeft == 0 && hudC.minD == 0 && hudC.secT == 0 && hudC.secO == 0 && dig_bad == 0,
+    check(csecs_i == 0 && hudC.minD == 0 && hudC.secT == 0 && hudC.secO == 0 && dig_bad == 0,
           $sformatf("90 s (LONG) counted down to 0:00 in %0d clocks, digits right on every clock (%0d wrong)", c, dig_bad));
     check(pics == 6 && pics_bad == 0, $sformatf("%0d clock pictures (1:30 ... 0:00) = the old drawing code (%0d with mismatches)", pics, pics_bad));
 
@@ -274,12 +277,12 @@ initial begin
         press_plus();
         if (l inside {2, 9, 10, 11, 42, 99, 101}) begin
             picture_now(bad, red); pics++; if (bad != 0) pics_bad++;
-            $display("   picture at level %0d (target %0d): %0d mismatches", hud.level, hud.target, bad);
+            $display("   picture at level %0d (target %0d): %0d mismatches", level_i, target_i, bad);
         end
     end
-    check(hud.level == 99 && hud.lvlT == 9 && hud.lvlO == 9 && dig_bad == 0,
+    check(level_i == 99 && hud.lvlT == 9 && hud.lvlO == 9 && dig_bad == 0,
           $sformatf("+ pressed 100 times: level %0d (stops at 99), digits %0d%0d, target %0d = %0d%0d%0d, all digits right (%0d wrong)",
-                    hud.level, hud.lvlT, hud.lvlO, hud.target, hud.tgtH, hud.tgtT, hud.tgtO, dig_bad));
+                    level_i, hud.lvlT, hud.lvlO, target_i, hud.tgtH, hud.tgtT, hud.tgtO, dig_bad));
     check(pics_bad == 0, $sformatf("%0d pictures of level + target = the old drawing code (%0d with mismatches)", pics, pics_bad));
 
     // ------------------------------------------------------------ T5
@@ -287,7 +290,7 @@ initial begin
     @(negedge clk) gameOverKey = 1; @(negedge clk) gameOverKey = 0;
     repeat (3) @(negedge clk);
     pix_bad = 0; pix_red = 0;
-    compare_band(0, GO_Y - 2, GO_Y + BIG_H + 1, hud.dollars, hud.target, hud.level, hud.secondsLeft, 1'b1);
+    compare_band(0, GO_Y - 2, GO_Y + BIG_H + 1, dollars_i, target_i, level_i, secs_i, 1'b1);
     check(hud.gameOver && pix_bad == 0 && pix_red > 0,
           $sformatf("GAME OVER band = the old drawing code: %0d mismatches, %0d red pixels", pix_bad, pix_red));
 
@@ -301,11 +304,11 @@ initial begin
         repeat (3) @(negedge clk);
         exp_t = (d == 0) ? game_params::TARGET_START_EASY : (d == 2) ? game_params::TARGET_START_HARD : game_params::TARGET_START_NORMAL;
         exp_s = (t == 0) ? game_params::LEVEL_TIME_SHORT  : (t == 2) ? game_params::LEVEL_TIME_LONG   : game_params::LEVEL_TIME_NORMAL;
-        if (hud.target != exp_t || hud.secondsLeft != exp_s || hud.level != 1 || hud.dollars != 0) begin
-            vals_bad++; $display("   d %0d t %0d: target %0d (exp %0d), seconds %0d (exp %0d)", d, t, hud.target, exp_t, hud.secondsLeft, exp_s);
+        if (target_i != exp_t || secs_i != exp_s || level_i != 1 || dollars_i != 0) begin
+            vals_bad++; $display("   d %0d t %0d: target %0d (exp %0d), seconds %0d (exp %0d)", d, t, target_i, exp_t, secs_i, exp_s);
         end
         picture_now(bad, red); pics++; if (bad != 0) pics_bad++;
-        $display("   difficulty %0d, time %0d: target %0d, clock %0d:%0d%0d, picture %0d mismatches", d, t, hud.target, hud.minD, hud.secT, hud.secO, bad);
+        $display("   difficulty %0d, time %0d: target %0d, clock %0d:%0d%0d, picture %0d mismatches", d, t, target_i, hud.minD, hud.secT, hud.secO, bad);
     end
     check(vals_bad == 0 && dig_bad == 0, $sformatf("all 9 choices: start target and time from game_params, digits right (%0d wrong values, %0d wrong digits)", vals_bad, dig_bad));
     check(pics_bad == 0, $sformatf("%0d pictures of the start values = the old drawing code (%0d with mismatches)", pics, pics_bad));
@@ -320,7 +323,7 @@ initial begin
     press_plus(); press_plus();
     @(negedge clk) gameOverKey = 1; @(negedge clk) gameOverKey = 0;
     repeat (5) @(negedge clk);
-    check(hud.level == 1 && n_nl == 0 && !hud.gameOver, $sformatf("cheatsOn = 0: + twice and * -> level %0d, %0d newLevel, gameOver %0d (all unchanged)", hud.level, n_nl, hud.gameOver));
+    check(level_i == 1 && n_nl == 0 && !hud.gameOver, $sformatf("cheatsOn = 0: + twice and * -> level %0d, %0d newLevel, gameOver %0d (all unchanged)", level_i, n_nl, hud.gameOver));
     @(negedge clk) hCheats = 1;
 
     // ------------------------------------------------------------ end
