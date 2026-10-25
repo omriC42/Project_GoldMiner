@@ -2,6 +2,8 @@
 // A two level bitmap. displaying randomly spawned rocks and gold on the screen in an 8x4 grid (8 columns x 4 rows).
 // Sprites: Large (64x64), Medium (32x32), Small (16x16) bitmaps made with BMPConverter_V21 (8-bit RRRGGGBB, 8'hFF = transparent).
 // (c) Technion IIT, Department of Electrical Engineering 2026
+// Oct 2026 (hook integration Step 9): the object values come from game_params.sv, and the new
+//   output collectType tells the hook WHAT it caught (its weight decides the pull-back speed).
 
 module	ObjectsMatrixBitMap	(	
 					input	logic	clk,
@@ -15,7 +17,8 @@ module	ObjectsMatrixBitMap	(
 					output	logic	drawingRequest, // output that the pixel should be displayed 
 					output	logic	[7:0] RGBout,  // rgb value from the bitmap (3-3-2 format)
 					output	logic	collectPulse,  // one clock pulse when the hook takes an object
-					output	logic	[5:0] collectValue  // the value of that object in dollars
+					output	logic	[5:0] collectValue, // the value of that object in dollars
+					output	logic	[2:0] collectType   // its code (1..3 gold S/M/L, 4..6 rock S/M/L) -> hook weight
  ) ;
 
 localparam logic [7:0] TRANSPARENT_ENCODING = 8'hFF ;// RGB value representing a transparent pixel 
@@ -63,22 +66,15 @@ localparam  int RAND_BITS_PER_OBJECT = 7 ; // 4 bits position + 1 bit gold/rock 
 logic [2:0] MazeBitMapMask [0:NUM_ROWS-1][0:NUM_COLS-1];  
 
 // ---- VALUES (dollars) --------------------------------------------------------
-// gold: small 12, medium 24, large 36.   rock: a third of the gold of the same size.
-localparam logic [5:0] GOLD_SMALL_VALUE  = 6'd12;
-localparam logic [5:0] GOLD_MEDIUM_VALUE = 6'd24;
-localparam logic [5:0] GOLD_LARGE_VALUE  = 6'd36;
-localparam logic [5:0] ROCK_SMALL_VALUE  = GOLD_SMALL_VALUE  / 6'd3;  //  4
-localparam logic [5:0] ROCK_MEDIUM_VALUE = GOLD_MEDIUM_VALUE / 6'd3;  //  8
-localparam logic [5:0] ROCK_LARGE_VALUE  = GOLD_LARGE_VALUE  / 6'd3;  // 12
-
+// Set in game_params.sv (EDIT HERE section) - do not change them here.
 function automatic logic [5:0] objectValue(input logic [2:0] obj);
 	case (obj)
-		3'd1:    objectValue = GOLD_SMALL_VALUE;
-		3'd2:    objectValue = GOLD_MEDIUM_VALUE;
-		3'd3:    objectValue = GOLD_LARGE_VALUE;
-		3'd4:    objectValue = ROCK_SMALL_VALUE;
-		3'd5:    objectValue = ROCK_MEDIUM_VALUE;
-		3'd6:    objectValue = ROCK_LARGE_VALUE;
+		3'd1:    objectValue = 6'(game_params::GOLD_SMALL_VALUE);
+		3'd2:    objectValue = 6'(game_params::GOLD_MEDIUM_VALUE);
+		3'd3:    objectValue = 6'(game_params::GOLD_LARGE_VALUE);
+		3'd4:    objectValue = 6'(game_params::ROCK_SMALL_VALUE);
+		3'd5:    objectValue = 6'(game_params::ROCK_MEDIUM_VALUE);
+		3'd6:    objectValue = 6'(game_params::ROCK_LARGE_VALUE);
 		default: objectValue = 6'd0;
 	endcase
 endfunction
@@ -423,6 +419,7 @@ begin
 		RGBout <=	8'h00;
 		collectPulse <= 1'b0;
 		collectValue <= 6'd0;
+		collectType  <= 3'd0;
 		loadLayout <= 1'b1;  // build a layout on the first clock after reset
 	end
 	else begin
@@ -432,8 +429,10 @@ begin
 
 		// report what the hook collected (only once: from the next clock the cell is empty)
 		collectPulse <= clearCell && !loadLayout && !newLevel;
-		if (clearCell)
+		if (clearCell) begin
 			collectValue <= objectValue(MazeBitMapMask[offsetY_MSB][offsetX_MSB]);
+			collectType  <= MazeBitMapMask[offsetY_MSB][offsetX_MSB];
+		end
 		
 		// Ensure Row 0 (the top row of cells) is never drawn
 		if (InsideRectangle == 1'b1 && offsetY_MSB != 2'b00)

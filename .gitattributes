@@ -1,0 +1,28 @@
+# Line endings: git stores every text file with LF; each PC gets its own style on checkout.
+# Stops "whole file changed" diffs when one of us saves with Windows (CRLF) and the other with LF.
+* text=auto
+
+# Quartus / ModelSim sources - text
+*.sv   text
+*.SV   text
+*.v    text
+*.bdf  text
+*.bsf  text
+*.qsf  text
+*.qpf  text
+*.qip  text
+*.sdc  text
+*.tcl  text
+*.do   text
+*.md   text
+*.mif  text
+
+# binary - never touched by git
+*.qxp  binary
+*.qar  binary
+*.sof  binary
+*.png  binary
+*.bmp  binary
+*.jpg  binary
+*.pdf  binary
+*.stp  binary

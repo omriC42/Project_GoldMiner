@@ -108,6 +108,13 @@ agreement for further details.
 		(text "collectValue[5..0]" (rect 198 75 299 94)(font "Intel Clear" (font_size 8)))
 		(line (pt 320 80)(pt 304 80)(line_width 3))
 	)
+	(port
+		(pt 320 96)
+		(output)
+		(text "collectType[2..0]" (rect 0 0 99 19)(font "Intel Clear" (font_size 8)))
+		(text "collectType[2..0]" (rect 200 91 299 110)(font "Intel Clear" (font_size 8)))
+		(line (pt 320 96)(pt 304 96)(line_width 3))
+	)
 	(drawing
 		(rectangle (rect 16 16 304 176))
 	)
