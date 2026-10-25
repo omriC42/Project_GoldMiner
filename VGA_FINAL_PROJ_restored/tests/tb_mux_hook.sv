@@ -1,6 +1,6 @@
 // tb_mux_hook.sv - Step 6+8: the hook drawn through objects_mux (priority) + hook_block
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_mux_hook.do         (expect VERSION 6.5.1)
+// Run:  ModelSim -> cd <project>/tests -> do run_mux_hook.do         (expect VERSION 6.5.2)
 // Checklist: tests/CHECKLIST_step6_top.md
 //
 // T1: ALL 64 combinations of the 6 drawing requests -> objects_mux must pick
@@ -42,7 +42,7 @@ logic [10:0] pixelX = 0, pixelY = 0;
 logic tipDR, hookBusy; logic [1:0] hookState;
 hook_block hb (.clk, .resetN, .startOfFrame(1'b0), .pixelX, .pixelY,
                .minerX(11'sd280), .minerY(11'sd100), .minerMoving(1'b0), .shoot_key(1'b0),
-               .tipCollision(1'b0), .goldDR(1'b0), .freeze(1'b0), .newLevel(1'b0), .catchType(3'd0),
+               .tipCollision(1'b0), .goldDR(1'b0), .freeze(1'b0), .newLevel(1'b0), .catchType(3'd0), .difficulty(2'(game_params::DIFFICULTY)),
                .hookDR(hb_DR), .hookRGB(hb_RGB), .tipDR, .hookBusy, .hookState, .hookCatch(),
                .deliverPulse(), .deliverValue());
 
@@ -87,7 +87,7 @@ function automatic bit in_miner(input int x, input int y); return x >= 280 && x 
 function automatic bit in_gold (input int x, input int y); return x >= 296 && x <= 330 && y >= 176 && y <= 190; endfunction
 
 initial begin
-    $display("\n##### tb_mux_hook VERSION 6.5.1 (2026-10-25, hook_block newLevel port) - if not the version Claude announced, run the full  do run_mux_hook.do  #####");
+    $display("\n##### tb_mux_hook VERSION 6.5.2 (2026-10-25, difficulty input) - if not the version Claude announced, run the full  do run_mux_hook.do  #####");
     repeat (3) @(negedge clk); resetN = 1; @(negedge clk);
 
     // ------------------------------------------------------------ T1

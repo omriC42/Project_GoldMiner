@@ -1,5 +1,5 @@
 # Step 9 - weight + game_params.sv: what to check BY EYE
-ModelSim: cd tests -> do run_hook_weight.do -> first line VERSION 9.6 -> expect 65 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_hook_weight.do -> first line VERSION 9.7 -> expect 79 PASS, 0 FAIL.
 All expected numbers are read from game_params.sv / hook_params.sv: after you change a number,
 run this test again - it checks the new number and that it still fits.
 
@@ -26,6 +26,9 @@ run this test again - it checks the new number and that it still fits.
 | 6 | ck held high for a long time | nothing more happens (one jump per press) |
 | 6 | second short press | level +1 again |
 | 6 | seconds run down to 0 -> cur_gameOver, then a press | still GAME OVER, level unchanged |
+| 6 | cheatN low, then a ck pulse | nothing happens (level stays 1) - cheats OFF on the settings screen |
+| 7 | hbDiff = 0 then 2, R falling edges | gold large comes back FASTER at EASY (120%) and SLOWER at HARD (80%) than in T4; meas = exp within 3% |
+| 8 | gDiff 0 / 1 / 2, n_gold / n_obj | Transcript: about 69% gold at EASY, 50% NORMAL, 31% HARD (2400 objects each, +-5%) |
 | 5 | target_digits | always equal to target (the screen digits); hudE/tgtH, tgtT, tgtO show the digits counting in decimal (e.g. 0 8 0 -> 1 0 0) |
 
 ## Board (after a full compile)

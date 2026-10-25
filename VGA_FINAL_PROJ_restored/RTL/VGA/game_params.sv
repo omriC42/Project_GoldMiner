@@ -44,7 +44,10 @@ package game_params;
   // ======================= EDIT HERE =======================
 
   // ---------------- level rules (game_hud) ----------------
-  localparam int START_SECONDS = 60;   // time per level in seconds          (1 .. 119)
+  // time per level: the 3 choices of the settings screen (Step 14)   (1 .. 119 s each)
+  localparam int LEVEL_TIME_SHORT  = 30;
+  localparam int LEVEL_TIME_NORMAL = 60;
+  localparam int LEVEL_TIME_LONG   = 90;
 
   // dollars needed to win a level (the level is won when the score is MORE than the target):
   //   level 1 needs TARGET_START, every next level needs TARGET_STEP more (it stops at 999).
@@ -74,15 +77,19 @@ package game_params;
   localparam int RETRACT_ROCK_MEDIUM_PX_PER_SEC = 130;
   localparam int RETRACT_ROCK_LARGE_PX_PER_SEC  =  70;
 
-   // ---------------- cheats ----------------
-  localparam bit CHEATS_ON = 1;   // 1 = keypad + jumps to the next level, 0 = cheats disabled
+  // ---------------- DEFAULT SETTINGS (Step 14) ----------------
+  // What the game uses after power-up / KEY0. The player changes them on the settings screen
+  // (keypad + on the opening screen); the game then follows the player's choice, not these.
+  localparam difficulty_t DIFFICULTY = NORMAL;   // EASY, NORMAL or HARD
+  localparam int DEFAULT_TIME_SEL    = 1;        // 0 = LEVEL_TIME_SHORT, 1 = NORMAL, 2 = LONG
+  localparam bit CHEATS_ON           = 1;        // 1 = keypad + (next level) and * (game over) work
+  localparam bit SOUND_ON            = 1;        // 1 = game sounds on
+  // the default time in seconds (worked out from DEFAULT_TIME_SEL - do not edit)
+  localparam int DEFAULT_SECONDS = (DEFAULT_TIME_SEL == 0) ? LEVEL_TIME_SHORT :
+                                   (DEFAULT_TIME_SEL == 2) ? LEVEL_TIME_LONG  : LEVEL_TIME_NORMAL;
 
- // ---------------- difficulty ----------------
-  // EASY, NORMAL or HARD.
-  // PREPARED for a later step: switching difficulty while playing is not built yet, so the game
-  // always uses DIFFICULTY below. Changing it here and recompiling already works for the
-  // pull-back speeds and the level targets.
-  localparam difficulty_t DIFFICULTY = NORMAL;
+ // ---------------- difficulty: what EASY / NORMAL / HARD change ----------------
+  // the level targets are above (TARGET_START_* / TARGET_STEP_*)
 
   // all pull-back speeds WITH an object are multiplied by this percent (100 = as written above)
   localparam int PULL_SPEED_PERCENT_EASY   = 120;
@@ -90,7 +97,8 @@ package game_params;
   localparam int PULL_SPEED_PERCENT_HARD   =  80;
 
   // share of GOLD among the objects of a new layout, in percent (the rest are rocks).
-  // NOT USED YET - the gold field is still 50/50. It is used when the difficulty step is built.
+  // Step 14: used by the gold field. It draws a random number 0..15 per object and makes it gold
+  // when the number is below round(PERCENT x 16 / 100): 70% -> 11/16 (69%), 50% -> 8/16, 30% -> 5/16 (31%).
   localparam int GOLD_PERCENT_EASY   = 70;
   localparam int GOLD_PERCENT_NORMAL = 50;
   localparam int GOLD_PERCENT_HARD   = 30;

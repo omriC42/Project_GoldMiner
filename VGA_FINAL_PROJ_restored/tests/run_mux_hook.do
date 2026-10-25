@@ -1,5 +1,5 @@
 # run_mux_hook.do - Step 6+8: objects_mux with the hook + hook_block, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_mux_hook.do        (expect VERSION 6.5.1)
+# Usage:  cd <project>/tests   then   do run_mux_hook.do        (expect VERSION 6.5.2)
 # To run again after ANY file change: the full  do run_mux_hook.do  (it recompiles).
 onbreak {resume}
 file mkdir frames

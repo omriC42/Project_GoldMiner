@@ -228,6 +228,22 @@ agreement for further details.
 		(line (pt 78 12)(pt 82 8))
 	)
 )
+(pin
+	(input)
+	(rect -1568 -648 -1368 -632)
+	(text "INPUT" (rect 157 0 185 10)(font "Arial" (font_size 6)))
+	(text "difficulty[1..0]" (rect 5 0 117 12)(font "Arial" ))
+	(pt 200 8)
+	(drawing
+		(line (pt 116 12)(pt 141 12))
+		(line (pt 116 4)(pt 141 4))
+		(line (pt 145 8)(pt 200 8))
+		(line (pt 116 12)(pt 116 4))
+		(line (pt 141 4)(pt 145 8))
+		(line (pt 141 12)(pt 145 8))
+	)
+	(text "VCC" (rect 160 7 180 17)(font "Arial" (font_size 6)))
+)
 (symbol
 	(rect -1816 -848 -1592 -704)
 	(text "square_object" (rect 5 0 73 12)(font "Arial" ))
@@ -323,9 +339,9 @@ agreement for further details.
 	(annotation_block (parameter)(rect -1848 -968 -1593 -892))
 )
 (symbol
-	(rect -1304 -944 -1056 -768)
+	(rect -1304 -944 -1056 -752)
 	(text "ObjectsMatrixBitMap" (rect 5 0 105 12)(font "Arial" ))
-	(text "objects_bitmap" (rect 8 160 82 172)(font "Arial" ))
+	(text "objects_bitmap" (rect 8 176 82 188)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -410,8 +426,15 @@ agreement for further details.
 		(text "collectType[2..0]" (rect 145 91 227 103)(font "Arial" ))
 		(line (pt 248 96)(pt 232 96)(line_width 3))
 	)
+	(port
+		(pt 0 160)
+		(input)
+		(text "difficulty[1..0]" (rect 0 0 112 19)(font "Arial" ))
+		(text "difficulty[1..0]" (rect 21 155 133 174)(font "Arial" ))
+		(line (pt 0 160)(pt 16 160)(line_width 3))
+	)
 	(drawing
-		(rectangle (rect 16 16 232 160))
+		(rectangle (rect 16 16 232 176))
 	)
 )
 (connector
@@ -621,4 +644,16 @@ agreement for further details.
 (connector
 	(pt -1568 -784)
 	(pt -1568 -848)
+)
+(connector
+	(text "difficulty[1..0]" (rect -1366 -656 -1254 -639)(font "Intel Clear" ))
+	(pt -1368 -640)
+	(pt -1320 -640)
+	(bus)
+)
+(connector
+	(text "difficulty[1..0]" (rect -1334 -800 -1222 -783)(font "Intel Clear" ))
+	(pt -1336 -784)
+	(pt -1304 -784)
+	(bus)
 )

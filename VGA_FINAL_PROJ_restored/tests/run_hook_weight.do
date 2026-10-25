@@ -1,5 +1,5 @@
 # run_hook_weight.do - Step 9: weight + game_params.sv, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_hook_weight.do        (expect VERSION 9.6)
+# Usage:  cd <project>/tests   then   do run_hook_weight.do        (expect VERSION 9.7)
 # Run it again after you change game_params.sv: it checks your NEW numbers.
 onbreak {resume}
 catch {quit -sim}
@@ -41,6 +41,7 @@ add wave -noupdate -radix unsigned              /tb_hook_weight/n_deliver
 add wave -noupdate                              /tb_hook_weight/hb/carryDR
 add wave -noupdate -divider {GAME HUD (T5: the HUD of cur_diff)}
 add wave -noupdate -radix unsigned -color Cyan /tb_hook_weight/cur_diff
+add wave -noupdate                 /tb_hook_weight/cheatN
 add wave -noupdate -radix unsigned -format Analog-Step -height 40 -min 0 -max 120 -color Green /tb_hook_weight/seconds
 add wave -noupdate -radix unsigned -format Analog-Step -height 50 -min 0 -max 300 -color Gold /tb_hook_weight/score
 add wave -noupdate -radix unsigned -format Analog-Step -height 50 -min 0 -max 300 -color Red /tb_hook_weight/target
@@ -53,6 +54,11 @@ add wave -noupdate -color Orange   /tb_hook_weight/hp
 add wave -noupdate -color Magenta  /tb_hook_weight/ck
 add wave -noupdate -color Green    /tb_hook_weight/cur_newLevel
 add wave -noupdate -color Red      /tb_hook_weight/cur_gameOver
+add wave -noupdate -divider {SETTINGS INPUTS (T7, T8)}
+add wave -noupdate -radix unsigned -color Cyan /tb_hook_weight/hbDiff
+add wave -noupdate -radix unsigned -color Cyan /tb_hook_weight/gDiff
+add wave -noupdate -radix unsigned /tb_hook_weight/n_gold
+add wave -noupdate -radix unsigned /tb_hook_weight/n_obj
 add wave -noupdate -divider {SCAN}
 add wave -noupdate                 /tb_hook_weight/clk
 add wave -noupdate -color Yellow   /tb_hook_weight/sof
@@ -70,4 +76,4 @@ proc zt {n} {
 }
 wave zoom full
 echo ""
-echo "=== Simulation is PAUSED, nothing was closed. ===   zt 1..6 / zt 0"
+echo "=== Simulation is PAUSED, nothing was closed. ===   zt 1..8 / zt 0"

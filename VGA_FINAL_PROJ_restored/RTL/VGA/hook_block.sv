@@ -28,6 +28,8 @@
 //    newLevel (1-clock pulse from game_hud): the hook goes straight back to the top, empty
 //    (hook_move restart). Whatever was on it is dropped WITHOUT a deliverPulse - an object
 //    still on the rope when the level ends is lost (decided with the user).
+//  * Oct 2026 (Step 14): input difficulty (from the settings screen) picks the column of the
+//    pull-back table below - before, it was the fixed DIFFICULTY of game_params.sv.
 
 module hook_block (
     input  logic               clk,
@@ -44,6 +46,7 @@ module hook_block (
     input  logic               freeze,        // game over (game_hud gameOver): hold + no catching
     input  logic               newLevel,      // 1-clock pulse (game_hud): hook back to the top, empty
     input  logic        [2:0]  catchType,     // Gold_DISPLAY.collectType: code of the object just taken
+    input  logic        [1:0]  difficulty,    // settings: 0 EASY, 1 NORMAL, 2 HARD -> pull-back speeds
 
     output logic               hookDR,        // rope or claw pixel   -> objects_mux
     output logic        [7:0]  hookRGB,       //                      -> objects_mux
@@ -115,9 +118,9 @@ localparam int STEP_ROCK_S_HARD   = (RETRACT_ROCK_SMALL_PX_PER_SEC  * PULL_SPEED
 localparam int STEP_ROCK_M_HARD   = (RETRACT_ROCK_MEDIUM_PX_PER_SEC * PULL_SPEED_PERCENT_HARD   / 100 * FP * 100 + FR / 2) / FR;
 localparam int STEP_ROCK_L_HARD   = (RETRACT_ROCK_LARGE_PX_PER_SEC  * PULL_SPEED_PERCENT_HARD   / 100 * FP * 100 + FR / 2) / FR;
 
-// The difficulty in use. Fixed for now (game_params.sv); a later step will drive it from the game.
-difficulty_t difficulty;
-assign difficulty = DIFFICULTY;
+// The difficulty in use = the input from the settings screen (Step 14)
+difficulty_t diffNow;
+assign diffNow = difficulty_t'(difficulty);
 
 // What is on the hook. catchType is valid one clock after hookCatch (the gold field registers it).
 logic    hookCatch_d;
@@ -147,7 +150,7 @@ logic [9:0] retractStep;
 always_comb begin
     retractStep = 10'(RETRACT_EMPTY_STEP_FP);                 // empty hook (hook_params.sv)
     if (caught) begin
-        case (difficulty)
+        case (diffNow)
             EASY:   case (caughtType)
                          GOLD_SMALL:  retractStep = 10'(STEP_GOLD_S_EASY);
                          GOLD_MEDIUM: retractStep = 10'(STEP_GOLD_M_EASY);

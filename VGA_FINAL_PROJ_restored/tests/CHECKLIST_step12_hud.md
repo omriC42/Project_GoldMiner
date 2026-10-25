@@ -1,5 +1,5 @@
 # Step 12 - HUD without dividers / functions: what to check BY EYE
-ModelSim: cd tests -> do run_game_hud.do -> first line VERSION 12.0 -> expect 10 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_game_hud.do -> first line VERSION 12.1 -> expect 13 PASS, 0 FAIL.
 Every number is kept twice: binary (dollars, level, target, secondsLeft - for the game rules) and as
 decimal digits (dolH/T/O, lvlT/O, tgtH/T/O, minD secT secO - for the screen), counted in decimal.
 The pictures are compared with the OLD drawing code (with / and %), copied into the testbench.
@@ -10,9 +10,11 @@ The pictures are compared with the OLD drawing code (with / and %), copied into 
 | 2 | collectValue, valT / valO | the value split into tens and ones: 9 -> 0,9 ; 10 -> 1,0 ; 63 -> 6,3 |
 | 2 | dollars_i (gold curve) vs dolH dolT dolO | the curve climbs to 999 and stays; the three digits always read the same number (e.g. 1 2 7 = 127) |
 | 2 | dig_bad, pix_bad | stay 0 |
-| 3 | csecs_i (green curve), minD secT secO | 119 -> 0 in steps; digits 1:59 ... 1:00 -> 0:59 (minute drops, tens jump 0 -> 5), x0 -> (x-1)9 |
+| 3 | csecs_i (green curve), minD secT secO | 90 -> 0 in steps (LONG time); digits 1:30 ... 1:00 -> 0:59 (minute drops, tens jump 0 -> 5), x0 -> (x-1)9 |
 | 4 | nextLevelKey pulses, level_i, lvlT lvlO | level 1..99 then stays 99; 09 -> 10 carry; target digits step by 30 until 999 |
 | 5 | gameOver | high; the GAME OVER band compared with 0 mismatches |
+| 6 | hDiff / hTime, loadStart | 9 resets: loadStart is high for ONE clock after each reset, then target = 40/48/60 and time = 30/60/90 s (Transcript lists all 9) |
+| 7 | hCheats low, nextLevelKey and gameOverKey pulses | level stays 1, no newLevel, gameOver stays 0 |
 
 ## Quartus (after a full compile)
 Compilation report > Analysis & Synthesis > Resource Utilization by Entity:

@@ -4,6 +4,8 @@
 // (c) Technion IIT, Department of Electrical Engineering 2026
 // Oct 2026 (hook integration Step 9): the object values come from game_params.sv, and the new
 //   output collectType tells the hook WHAT it caught (its weight decides the pull-back speed).
+// Oct 2026 (Step 14): input difficulty (settings screen) sets the share of GOLD in a new layout
+//   (game_params GOLD_PERCENT_EASY/NORMAL/HARD); before, gold/rock was always 50/50.
 
 module	ObjectsMatrixBitMap	(	
 					input	logic	clk,
@@ -13,6 +15,7 @@ module	ObjectsMatrixBitMap	(
 					input	logic	InsideRectangle, // input that the pixel is within the grid area
 					input logic collision_Hook_Object, // collision from miner hook/miner
 					input logic newLevel, // one clock pulse from game_hud: level won -> build a new layout
+					input logic [1:0] difficulty, // settings: 0 EASY, 1 NORMAL, 2 HARD -> share of gold
 
 					output	logic	drawingRequest, // output that the pixel should be displayed 
 					output	logic	[7:0] RGBout,  // rgb value from the bitmap (3-3-2 format)
@@ -61,7 +64,23 @@ localparam  int NUM_ROWS = 1 << MAZE_NUMBER_OF__Y_BITS ; // 4
 localparam  int CELLS_PER_OBJECT = 3;
 localparam  int PLAY_CELLS  = (NUM_ROWS - 1) * NUM_COLS ;      // 24
 localparam  int NUM_OBJECTS = PLAY_CELLS / CELLS_PER_OBJECT ;  // 8
-localparam  int RAND_BITS_PER_OBJECT = 7 ; // 4 bits position + 1 bit gold/rock + 2 bits size
+localparam  int RAND_BITS_PER_OBJECT = 10 ; // 4 bits position + 2 bits size + 4 bits gold-or-rock draw
+                                            // (8 objects x 10 = 80 of the 96 random bits)
+
+// ---- share of GOLD (Step 14) --------------------------------------------------
+// Each object draws a random number 0..15 and is GOLD when it is below the threshold of the
+// current difficulty: round(GOLD_PERCENT x 16 / 100) - constants, worked out while compiling.
+localparam  logic [4:0] GOLD_BELOW_EASY   = 5'((game_params::GOLD_PERCENT_EASY   * 16 + 50) / 100);   // 70% -> 11
+localparam  logic [4:0] GOLD_BELOW_NORMAL = 5'((game_params::GOLD_PERCENT_NORMAL * 16 + 50) / 100);   // 50% ->  8
+localparam  logic [4:0] GOLD_BELOW_HARD   = 5'((game_params::GOLD_PERCENT_HARD   * 16 + 50) / 100);   // 30% ->  5
+logic [4:0] goldBelow;
+always_comb begin
+	case (difficulty)
+		2'd0:    goldBelow = GOLD_BELOW_EASY;
+		2'd2:    goldBelow = GOLD_BELOW_HARD;
+		default: goldBelow = GOLD_BELOW_NORMAL;
+	endcase
+end
 
 logic [2:0] MazeBitMapMask [0:NUM_ROWS-1][0:NUM_COLS-1];  
 
@@ -102,10 +121,10 @@ begin
 		
 			// Place exactly one object per group of CELLS_PER_OBJECT cells in rows 1-3
 			for (int j = 0; j < NUM_OBJECTS; j++) begin
-				automatic logic [6:0] r       = rand_counter[j*RAND_BITS_PER_OBJECT +: RAND_BITS_PER_OBJECT];
+				automatic logic [9:0] r       = rand_counter[j*RAND_BITS_PER_OBJECT +: RAND_BITS_PER_OBJECT];
 				automatic int         pos     = int'(CELL_OF_RANDOM[r[3:0]]);    // which cell_idx of the group gets the object
-				automatic logic       is_gold = r[4];
-				automatic logic [1:0] size_opt = r[6:5];
+				automatic logic [1:0] size_opt = r[5:4];
+				automatic logic       is_gold = ({1'b0, r[9:6]} < goldBelow);   // gold with chance goldBelow/16
 				automatic logic [2:0] obj_val;
 			
 				// Determine object type and size

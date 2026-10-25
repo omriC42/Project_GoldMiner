@@ -1,5 +1,5 @@
 # run_game_hud.do - Step 12: game_hud without dividers / functions, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_game_hud.do        (expect VERSION 12.0)
+# Usage:  cd <project>/tests   then   do run_game_hud.do        (expect VERSION 12.1)
 # To run again after ANY file change: the full  do run_game_hud.do  (it recompiles).
 onbreak {resume}
 catch {quit -sim}
@@ -36,8 +36,13 @@ add wave -noupdate -radix unsigned /tb_game_hud/target_i
 add wave -noupdate -radix unsigned /tb_game_hud/hud/tgtH
 add wave -noupdate -radix unsigned /tb_game_hud/hud/tgtT
 add wave -noupdate -radix unsigned /tb_game_hud/hud/tgtO
-add wave -noupdate -divider {CLOCK (T3: 119 s HUD)}
-add wave -noupdate -radix unsigned -format Analog-Step -height 60 -min 0 -max 120 -color Green /tb_game_hud/csecs_i
+add wave -noupdate -divider {SETTINGS (T6/T7)}
+add wave -noupdate -radix unsigned /tb_game_hud/hDiff
+add wave -noupdate -radix unsigned /tb_game_hud/hTime
+add wave -noupdate                 /tb_game_hud/hCheats
+add wave -noupdate                 /tb_game_hud/hud/loadStart
+add wave -noupdate -divider {CLOCK (T3: 90 s HUD)}
+add wave -noupdate -radix unsigned -format Analog-Step -height 60 -min 0 -max 100 -color Green /tb_game_hud/csecs_i
 add wave -noupdate -radix unsigned /tb_game_hud/hudC/minD
 add wave -noupdate -radix unsigned /tb_game_hud/hudC/secT
 add wave -noupdate -radix unsigned /tb_game_hud/hudC/secO
@@ -61,4 +66,4 @@ proc zt {n} {
 }
 wave zoom full
 echo ""
-echo "=== Simulation is PAUSED, nothing was closed. ===   Checklist: CHECKLIST_step12_hud.md   zt 1..5 / zt 0"
+echo "=== Simulation is PAUSED, nothing was closed. ===   Checklist: CHECKLIST_step12_hud.md   zt 1..7 / zt 0"

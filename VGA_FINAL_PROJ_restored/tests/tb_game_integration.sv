@@ -1,6 +1,6 @@
 // tb_game_integration.sv - Step 8.5: the hook inside the GAME, played like a player would.
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.7.1)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.8)
 // Checklist: tests/CHECKLIST_step85_integration.md
 //
 // The REAL modules, wired exactly like TOP_VGA_DEMO_KBD.bdf / Miner_Block_T.bdf / Objects_DISPLAY.bdf:
@@ -58,6 +58,9 @@ logic [10:0] pixelX = 0, pixelY = 0;
 logic key2 = 0, key4 = 0, key6 = 0;            // keypad keys (keyIsPressed[2], [4], [6])
 logic keyStar = 0, keyPlus = 0;               // keypad * (game over shortcut) and + (next level cheat)
 logic gameOver;                               // game_hud -> hook freeze + miner lock (Step 10)
+// the settings (Step 14): here the defaults of game_params.sv (the settings screen is tested in Part B)
+logic [1:0] setDiff = 2'(game_params::DIFFICULTY), setTime = 2'(game_params::DEFAULT_TIME_SEL);
+logic       setCheats = game_params::CHEATS_ON, setSound = game_params::SOUND_ON;
 
 // =====================================================================================
 // MINER  (= Smiley_Block_T)
@@ -101,7 +104,7 @@ square_object #(.OBJECT_WIDTH_X(512), .OBJECT_HEIGHT_Y(256)) goldBox (
     .offsetX(gOffX), .offsetY(gOffY), .drawingRequest(gBoxDR), .RGBout(gBoxRGB));
 ObjectsMatrixBitMap gbm (
     .clk, .resetN, .offsetX(gOffX), .offsetY(gOffY), .InsideRectangle(gBoxDR),
-    .collision_Hook_Object(hookCatch), .newLevel,
+    .collision_Hook_Object(hookCatch), .newLevel, .difficulty(setDiff),
     .drawingRequest(goldDR), .RGBout(goldRGB), .collectPulse(goldCollected), .collectValue(goldValue),
     .collectType(goldType));
 
@@ -113,7 +116,7 @@ logic hookDeliver; logic [5:0] hookDeliverValue;     // score at the top (TOP: h
 hook_block hb (
     .clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY,
     .minerX, .minerY, .minerMoving, .shoot_key(key2),
-    .tipCollision(1'b0), .goldDR, .freeze(gameOver), .newLevel, .catchType(goldType),
+    .tipCollision(1'b0), .goldDR, .freeze(gameOver), .newLevel, .catchType(goldType), .difficulty(setDiff),
     .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
     .deliverPulse(hookDeliver), .deliverValue(hookDeliverValue));
 
@@ -124,6 +127,7 @@ logic hudDR; logic [7:0] hudRGB; logic timeUp, levelWon;
 game_hud hud (
     .clk, .resetN, .pixelX, .pixelY,
     .collectPulse(hookDeliver), .collectValue(hookDeliverValue), .gameOverKey(keyStar), .nextLevelKey(keyPlus),
+    .difficulty(setDiff), .timeSel(setTime), .cheatsOn(setCheats),
     .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
 // Step 10: the miner stands still while the hook is out OR the game is over (OR2 inst43 in the TOP)
 assign minerLock = hookBusy || gameOver;
@@ -132,7 +136,7 @@ assign minerLock = hookBusy || gameOver;
 // SOUND EVENTS  (= game_sound inst44; melody_player_1 + AUDIO are tested in tb_game_sound)
 // =====================================================================================
 logic soundStart; logic [3:0] soundSelect;
-game_sound gsnd (.clk, .resetN, .catchPulse(goldCollected), .moneyPulse(hookDeliver), .newLevel, .gameOver,
+game_sound gsnd (.clk, .resetN, .catchPulse(goldCollected), .moneyPulse(hookDeliver), .newLevel, .gameOver, .soundOn(setSound),
                  .startSound(soundStart), .soundSelect);
 int  snd_log [0:15];        // sounds started since the last snd_clear (game_params::sound_t numbers)
 int  snd_n = 0;
@@ -407,11 +411,11 @@ int  f, w, x_before, x_at_shot, r_peak, score_before, r_a2, r_b2, mask_copy [1:3
 bit  x_constant, x_still, others_same, r_down;
 
 initial begin
-    $display("\n##### tb_game_integration VERSION 8.7.1 (2026-10-25, HUD without dividers) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
+    $display("\n##### tb_game_integration VERSION 8.8 (2026-10-25, settings inputs = game_params defaults) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
     $display("   hook_params: swing %0d deg/s (%0d..%0d deg), shoot %0d px/s, empty pull-back %0d px/s",
              SWING_DEG_PER_SEC, SWING_MIN_DEG, SWING_MAX_DEG, SHOOT_PX_PER_SEC, RETRACT_EMPTY_PX_PER_SEC);
     $display("   game_params: difficulty %s, level 1 target %0d (+%0d per level), %0d s per level", diff_now.name(),
-             hud.T_START, hud.T_STEP, game_params::START_SECONDS);
+             hud.tStart, hud.tStep, game_params::DEFAULT_SECONDS);
     repeat (3) @(negedge clk); resetN = 1;
     repeat (5) @(negedge clk);
 

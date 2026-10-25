@@ -1,6 +1,6 @@
 // tb_hook_block.sv - Step 4: the hook_block wrapper (hook_move + hook_draw + new rules)
 //
-// Run:  ModelSim -> cd <project>/tests  ->  do run_hook_block.do      (expect VERSION 4.5)
+// Run:  ModelSim -> cd <project>/tests  ->  do run_hook_block.do      (expect VERSION 4.5.1)
 // Checklist: tests/CHECKLIST_step4_hook_block.md
 //
 // Tests the NEW things in the wrapper:
@@ -44,7 +44,7 @@ int   n_hookCatch = 0;
 always @(posedge clk) if (hookCatch) n_hookCatch++;
 
 hook_block dut (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
-                .minerMoving, .shoot_key, .tipCollision, .goldDR(goldDR_tb), .freeze, .newLevel, .catchType,
+                .minerMoving, .shoot_key, .tipCollision, .goldDR(goldDR_tb), .freeze, .newLevel, .catchType, .difficulty(2'(game_params::DIFFICULTY)),
                 .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
                 .deliverPulse, .deliverValue);
 
@@ -186,7 +186,7 @@ endtask
 int n_before, fr;
 
 initial begin
-    $display("\n##### tb_hook_block VERSION 4.5 (2026-10-25, game over freeze + new level) - if not the version Claude announced, run the full  do run_hook_block.do  #####");
+    $display("\n##### tb_hook_block VERSION 4.5.1 (2026-10-25, difficulty input) - if not the version Claude announced, run the full  do run_hook_block.do  #####");
 
     // ------------------------------------------------------------ T1
     begin_test(1, "T1 reset");

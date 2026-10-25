@@ -1,5 +1,5 @@
 # run_game_integration.do - Step 8.5: the hook inside the game (GUI mode, nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_game_integration.do        (expect VERSION 8.7.1)
+# Usage:  cd <project>/tests   then   do run_game_integration.do        (expect VERSION 8.8)
 # To run again after ANY file change: the full  do run_game_integration.do  (it recompiles).
 onbreak {resume}
 file mkdir frames

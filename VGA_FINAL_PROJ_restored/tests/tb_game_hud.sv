@@ -1,6 +1,6 @@
 // tb_game_hud.sv - Step 12: game_hud without dividers and without functions
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_hud.do        (expect VERSION 12.0)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_hud.do        (expect VERSION 12.1)
 // Checklist: tests/CHECKLIST_step12_hud.md
 //
 // game_hud now keeps every number twice: binary (to compare) and as decimal digits (to draw),
@@ -10,12 +10,15 @@
 //  * the PICTURE: the HUD band (and the GAME OVER band) is scanned pixel by pixel and compared with
 //    the OLD drawing code (digitAt / numberAt / gameOverTextAt with / and %), copied into this file
 //    as an independent reference model.
-// T1 after reset: digits + picture (score 0, target, level 1, clock START_SECONDS)
+// T1 after reset: digits + picture (score 0, target, level 1, clock = default time)
 // T2 score: 400 random values 1..63 -> binary = the model's sum (stops at 999), digits, 6 pictures
-// T3 clock: a second HUD with START_SECONDS = 119 and a 5000-clock "second": counts 119 -> 0,
-//    digits every clock, 7 pictures of the clock area (1:59, 1:40, 1:00, 0:59, 0:10, 0:09, 0:00)
+// T3 clock: a second HUD with the LONG time (90 s) and a 5000-clock "second": counts 90 -> 0,
+//    digits every clock, 6 pictures of the clock area (1:30, 1:00, 0:59, 0:10, 0:09, 0:00)
 // T4 level: keypad + 100 times -> level 1..99 (stops at 99), target digits, 5 pictures
 // T5 GAME OVER: keypad * -> the GAME OVER band picture
+// T6 (Step 14) settings inputs: all 9 difficulty x time choices -> start target, start time, digits
+//    and picture, all from game_params.sv
+// T7 (Step 14) cheatsOn = 0: keypad + and * do nothing
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
 // stimulus on the falling edge.
 
@@ -28,17 +31,21 @@ always #5 clk = ~clk;
 logic [10:0] pixelX = 0, pixelY = 0;
 logic        collectPulse = 0, gameOverKey = 0, nextLevelKey = 0;
 logic  [5:0] collectValue = 0;
+logic  [1:0] hDiff = 2'(game_params::DIFFICULTY), hTime = 2'(game_params::DEFAULT_TIME_SEL);   // settings (Step 14)
+logic        hCheats = 1;
 logic        hudDR, timeUp, gameOver, levelWon, newLevel;
 logic  [7:0] hudRGB;
 // the game's HUD (real clock: its time does not run out in this test)
 game_hud hud (.clk, .resetN, .pixelX, .pixelY, .collectPulse, .collectValue, .gameOverKey, .nextLevelKey,
+              .difficulty(hDiff), .timeSel(hTime), .cheatsOn(hCheats),
               .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
-// T3: 119 seconds, 1 "second" = 5000 clocks (long enough to scan the clock area); no score / keys
+// T3: the LONG time (timeSel 2 = 90 s), 1 "second" = 5000 clocks (long enough to scan the clock area); no score / keys
 logic        cDR, cTimeUp, cGameOver, cLevelWon, cNewLevel;
 logic  [7:0] cRGB;
 logic        clockRun = 0;                      // its reset: held until T3
-game_hud #(.CLOCK_HZ(5000), .START_SECONDS(119)) hudC (.clk, .resetN(clockRun), .pixelX, .pixelY,
+game_hud #(.CLOCK_HZ(5000)) hudC (.clk, .resetN(clockRun), .pixelX, .pixelY,
               .collectPulse(1'b0), .collectValue(6'd0), .gameOverKey(1'b0), .nextLevelKey(1'b0),
+              .difficulty(2'd1), .timeSel(2'd2), .cheatsOn(1'b0),
               .drawingRequest(cDR), .RGBout(cRGB), .timeUp(cTimeUp), .gameOver(cGameOver),
               .levelWon(cLevelWon), .newLevel(cNewLevel));
 
@@ -196,9 +203,11 @@ endtask
 
 int  bad, red, model, v, pics, pics_bad, red_total, bin_bad, seed, c, sat_seen;
 int  pic_at [0:5];
+int  vals_bad, exp_t, exp_s, n_nl = 0;
+always @(posedge clk) if (newLevel) n_nl++;
 
 initial begin
-    $display("\n##### tb_game_hud VERSION 12.0 (2026-10-25, HUD digits counted in decimal, no dividers / functions) - if not the version Claude announced, run the full  do run_game_hud.do  #####");
+    $display("\n##### tb_game_hud VERSION 12.1 (2026-10-25, + settings inputs: difficulty, time, cheats) - if not the version Claude announced, run the full  do run_game_hud.do  #####");
     repeat (3) @(negedge clk);
     resetN = 1;
     repeat (5) @(negedge clk);
@@ -206,7 +215,7 @@ initial begin
     // ------------------------------------------------------------ T1
     begin_test(1, "T1 after reset");
     picture_now(bad, red);
-    check(dig_bad == 0 && hud.dolO == 0 && hud.lvlO == 1 && hud.minD == game_params::START_SECONDS / 60,
+    check(dig_bad == 0 && hud.dolO == 0 && hud.lvlO == 1 && hud.minD == game_params::DEFAULT_SECONDS / 60,
           $sformatf("digits after reset: $%0d%0d%0d, level %0d%0d, target %0d%0d%0d, clock %0d:%0d%0d",
                     hud.dolH, hud.dolT, hud.dolO, hud.lvlT, hud.lvlO, hud.tgtH, hud.tgtT, hud.tgtO, hud.minD, hud.secT, hud.secO));
     check(bad == 0 && red > 0, $sformatf("HUD band = the old drawing code: %0d mismatches, %0d red pixels", bad, red));
@@ -236,8 +245,8 @@ initial begin
     check(pics_bad == 0, $sformatf("%0d pictures of the score (1, 2 and 3 digits, 999) = the old drawing code (%0d with mismatches)", pics, pics_bad));
 
     // ------------------------------------------------------------ T3
-    begin_test(3, "T3 clock 119 -> 0");
-    @(negedge clk) clockRun = 1;                      // the 119-second HUD starts now
+    begin_test(3, "T3 clock 90 -> 0");
+    @(negedge clk) clockRun = 1;                      // the 90-second HUD starts now
     pics = 0; pics_bad = 0; c = 0; v = -1;
     // the clock area (x 520..639, y 48..84 = 4440 pixels) is scanned right after the chosen seconds
     // start, so the scan ends before the next second (5000 clocks)
@@ -245,7 +254,7 @@ initial begin
         @(negedge clk); c++;
         if (int'(hudC.secondsLeft) != v) begin
             v = hudC.secondsLeft;
-            if (v inside {119, 100, 60, 59, 10, 9, 0}) begin
+            if (v inside {90, 60, 59, 10, 9, 0}) begin
                 pix_bad = 0; pix_red = 0;
                 compare_region(1, 520, 639, 48, 84, 0, hudC.target, 1, v, 1'b0);
                 pics++; if (pix_bad != 0) pics_bad++;
@@ -255,8 +264,8 @@ initial begin
         end
     end
     check(hudC.secondsLeft == 0 && hudC.minD == 0 && hudC.secT == 0 && hudC.secO == 0 && dig_bad == 0,
-          $sformatf("119 s counted down to 0:00 in %0d clocks, digits right on every clock (%0d wrong)", c, dig_bad));
-    check(pics == 7 && pics_bad == 0, $sformatf("%0d clock pictures (1:59 ... 0:00) = the old drawing code (%0d with mismatches)", pics, pics_bad));
+          $sformatf("90 s (LONG) counted down to 0:00 in %0d clocks, digits right on every clock (%0d wrong)", c, dig_bad));
+    check(pics == 6 && pics_bad == 0, $sformatf("%0d clock pictures (1:30 ... 0:00) = the old drawing code (%0d with mismatches)", pics, pics_bad));
 
     // ------------------------------------------------------------ T4
     begin_test(4, "T4 level 1 -> 99");
@@ -282,10 +291,42 @@ initial begin
     check(hud.gameOver && pix_bad == 0 && pix_red > 0,
           $sformatf("GAME OVER band = the old drawing code: %0d mismatches, %0d red pixels", pix_bad, pix_red));
 
+    // ------------------------------------------------------------ T6
+    begin_test(6, "T6 settings: 3 difficulties x 3 times");
+    vals_bad = 0; pics = 0; pics_bad = 0;
+    for (int d = 0; d < 3; d++) for (int t = 0; t < 3; t++) begin
+        @(negedge clk) begin resetN = 0; hDiff = 2'(d); hTime = 2'(t); end      // like the start screen: game in reset
+        repeat (3) @(negedge clk);
+        resetN = 1;
+        repeat (3) @(negedge clk);
+        exp_t = (d == 0) ? game_params::TARGET_START_EASY : (d == 2) ? game_params::TARGET_START_HARD : game_params::TARGET_START_NORMAL;
+        exp_s = (t == 0) ? game_params::LEVEL_TIME_SHORT  : (t == 2) ? game_params::LEVEL_TIME_LONG   : game_params::LEVEL_TIME_NORMAL;
+        if (hud.target != exp_t || hud.secondsLeft != exp_s || hud.level != 1 || hud.dollars != 0) begin
+            vals_bad++; $display("   d %0d t %0d: target %0d (exp %0d), seconds %0d (exp %0d)", d, t, hud.target, exp_t, hud.secondsLeft, exp_s);
+        end
+        picture_now(bad, red); pics++; if (bad != 0) pics_bad++;
+        $display("   difficulty %0d, time %0d: target %0d, clock %0d:%0d%0d, picture %0d mismatches", d, t, hud.target, hud.minD, hud.secT, hud.secO, bad);
+    end
+    check(vals_bad == 0 && dig_bad == 0, $sformatf("all 9 choices: start target and time from game_params, digits right (%0d wrong values, %0d wrong digits)", vals_bad, dig_bad));
+    check(pics_bad == 0, $sformatf("%0d pictures of the start values = the old drawing code (%0d with mismatches)", pics, pics_bad));
+
+    // ------------------------------------------------------------ T7
+    begin_test(7, "T7 cheats OFF");
+    @(negedge clk) begin resetN = 0; hDiff = 2'(game_params::DIFFICULTY); hTime = 2'(game_params::DEFAULT_TIME_SEL); hCheats = 0; end
+    repeat (3) @(negedge clk);
+    resetN = 1;
+    repeat (3) @(negedge clk);
+    n_nl = 0;
+    press_plus(); press_plus();
+    @(negedge clk) gameOverKey = 1; @(negedge clk) gameOverKey = 0;
+    repeat (5) @(negedge clk);
+    check(hud.level == 1 && n_nl == 0 && !hud.gameOver, $sformatf("cheatsOn = 0: + twice and * -> level %0d, %0d newLevel, gameOver %0d (all unchanged)", hud.level, n_nl, hud.gameOver));
+    @(negedge clk) hCheats = 1;
+
     // ------------------------------------------------------------ end
-    t_end[5] = $realtime; test_no = 0;
+    t_end[7] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
-    write_windows_file(5);
+    write_windows_file(7);
     $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
              nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
     $display("Simulation PAUSED (not closed). zt <n> zooms on test n.\n");

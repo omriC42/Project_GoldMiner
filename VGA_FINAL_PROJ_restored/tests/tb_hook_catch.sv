@@ -1,7 +1,7 @@
 // tb_hook_catch.sv - Step 7: CATCHING. Real objects field (square_object + ObjectsMatrixBitMap,
 // same parameters as Objects_DISPLAY) + real hook_block + objects_mux (for the images).
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_hook_catch.do        (expect VERSION 7.4.1)
+// Run:  ModelSim -> cd <project>/tests -> do run_hook_catch.do        (expect VERSION 7.4.2)
 // Checklist: tests/CHECKLIST_step7_catch.md
 //
 // T1 reads the random layout and picks a target object (biggest gold, else biggest rock).
@@ -37,7 +37,7 @@ square_object #(.OBJECT_WIDTH_X(512), .OBJECT_HEIGHT_Y(256)) gsq (
     .offsetX(offX), .offsetY(offY), .drawingRequest(boxDR), .RGBout(boxRGB));
 ObjectsMatrixBitMap gbm (
     .clk, .resetN, .offsetX(offX), .offsetY(offY), .InsideRectangle(boxDR),
-    .collision_Hook_Object(hookCatch), .newLevel(1'b0),
+    .collision_Hook_Object(hookCatch), .newLevel(1'b0), .difficulty(2'(game_params::DIFFICULTY)),
     .drawingRequest(goldDR), .RGBout(goldRGB), .collectPulse, .collectValue, .collectType);
 
 // ---------------- the hook ----------------
@@ -45,7 +45,7 @@ logic hookDR, tipDR, hookBusy; logic [7:0] hookRGB; logic [1:0] hookState;
 logic deliverPulse; logic [5:0] deliverValue;         // 7.4: score at the top
 hook_block hb (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
                .minerMoving(1'b0), .shoot_key, .tipCollision(1'b0), .goldDR, .freeze(1'b0), .newLevel(1'b0),
-               .catchType(collectType),
+               .catchType(collectType), .difficulty(2'(game_params::DIFFICULTY)),
                .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
                .deliverPulse, .deliverValue);
 
@@ -185,7 +185,7 @@ endtask
 int f, best, t, r0;
 
 initial begin
-    $display("\n##### tb_hook_catch VERSION 7.4.1 (2026-10-25, hook_block newLevel port) - if not the version Claude announced, run the full  do run_hook_catch.do  #####");
+    $display("\n##### tb_hook_catch VERSION 7.4.2 (2026-10-25, difficulty inputs) - if not the version Claude announced, run the full  do run_hook_catch.do  #####");
     repeat (3) @(negedge clk); resetN = 1;
     repeat (5) @(negedge clk);
 

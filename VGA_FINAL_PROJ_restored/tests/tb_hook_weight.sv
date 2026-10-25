@@ -1,6 +1,6 @@
 // tb_hook_weight.sv - Step 9: weight + game_params.sv (the moved parameters still work)
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.6)
+// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.7)
 // Checklist: tests/CHECKLIST_step9_weight.md
 //
 // Every expected number below is read from game_params.sv / hook_params.sv, so after you change
@@ -17,13 +17,17 @@
 //    its score from hook_block deliverPulse/deliverValue exactly like the game: the score must NOT
 //    change at the catch, and must go up by the object's value (game_params.sv) when the hook is
 //    back up - ONE pulse per catch, none for the empty shot.
-// T5 game_hud: START_SECONDS and the level targets from game_params.sv, for EASY, NORMAL and HARD
+// T5 game_hud: the default time and the level targets from game_params.sv, for EASY, NORMAL and HARD
 //    (one HUD per difficulty, fast clock: 1 "second" = 100 clocks). Each HUD plays 4 levels:
 //    level 1 target = TARGET_START, every won level adds TARGET_STEP (max 999), the screen digits
 //    match the target. Rule (game_hud): the level is won when score >= target, so levels 1-3 are won
 //    with EXACTLY the target, and at level 4 a score of target-1 -> GAME OVER.
 // T6 cheat: keypad + (nextLevelKey) jumps to the next level - once per press, even when held;
-//    ignored in GAME OVER; does nothing at all when game_params CHEATS_ON = 0.
+//    ignored in GAME OVER. 9.7: with the cheatsOn input = 0 (settings screen) + does nothing.
+// Oct 2026 (9.7, Step 14) SETTINGS INPUTS: difficulty / time / cheats are inputs now.
+// T7 the hook's pull-back speed follows the difficulty input while running (gold large, EASY + HARD)
+// T8 the share of gold in new layouts follows the difficulty: 300 layouts each,
+//    gold share = round(GOLD_PERCENT x 16 / 100) / 16 (+-5%).
 //
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
 // stimulus on the falling edge.
@@ -56,14 +60,17 @@ end
 logic goldDR; assign goldDR = band_p2;
 logic hookDR, tipDR, hookBusy, hookCatch; logic [7:0] hookRGB; logic [1:0] hookState;
 logic dPulse; logic [5:0] dValue;             // 9.5: deliverPulse / deliverValue (score at the top)
+logic [1:0] hbDiff = 2'(game_params::DIFFICULTY);   // 9.7: the hook's difficulty input (T7 changes it)
+localparam logic [1:0] DEF_TIME = 2'(game_params::DEFAULT_TIME_SEL);
 hook_block hb (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
                .minerMoving(1'b0), .shoot_key, .tipCollision(1'b0), .goldDR, .freeze(1'b0), .newLevel(1'b0),
-               .catchType, .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
+               .catchType, .difficulty(hbDiff), .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
                .deliverPulse(dPulse), .deliverValue(dValue));
 // score at the top (9.5): the score HUD gets its dollars from the hook, like TOP_VGA_DEMO_KBD
 logic hsDR, hsTimeUp, hsGameOver, hsLevelWon, hsNewLevel; logic [7:0] hsRGB;
 game_hud hudScore (.clk, .resetN, .pixelX(11'd0), .pixelY(11'd0),
     .collectPulse(dPulse), .collectValue(dValue), .gameOverKey(1'b0), .nextLevelKey(1'b0),
+    .difficulty(2'(game_params::DIFFICULTY)), .timeSel(DEF_TIME), .cheatsOn(1'b0),
     .drawingRequest(hsDR), .RGBout(hsRGB), .timeUp(hsTimeUp), .gameOver(hsGameOver), .levelWon(hsLevelWon),
     .newLevel(hsNewLevel));
 int top_score; assign top_score = hudScore.dollars;
@@ -81,33 +88,36 @@ end
 // =====================================================================================
 logic gDR, gPulse; logic [7:0] gRGB; logic [5:0] gValue; logic [2:0] gType;
 logic [10:0] gOffX = 0, gOffY = 0;  logic gNew = 0;
+logic [1:0]  gDiff = 2'(game_params::DIFFICULTY);   // 9.7: the gold field's difficulty input (T8)
 ObjectsMatrixBitMap gbm (.clk, .resetN, .offsetX(gOffX), .offsetY(gOffY), .InsideRectangle(1'b0),
-    .collision_Hook_Object(1'b0), .newLevel(gNew),
+    .collision_Hook_Object(1'b0), .newLevel(gNew), .difficulty(gDiff),
     .drawingRequest(gDR), .RGBout(gRGB), .collectPulse(gPulse), .collectValue(gValue), .collectType(gType));
 
 // =====================================================================================
-// HUDs (T5): hud = the game's (difficulty from game_params.sv), hudE/hudN/hudH = one per difficulty.
-// START_SECONDS and the targets are NOT given here: they must come from game_params.sv.
+// HUDs (T5): hud = the game's (default difficulty of game_params.sv), hudE/hudN/hudH = one per
+// difficulty input. The times and the targets are NOT given here: they must come from game_params.sv.
 // =====================================================================================
 logic hp [0:2] = '{0, 0, 0};                 // collectPulse per difficulty HUD
 logic [5:0] hv [0:2] = '{0, 0, 0};           // collectValue per difficulty HUD
 logic ck [0:2] = '{0, 0, 0};                 // cheat key (keypad +) per difficulty HUD
+logic cheatN = 1;                            // 9.7: hudN's cheatsOn input (T6 turns it off)
 logic hudDR, timeUp, gameOver, levelWon, newLevel; logic [7:0] hudRGB;
 game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hud (.clk, .resetN, .pixelX(11'd0), .pixelY(11'd0),
     .collectPulse(1'b0), .collectValue(6'd0), .gameOverKey(1'b0), .nextLevelKey(1'b0),
+    .difficulty(2'(game_params::DIFFICULTY)), .timeSel(DEF_TIME), .cheatsOn(1'b0),
     .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
 logic nlE, nlN, nlH, goE, goN, goH;
-game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ), .DIFFICULTY(game_params::EASY)) hudE (.clk, .resetN,
+game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hudE (.clk, .resetN,
     .pixelX(11'd0), .pixelY(11'd0), .collectPulse(hp[0]), .collectValue(hv[0]), .gameOverKey(1'b0),
-    .nextLevelKey(ck[0]),
+    .nextLevelKey(ck[0]), .difficulty(2'd0), .timeSel(DEF_TIME), .cheatsOn(1'b1),
     .drawingRequest(), .RGBout(), .timeUp(), .gameOver(goE), .levelWon(), .newLevel(nlE));
-game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ), .DIFFICULTY(game_params::NORMAL)) hudN (.clk, .resetN,
+game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hudN (.clk, .resetN,
     .pixelX(11'd0), .pixelY(11'd0), .collectPulse(hp[1]), .collectValue(hv[1]), .gameOverKey(1'b0),
-    .nextLevelKey(ck[1]),
+    .nextLevelKey(ck[1]), .difficulty(2'd1), .timeSel(DEF_TIME), .cheatsOn(cheatN),
     .drawingRequest(), .RGBout(), .timeUp(), .gameOver(goN), .levelWon(), .newLevel(nlN));
-game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ), .DIFFICULTY(game_params::HARD)) hudH (.clk, .resetN,
+game_hud #(.CLOCK_HZ(HUD_CLOCK_HZ)) hudH (.clk, .resetN,
     .pixelX(11'd0), .pixelY(11'd0), .collectPulse(hp[2]), .collectValue(hv[2]), .gameOverKey(1'b0),
-    .nextLevelKey(ck[2]),
+    .nextLevelKey(ck[2]), .difficulty(2'd2), .timeSel(DEF_TIME), .cheatsOn(1'b1),
     .drawingRequest(), .RGBout(), .timeUp(), .gameOver(goH), .levelWon(), .newLevel(nlH));
 
 // =====================================================================================
@@ -229,7 +239,7 @@ function automatic int hook_step(input int d, input int t);   // read hook_block
     endcase
 endfunction
 function automatic real expected_px_s(input int t);
-    if (t >= 1 && t <= 6) return real'(speed_param(t)) * percent_param(int'(game_params::DIFFICULTY)) / 100.0;
+    if (t >= 1 && t <= 6) return real'(speed_param(t)) * percent_param(int'(hbDiff)) / 100.0;
     return real'(RETRACT_EMPTY_PX_PER_SEC);
 endfunction
 
@@ -279,7 +289,7 @@ endtask
 
 task automatic hud_wait_level_end(output int clocks);
     clocks = 0;
-    while (!cur_newLevel && !cur_gameOver && clocks < (game_params::START_SECONDS + 2) * HUD_CLOCK_HZ + 100) begin
+    while (!cur_newLevel && !cur_gameOver && clocks < (game_params::DEFAULT_SECONDS + 2) * HUD_CLOCK_HZ + 100) begin
         @(negedge clk); clocks++;
     end
     repeat (3) @(negedge clk);
@@ -318,9 +328,9 @@ task automatic hud_play(input int d);
     cur_diff = d;
     @(negedge clk) resetN = 0; repeat (3) @(negedge clk); resetN = 1; @(negedge clk);
     n_newLevel = 0;
-    check(seconds == game_params::START_SECONDS && target == tgt_start(d) && target_digits == tgt_start(d) && level == 1,
+    check(seconds == game_params::DEFAULT_SECONDS && target == tgt_start(d) && target_digits == tgt_start(d) && level == 1,
           $sformatf("%s level 1: %0d s, target %0d, screen digits %0d (game_params: %0d s, target %0d)",
-                    diff_name(d), seconds, target, target_digits, game_params::START_SECONDS, tgt_start(d)));
+                    diff_name(d), seconds, target, target_digits, game_params::DEFAULT_SECONDS, tgt_start(d)));
     for (lv = 1; lv <= 3; lv++) begin
         hud_add(target);                                      // exactly the target = enough
         hud_wait_level_end(c);
@@ -343,7 +353,7 @@ endtask
 task automatic cheat_test();
     int lv0, tg0, nl0;
     bit on;
-    on = game_params::CHEATS_ON;
+    on = cheatN;
     cur_diff = 1;
     @(negedge clk) resetN = 0; repeat (3) @(negedge clk); resetN = 1;
     repeat (350) @(negedge clk);                       // 3.5 "seconds" pass: the clock is not at the start
@@ -353,7 +363,7 @@ task automatic cheat_test();
     repeat (3) @(negedge clk);
     if (on)
         check(level == lv0 + 1 && target == expected_target(1, lv0 + 1) && target_digits == target &&
-              seconds == game_params::START_SECONDS && score == 0 && n_newLevel == 1,
+              seconds == game_params::DEFAULT_SECONDS && score == 0 && n_newLevel == 1,
               $sformatf("CHEATS_ON = 1: + -> level %0d -> %0d, target %0d -> %0d, clock back to %0d s, score 0, one newLevel",
                         lv0, level, tg0, target, seconds));
     else
@@ -371,7 +381,7 @@ task automatic cheat_test();
         check(1, "target is 0: GAME OVER cannot happen (skipped)");
     else begin
         nl0 = 0;
-        while (!cur_gameOver && nl0 < (game_params::START_SECONDS + 2) * HUD_CLOCK_HZ) begin @(negedge clk); nl0++; end
+        while (!cur_gameOver && nl0 < (game_params::DEFAULT_SECONDS + 2) * HUD_CLOCK_HZ) begin @(negedge clk); nl0++; end
         lv0 = level;
         @(negedge clk) ck[1] = 1; repeat (3) @(negedge clk); ck[1] = 0; repeat (3) @(negedge clk);
         check(cur_gameOver && level == lv0, $sformatf("in GAME OVER + does nothing (still GAME OVER, level %0d)", level));
@@ -379,13 +389,18 @@ task automatic cheat_test();
 endtask
 
 game_params::difficulty_t diff_now = game_params::DIFFICULTY;   // copy: enum name for the Transcript
+int  n_gold, n_obj;  real exp_share, meas_share;                  // T8
+function automatic int gold_pct(input int d);
+    case (d) 0: return game_params::GOLD_PERCENT_EASY; 2: return game_params::GOLD_PERCENT_HARD;
+             default: return game_params::GOLD_PERCENT_NORMAL; endcase
+endfunction
 bit ok_all;
 int c;
 
 initial begin
-    $display("\n##### tb_hook_weight VERSION 9.6 (2026-10-25, gold field values without a function) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
+    $display("\n##### tb_hook_weight VERSION 9.7 (2026-10-25, settings inputs: difficulty, time, cheats, gold share) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
     $display("   game_params: difficulty %s, %0d s per level, targets EASY %0d+%0d, NORMAL %0d+%0d, HARD %0d+%0d per level",
-             diff_now.name(), game_params::START_SECONDS,
+             diff_now.name(), game_params::DEFAULT_SECONDS,
              game_params::TARGET_START_EASY, game_params::TARGET_STEP_EASY, game_params::TARGET_START_NORMAL,
              game_params::TARGET_STEP_NORMAL, game_params::TARGET_START_HARD, game_params::TARGET_STEP_HARD);
     repeat (3) @(negedge clk); resetN = 1;
@@ -395,8 +410,12 @@ initial begin
     begin_test(1, "T1 game_params fit the hardware");
     ok_all = 1; for (int t = 1; t <= 6; t++) if (value_param(t) < 1 || value_param(t) > 63) ok_all = 0;
     check(ok_all, "every object value is 1..63 (the score input is 6 bits)");
-    check(game_params::START_SECONDS >= 1 && game_params::START_SECONDS <= 119,
-          $sformatf("START_SECONDS = %0d is 1..119 (the clock shows up to 1:59)", game_params::START_SECONDS));
+    check(game_params::LEVEL_TIME_SHORT >= 1 && game_params::LEVEL_TIME_SHORT <= 119 &&
+          game_params::LEVEL_TIME_NORMAL >= 1 && game_params::LEVEL_TIME_NORMAL <= 119 &&
+          game_params::LEVEL_TIME_LONG >= 1 && game_params::LEVEL_TIME_LONG <= 119 &&
+          game_params::DEFAULT_TIME_SEL >= 0 && game_params::DEFAULT_TIME_SEL <= 2,
+          $sformatf("LEVEL_TIME_SHORT/NORMAL/LONG = %0d/%0d/%0d s are 1..119 (the clock shows up to 1:59), DEFAULT_TIME_SEL %0d is 0..2",
+                    game_params::LEVEL_TIME_SHORT, game_params::LEVEL_TIME_NORMAL, game_params::LEVEL_TIME_LONG, game_params::DEFAULT_TIME_SEL));
     ok_all = 1; for (int d = 0; d < 3; d++) if (tgt_start(d) < 0 || tgt_start(d) > 999 || tgt_step(d) < 0 || tgt_step(d) > 999) ok_all = 0;
     check(ok_all, "every TARGET_START and TARGET_STEP is 0..999 (3 digits on the HUD)");
     ok_all = 1;
@@ -449,19 +468,56 @@ initial begin
 
     // ------------------------------------------------------------ T5
     begin_test(5, "T5 game_hud: seconds + level targets");
-    check(hud.T_START == tgt_start(int'(game_params::DIFFICULTY)) && hud.T_STEP == tgt_step(int'(game_params::DIFFICULTY)),
-          $sformatf("the game's HUD uses DIFFICULTY %s: start %0d, step %0d", diff_now.name(), hud.T_START, hud.T_STEP));
+    check(hud.tStart == tgt_start(int'(game_params::DIFFICULTY)) && hud.tStep == tgt_step(int'(game_params::DIFFICULTY)),
+          $sformatf("the game's HUD (difficulty input %s): start %0d, step %0d", diff_now.name(), hud.tStart, hud.tStep));
     for (int d = 0; d < 3; d++) hud_play(d);
 
     // ------------------------------------------------------------ T6
     begin_test(6, "T6 cheat: keypad + = next level");
-    $display("   game_params::CHEATS_ON = %0d", game_params::CHEATS_ON);
     cheat_test();
+    // 9.7: cheats OFF (settings screen) -> + does nothing
+    @(negedge clk) begin resetN = 0; cheatN = 0; end
+    repeat (3) @(negedge clk); resetN = 1;
+    repeat (50) @(negedge clk);
+    cur_diff = 1; n_newLevel = 0;
+    @(negedge clk) ck[1] = 1; repeat (3) @(negedge clk); ck[1] = 0; repeat (3) @(negedge clk);
+    check(level == 1 && n_newLevel == 0, $sformatf("cheatsOn = 0: + does nothing (level %0d, %0d newLevel)", level, n_newLevel));
+    @(negedge clk) cheatN = 1;
+
+    // ------------------------------------------------------------ T7 (9.7)
+    begin_test(7, "T7 pull-back follows the difficulty input");
+    @(negedge clk) hbDiff = 2'd0;                        // EASY: objects come back faster
+    shot_test(3, 1'b1);
+    @(negedge clk) hbDiff = 2'd2;                        // HARD: slower
+    shot_test(3, 1'b1);
+    @(negedge clk) hbDiff = 2'(game_params::DIFFICULTY);
+
+    // ------------------------------------------------------------ T8 (9.7)
+    begin_test(8, "T8 share of gold follows the difficulty");
+    for (int d = 0; d < 3; d++) begin
+        @(negedge clk) gDiff = 2'(d);
+        n_gold = 0; n_obj = 0;
+        for (int l = 0; l < 300; l++) begin
+            @(negedge clk) gNew = 1; @(negedge clk) gNew = 0;     // a new random layout
+            repeat (37) @(negedge clk);                            // let the random bits move on
+            for (int row = 1; row < 4; row++) for (int col = 0; col < 8; col++)
+                if (gbm.MazeBitMapMask[row][col] != 0) begin
+                    n_obj++;
+                    if (gbm.MazeBitMapMask[row][col] <= 3) n_gold++;
+                end
+        end
+        exp_share = real'((gold_pct(d) * 16 + 50) / 100) / 16.0;
+        meas_share = real'(n_gold) / real'(n_obj);
+        check(n_obj == 300 * 8 && meas_share > exp_share - 0.05 && meas_share < exp_share + 0.05,
+              $sformatf("%s: %0d of %0d objects are gold = %0.1f%% (game_params %0d%% -> %0d/16 = %0.1f%%, +-5%%)",
+                        diff_name(d), n_gold, n_obj, 100.0 * meas_share, gold_pct(d), (gold_pct(d) * 16 + 50) / 100, 100.0 * exp_share));
+    end
+    @(negedge clk) gDiff = 2'(game_params::DIFFICULTY);
 
     // ------------------------------------------------------------ end
-    t_end[6] = $realtime; test_no = 0;
+    t_end[8] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
-    write_windows_file(6);
+    write_windows_file(8);
     $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
              nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
     $display("Simulation PAUSED (not closed). zt <n> zooms on test n.\n");

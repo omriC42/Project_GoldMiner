@@ -1,15 +1,17 @@
 // game_hud - numbers at the top of the screen, levels, and GAME OVER
 // (c) Technion IIT, Department of Electrical Engineering 2026
 //
-//  1. Clock   : counts down START_SECONDS -> 0:00 (one step every CLOCK_HZ clocks = 1 second).
-//     Oct 2026 (hook integration Step 9): START_SECONDS and the targets are set in game_params.sv.
+//  1. Clock   : counts down the level time -> 0:00 (one step every CLOCK_HZ clocks = 1 second).
+//     Oct 2026 (Step 14): the time (30/60/90 s, timeSel), the difficulty (targets) and cheats on/off
+//     are INPUTS from the settings screen; the numbers for each choice are in game_params.sv.
 //  2. Dollars : every collectPulse adds collectValue (the value of what the hook took).
 //  3. Target  : level 1 needs TARGET_START, every won level adds TARGET_STEP (max 999), both
-//               chosen by DIFFICULTY in game_params.sv.   Level: starts at 1.
+//               chosen by the difficulty input (game_params.sv).   Level: starts at 1.
 //  4. When the clock reaches 0:00:
 //        dollars >= target -> next level: level + 1, clock back to the start, dollars back to 0,
 //                             newLevel pulse (the gold field builds a new random layout).
-//        (keypad * jumps straight to GAME OVER at any time, keypad + to the next level - shortcuts)
+//        (keypad * jumps straight to GAME OVER at any time, keypad + to the next level - cheats,
+//         only when cheatsOn = 1)
 //        otherwise         -> GAME OVER: the game stops and "GAME OVER" is shown in the
 //                             middle of the screen until the reset button is pressed.
 //  5. Drawing : red text. Digits use a 5x7 font drawn 4x bigger (20x28 per digit, hud_digit.sv),
@@ -23,6 +25,9 @@
 //       level    lvlT lvlO      : + 1 at every new level
 //       clock    minD secT secO : - 1 every second (9 -> 8 ... 0 -> 9 with a borrow, 0 -> 5 for tens)
 //     The only "/" and "%" left are on constants (the start values), worked out by Quartus.
+//  Oct 2026 (Step 14) START VALUES: on the first clock after reset (loadStart) the clock, the target
+//   and their digits are loaded from the chosen time / difficulty (tables of constants). The game
+//   is held in reset while the player is on the opening / settings screen, so the choice is stable.
 //   * the old drawing functions (digitAt / numberAt / gameOverTextAt) became 11 instances of the
 //     small module hud_digit (one per digit place) and one always_comb block for GAME OVER.
 
@@ -35,6 +40,9 @@ module game_hud (
     input  logic  [5:0] collectValue,   // its value in dollars
     input  logic        gameOverKey,    // shortcut: keypad * ends the game
     input  logic        nextLevelKey,   // shortcut: keypad + jumps to next level
+    input  logic  [1:0] difficulty,     // settings: 0 EASY, 1 NORMAL, 2 HARD (game_params::difficulty_t)
+    input  logic  [1:0] timeSel,        // settings: 0 short, 1 normal, 2 long (LEVEL_TIME_* in game_params)
+    input  logic        cheatsOn,       // settings: 1 = keypad + and * work
     output logic        drawingRequest,
     output logic  [7:0] RGBout,
     output logic        timeUp,         // clock shows 0:00
@@ -43,9 +51,9 @@ module game_hud (
     output logic        newLevel        // one clock pulse when a level is won
 );
 
+import game_params::*;
+
 parameter int CLOCK_HZ      = 31_500_000;
-parameter int START_SECONDS = game_params::START_SECONDS;  // change it in game_params.sv
-parameter game_params::difficulty_t DIFFICULTY = game_params::DIFFICULTY; // change it in game_params.sv
 
 // where things are drawn (top-left corner)
 localparam int DOLLAR_X = 56,  DOLLAR_Y = 14;   // right of the $ icon
@@ -54,20 +62,39 @@ localparam int LEVEL_X  = 522, LEVEL_Y  = 12;   // right of the word "Level"
 localparam int CLOCK_X  = 530, CLOCK_Y  = 52;   // right of the stopwatch
 localparam int GO_X     = 108, GO_Y     = 212;  // "GAME OVER", centered on the screen
 
-// level targets for this difficulty (game_params.sv), worked out by Quartus at compile time
-localparam int T_START = (DIFFICULTY == game_params::EASY) ? game_params::TARGET_START_EASY :
-                         (DIFFICULTY == game_params::HARD) ? game_params::TARGET_START_HARD :
-                                                             game_params::TARGET_START_NORMAL;
-localparam int T_STEP  = (DIFFICULTY == game_params::EASY) ? game_params::TARGET_STEP_EASY :
-                         (DIFFICULTY == game_params::HARD) ? game_params::TARGET_STEP_HARD :
-                                                             game_params::TARGET_STEP_NORMAL;
 localparam int T_MAX   = 999;
-// start values split into decimal digits - CONSTANTS, so Quartus does this at compile time (no hardware)
-localparam logic [3:0] T_START_H = 4'(T_START / 100), T_START_T = 4'((T_START / 10) % 10), T_START_O = 4'(T_START % 10);
-localparam logic [3:0] T_STEP_H  = 4'(T_STEP  / 100), T_STEP_T  = 4'((T_STEP  / 10) % 10), T_STEP_O  = 4'(T_STEP  % 10);
-localparam logic [3:0] S_START_M = 4'(START_SECONDS / 60);                 // 0 or 1 minute
-localparam logic [3:0] S_START_T = 4'((START_SECONDS % 60) / 10);          // tens of seconds
-localparam logic [3:0] S_START_O = 4'(START_SECONDS % 10);                 // seconds
+// the choices of the settings screen as numbers AND as decimal digits - all CONSTANTS from
+// game_params.sv, so the "/" and "%" here are done by Quartus while compiling (no hardware)
+localparam int TS_E = TARGET_START_EASY, TS_N = TARGET_START_NORMAL, TS_H = TARGET_START_HARD;
+localparam int TP_E = TARGET_STEP_EASY,  TP_N = TARGET_STEP_NORMAL,  TP_H = TARGET_STEP_HARD;
+localparam int LT_S = LEVEL_TIME_SHORT,  LT_N = LEVEL_TIME_NORMAL,   LT_L = LEVEL_TIME_LONG;
+
+// ---------------- this game's start values (from the settings inputs) ----------------
+logic [9:0] tStart, tStep;            // level-1 target, target step
+logic [3:0] tStartH, tStartT, tStartO, tStepH, tStepT, tStepO;
+logic [6:0] startSeconds;             // time per level
+logic [3:0] sStartM, sStartT, sStartO;
+always_comb begin
+    case (difficulty_t'(difficulty))
+        EASY: begin
+            tStart = 10'(TS_E); tStartH = 4'(TS_E / 100); tStartT = 4'((TS_E / 10) % 10); tStartO = 4'(TS_E % 10);
+            tStep  = 10'(TP_E); tStepH  = 4'(TP_E / 100); tStepT  = 4'((TP_E / 10) % 10); tStepO  = 4'(TP_E % 10);
+        end
+        HARD: begin
+            tStart = 10'(TS_H); tStartH = 4'(TS_H / 100); tStartT = 4'((TS_H / 10) % 10); tStartO = 4'(TS_H % 10);
+            tStep  = 10'(TP_H); tStepH  = 4'(TP_H / 100); tStepT  = 4'((TP_H / 10) % 10); tStepO  = 4'(TP_H % 10);
+        end
+        default: begin                // NORMAL
+            tStart = 10'(TS_N); tStartH = 4'(TS_N / 100); tStartT = 4'((TS_N / 10) % 10); tStartO = 4'(TS_N % 10);
+            tStep  = 10'(TP_N); tStepH  = 4'(TP_N / 100); tStepT  = 4'((TP_N / 10) % 10); tStepO  = 4'(TP_N % 10);
+        end
+    endcase
+    case (timeSel)
+        2'd0:    begin startSeconds = 7'(LT_S); sStartM = 4'(LT_S / 60); sStartT = 4'((LT_S % 60) / 10); sStartO = 4'(LT_S % 10); end
+        2'd2:    begin startSeconds = 7'(LT_L); sStartM = 4'(LT_L / 60); sStartT = 4'((LT_L % 60) / 10); sStartO = 4'(LT_L % 10); end
+        default: begin startSeconds = 7'(LT_N); sStartM = 4'(LT_N / 60); sStartT = 4'((LT_N % 60) / 10); sStartO = 4'(LT_N % 10); end
+    endcase
+end
 
 localparam logic [7:0] TRANSPARENT_ENCODING = 8'hFF;
 localparam logic [7:0] TEXT_COLOR = 8'hE0;       // red
@@ -104,7 +131,7 @@ localparam logic [0:MSG_LEN-1][2:0] MESSAGE = {3'd0, 3'd1, 3'd2, 3'd3, 3'd7, 3'd
 enum logic {PLAYING, GAME_OVER_ST} state;
 
 logic [24:0] tickCnt;            // counts clocks inside one second
-logic  [6:0] secondsLeft;        // START_SECONDS .. 0   (binary: for "time is up")
+logic  [6:0] secondsLeft;        // level time .. 0      (binary: for "time is up")
 logic  [3:0] minD, secT, secO;   // the same time as digits M:TO (for the screen)
 logic  [9:0] dollars;            // 0 .. 999             (binary: for "score >= target")
 logic  [3:0] dolH, dolT, dolO;   // the same score as digits
@@ -113,16 +140,16 @@ logic  [3:0] lvlT, lvlO;         // the same level as digits
 logic  [9:0] target;             // dollars needed in this level (to compare with the score)
 logic  [3:0] tgtH, tgtT, tgtO;   // the same target as decimal digits (to draw it)
 
-// ---------------- next target = target + T_STEP (stops at 999), as a number and as digits ----------------
+// ---------------- next target = target + tStep (stops at 999), as a number and as digits ----------------
 logic [10:0] targetSum;
 logic  [9:0] targetNext;
 logic  [4:0] sumO, sumT, sumH;   // decimal digit addition with carry
 logic  [3:0] nextH, nextT, nextO;
 always_comb begin
-    targetSum = 11'(target) + 11'(T_STEP);
-    sumO = 5'(tgtO) + 5'(T_STEP_O);
-    sumT = 5'(tgtT) + 5'(T_STEP_T) + ((sumO > 5'd9) ? 5'd1 : 5'd0);
-    sumH = 5'(tgtH) + 5'(T_STEP_H) + ((sumT > 5'd9) ? 5'd1 : 5'd0);
+    targetSum = 11'(target) + 11'(tStep);
+    sumO = 5'(tgtO) + 5'(tStepO);
+    sumT = 5'(tgtT) + 5'(tStepT) + ((sumO > 5'd9) ? 5'd1 : 5'd0);
+    sumH = 5'(tgtH) + 5'(tStepH) + ((sumT > 5'd9) ? 5'd1 : 5'd0);
     nextO = (sumO > 5'd9) ? 4'(sumO - 5'd10) : 4'(sumO);
     nextT = (sumT > 5'd9) ? 4'(sumT - 5'd10) : 4'(sumT);
     nextH = 4'(sumH);
@@ -174,17 +201,19 @@ always_ff @(posedge clk or negedge resetN) begin
     if (!resetN) nextLevelKey_d <= 1'b0;
     else         nextLevelKey_d <= nextLevelKey;
 end
-assign cheatNextLevel = nextLevelKey && !nextLevelKey_d && game_params::CHEATS_ON;
+assign cheatNextLevel = nextLevelKey && !nextLevelKey_d && cheatsOn;
 
+logic loadStart;               // 1 on the first clock after reset: load the start values
 always_ff @(posedge clk or negedge resetN)
 begin
     if (!resetN) begin
+        loadStart   <= 1'b1;
         state       <= PLAYING;
         tickCnt     <= 25'd0;
-        secondsLeft <= 7'(START_SECONDS);
-        minD        <= S_START_M;
-        secT        <= S_START_T;
-        secO        <= S_START_O;
+        secondsLeft <= 7'd0;                    // all 0 in reset; the start values are loaded
+        minD        <= 4'd0;
+        secT        <= 4'd0;
+        secO        <= 4'd0;
         dollars     <= 10'd0;
         dolH        <= 4'd0;
         dolT        <= 4'd0;
@@ -192,17 +221,28 @@ begin
         level       <= 7'd1;
         lvlT        <= 4'd0;
         lvlO        <= 4'd1;
-        target      <= 10'(T_START);
-        tgtH        <= T_START_H;
-        tgtT        <= T_START_T;
-        tgtO        <= T_START_O;
+        target      <= 10'd0;                   // on the first clock after reset (loadStart)
+        tgtH        <= 4'd0;
+        tgtT        <= 4'd0;
+        tgtO        <= 4'd0;
         newLevel    <= 1'b0;
+    end
+    else if (loadStart) begin                  // first clock: the start values of the chosen settings
+        loadStart   <= 1'b0;
+        secondsLeft <= startSeconds;
+        minD        <= sStartM;
+        secT        <= sStartT;
+        secO        <= sStartO;
+        target      <= tStart;
+        tgtH        <= tStartH;
+        tgtT        <= tStartT;
+        tgtO        <= tStartO;
     end
     else begin
         newLevel <= 1'b0;                       // default: no pulse
 
         if (state == PLAYING) begin
-            if (gameOverKey)
+            if (gameOverKey && cheatsOn)
                 state <= GAME_OVER_ST;          // shortcut key (keypad *)
             else if (secondsLeft == 7'd0 && dollars >= target || cheatNextLevel) begin      // time is up - decide
                     // level won -> start the next level, which needs TARGET_STEP more
@@ -215,10 +255,10 @@ begin
                     tgtH        <= nextH;
                     tgtT        <= nextT;
                     tgtO        <= nextO;
-                    secondsLeft <= 7'(START_SECONDS);
-                    minD        <= S_START_M;
-                    secT        <= S_START_T;
-                    secO        <= S_START_O;
+                    secondsLeft <= startSeconds;
+                    minD        <= sStartM;
+                    secT        <= sStartT;
+                    secO        <= sStartO;
                     tickCnt     <= 25'd0;
                     dollars     <= 10'd0;
                     dolH        <= 4'd0;
@@ -263,7 +303,7 @@ end
 
 assign timeUp   = (secondsLeft == 7'd0);
 assign gameOver = (state == GAME_OVER_ST);
-assign levelWon = (state == PLAYING) && (level > 7'd1) && (secondsLeft >= 7'(START_SECONDS - 2));
+assign levelWon = (state == PLAYING) && (level > 7'd1) && (secondsLeft + 7'd2 >= startSeconds);
 
 //----------------------------------------------------------------------------
 // drawing: one hud_digit per digit place (no leading zeros: numbers are left-aligned)

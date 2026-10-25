@@ -115,6 +115,13 @@ agreement for further details.
 		(text "collectType[2..0]" (rect 200 91 299 110)(font "Intel Clear" (font_size 8)))
 		(line (pt 320 96)(pt 304 96)(line_width 3))
 	)
+	(port
+		(pt 0 160)
+		(input)
+		(text "difficulty[1..0]" (rect 0 0 112 19)(font "Intel Clear" (font_size 8)))
+		(text "difficulty[1..0]" (rect 21 155 133 174)(font "Intel Clear" (font_size 8)))
+		(line (pt 0 160)(pt 16 160)(line_width 3))
+	)
 	(drawing
 		(rectangle (rect 16 16 304 176))
 	)

@@ -1,5 +1,5 @@
 # run_game_sound.do - Step 11: game sounds (game_sound + melody_player_1 + GameJukeBox), GUI mode
-# Usage:  cd <project>/tests   then   do run_game_sound.do        (expect VERSION 11.0)
+# Usage:  cd <project>/tests   then   do run_game_sound.do        (expect VERSION 11.1)
 # To run again after ANY file change: the full  do run_game_sound.do  (it recompiles).
 onbreak {resume}
 catch {quit -sim}
@@ -26,6 +26,7 @@ add wave -noupdate -color Gold     /tb_game_sound/objectCollected
 add wave -noupdate -color Green    /tb_game_sound/deliverPulse
 add wave -noupdate -color Cyan     /tb_game_sound/newLevel
 add wave -noupdate -color Red      /tb_game_sound/gameOver
+add wave -noupdate -color Magenta  /tb_game_sound/soundOn
 add wave -noupdate -divider {game_sound -> melody_player_1}
 add wave -noupdate -color Orange   /tb_game_sound/soundStart
 add wave -noupdate -radix Sound -color Orange /tb_game_sound/soundSelect
@@ -58,4 +59,4 @@ proc zt {n} {
 }
 wave zoom full
 echo ""
-echo "=== Simulation is PAUSED, nothing was closed. ===   Checklist: CHECKLIST_step11_sound.md   zt 1..5 / zt 0"
+echo "=== Simulation is PAUSED, nothing was closed. ===   Checklist: CHECKLIST_step11_sound.md   zt 1..6 / zt 0"

@@ -1,5 +1,5 @@
 # Step 11 - game sounds: what to check BY EYE
-ModelSim: cd tests -> do run_game_sound.do -> first line VERSION 11.0 -> expect 16 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_game_sound.do -> first line VERSION 11.1 -> expect 18 PASS, 0 FAIL.
 Time here is in "ticks": melody_player_1 runs in simulation mode, 1 tick (= 1/100 s on the board) every 21 clocks.
 Tunes (GameJukeBox.sv), tempo + gap + on/off (game_params.sv):
 
@@ -22,6 +22,7 @@ Tunes (GameJukeBox.sv), tempo + gap + on/off (game_params.sv):
 | 3 | gameOver kept high after that | nothing more starts |
 | 4 | two events on one clock | soundSelect: LEVEL (level+money), MONEY (money+catch), GAMEOVER (game over+level) |
 | 5 | gameResetN low, all four events | soundStart stays 0, the player stays idle, EnableSound 0 |
+| 6 | soundOn (magenta) low, all four events | soundStart stays 0; soundOn high again -> the next deliverPulse starts MONEY |
 
 Never: two sounds at once; a sound while SM_Maestro is idle; a sound on the opening screen; offStart.
 

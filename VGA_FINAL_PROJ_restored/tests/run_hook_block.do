@@ -1,5 +1,5 @@
 # run_hook_block.do - Step 4: hook_block wrapper, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_hook_block.do        (expect VERSION 4.5)
+# Usage:  cd <project>/tests   then   do run_hook_block.do        (expect VERSION 4.5.1)
 # To run again after ANY file change: the full  do run_hook_block.do  (it recompiles).
 # 'restart -f ; run -all' does NOT recompile.
 onbreak {resume}

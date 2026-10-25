@@ -1,6 +1,6 @@
 // tb_game_sound.sv - Step 11: the game sounds (game_sound -> melody_player_1 -> GameJukeBox)
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_sound.do        (expect VERSION 11.0)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_sound.do        (expect VERSION 11.1)
 // Checklist: tests/CHECKLIST_step11_sound.md
 //
 // melody_player_1 runs with SIMULATION_MODE = 1: its "1/100 s" tick comes every 21 clocks, so a
@@ -17,6 +17,7 @@
 //    first note and plays completely; the cut game over never ends. gameOver staying 1 -> no repeat
 // T4 two events on the SAME clock -> the more important sound (game over > level > money > catch)
 // T5 game held in reset (opening screen): events -> no sound at all
+// T6 (Step 14) soundOn = 0 (settings screen: SOUND OFF): events -> no sound; back to 1 -> sounds again
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
 // stimulus on the falling edge.
 
@@ -29,18 +30,19 @@ always #5 clk = ~clk;
 
 // events (like the TOP nets)
 logic objectCollected = 0, deliverPulse = 0, newLevel = 0, gameOver = 0;
+logic soundOn = 1;                               // settings: SOUND ON / OFF (Step 14)
 logic soundStart;  logic [3:0] soundSelect;
 logic offStart;    logic [3:0] offSelect;
 logic [3:0] tone;  logic EnableSound, melodyEnded;
 
 game_sound gs (.clk, .resetN(gameResetN), .catchPulse(objectCollected), .moneyPulse(deliverPulse),
-               .newLevel, .gameOver, .startSound(soundStart), .soundSelect);
+               .newLevel, .gameOver, .soundOn, .startSound(soundStart), .soundSelect);
 // T2: the same block with every sound switched off
 game_sound #(.CATCH_ON(1'b0), .MONEY_ON(1'b0), .LEVEL_ON(1'b0), .GAMEOVER_ON(1'b0)) gsOff (
                .clk, .resetN(gameResetN), .catchPulse(objectCollected), .moneyPulse(deliverPulse),
-               .newLevel, .gameOver, .startSound(offStart), .soundSelect(offSelect));
+               .newLevel, .gameOver, .soundOn(1'b1), .startSound(offStart), .soundSelect(offSelect));
 melody_player_1 #(.SIMULATION_MODE(1'b1)) player (
-               .resetN, .CLOCK_31p5(clk), .startMelodyKey(soundStart), .melodySelect(soundSelect),
+               .resetN, .CLOCK_31p5(clk), .startMelodyPulse(soundStart), .melodySelect(soundSelect),
                .tone, .EnableSoundOut(EnableSound), .melodyEnded);
 
 // ---------------- wave helpers ----------------
@@ -166,7 +168,7 @@ string why;
 int  sel_after;
 
 initial begin
-    $display("\n##### tb_game_sound VERSION 11.0 (2026-10-25, game sounds: newest wins) - if not the version Claude announced, run the full  do run_game_sound.do  #####");
+    $display("\n##### tb_game_sound VERSION 11.1 (2026-10-25, + soundOn setting) - if not the version Claude announced, run the full  do run_game_sound.do  #####");
     $display("   game_params: beat fast %0d / slow %0d (1/100 s), gap %0d, switches catch %0d money %0d level %0d game over %0d",
              SOUND_BEAT_FAST_CS, SOUND_BEAT_SLOW_CS, SOUND_GAP_CS, SOUND_CATCH_ON, SOUND_MONEY_ON, SOUND_LEVEL_ON, SOUND_GAMEOVER_ON);
     repeat (3) @(negedge clk);
@@ -249,10 +251,23 @@ initial begin
           "gameResetN = 0: all four events -> no sound started, the player stays idle and silent");
     @(negedge clk) gameResetN = 1;
 
+    // ------------------------------------------------------------ T6
+    begin_test(6, "T6 SOUND OFF (settings)");
+    @(negedge clk) soundOn = 0;
+    s0 = n_start;
+    pulse(objectCollected); repeat (50) @(negedge clk); pulse(deliverPulse); repeat (50) @(negedge clk); pulse(newLevel);
+    @(negedge clk) gameOver = 1; repeat (2000) @(negedge clk); gameOver = 0;
+    check(n_start == s0 && st == ST_IDLE && !EnableSound, "soundOn = 0: catch, money, level, game over -> no sound at all");
+    @(negedge clk) soundOn = 1;
+    pulse(deliverPulse);
+    @(negedge clk);
+    check(n_start == s0 + 1 && soundSelect == 4'(SND_MONEY), "soundOn = 1 again: the next event (money) plays");
+    wait_end(clocks);
+
     // ------------------------------------------------------------ end
-    t_end[5] = $realtime; test_no = 0;
+    t_end[6] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
-    write_windows_file(5);
+    write_windows_file(6);
     $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
              nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
     $display("Simulation PAUSED (not closed). zt <n> zooms on test n.\n");

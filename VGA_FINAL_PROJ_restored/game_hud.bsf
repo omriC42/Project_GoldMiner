@@ -21,9 +21,9 @@ agreement for further details.
 */
 (header "symbol" (version "1.1"))
 (symbol
-	(rect 16 16 248 192)
+	(rect 16 16 248 240)
 	(text "game_hud" (rect 5 0 47 12)(font "Arial" ))
-	(text "inst" (rect 8 160 20 172)(font "Arial" ))
+	(text "inst" (rect 8 208 20 220)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -121,6 +121,27 @@ agreement for further details.
 		(text "newLevel" (rect 0 0 37 12)(font "Arial" ))
 		(text "newLevel" (rect 174 107 211 119)(font "Arial" ))
 		(line (pt 232 112)(pt 216 112)(line_width 1))
+	)
+	(port
+		(pt 0 160)
+		(input)
+		(text "difficulty[1..0]" (rect 0 0 112 19)(font "Arial" ))
+		(text "difficulty[1..0]" (rect 21 155 133 174)(font "Arial" ))
+		(line (pt 0 160)(pt 16 160)(line_width 3))
+	)
+	(port
+		(pt 0 176)
+		(input)
+		(text "timeSel[1..0]" (rect 0 0 91 19)(font "Arial" ))
+		(text "timeSel[1..0]" (rect 21 171 112 190)(font "Arial" ))
+		(line (pt 0 176)(pt 16 176)(line_width 3))
+	)
+	(port
+		(pt 0 192)
+		(input)
+		(text "cheatsOn" (rect 0 0 56 19)(font "Arial" ))
+		(text "cheatsOn" (rect 21 187 77 206)(font "Arial" ))
+		(line (pt 0 192)(pt 16 192))
 	)
 	(parameter
 		"CLOCK_HZ"

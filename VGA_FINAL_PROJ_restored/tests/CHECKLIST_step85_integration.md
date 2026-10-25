@@ -1,5 +1,5 @@
 # Step 8.5 - the hook inside the game: what to check BY EYE
-ModelSim: cd tests -> do run_game_integration.do -> first line VERSION 8.7.1 -> expect 47 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_game_integration.do -> first line VERSION 8.8 -> expect 47 PASS, 0 FAIL.
 Real modules: miner_move + miner sprite + dust (6 pictures, driven by the real motion movingLeft/movingRight), hook_block, gold field (square_object + GoldsMatrixBitMap),
 game_hud (score, fed by hook_block deliverPulse/deliverValue = score at the top, like the TOP), objects_mux. The testbench only presses keys 2/4/6 - nothing is forced.
 The gold layout is printed in the Transcript at T1 (same every run in simulation).

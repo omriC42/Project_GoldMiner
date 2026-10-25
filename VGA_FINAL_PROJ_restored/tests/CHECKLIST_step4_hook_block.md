@@ -1,5 +1,5 @@
 # Step 4 - hook_block wrapper: what to check BY EYE
-ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.5 -> expect 46 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.5.1 -> expect 46 PASS, 0 FAIL.
 
 | Test (zt n) | Look at | Expected |
 |---|---|---|

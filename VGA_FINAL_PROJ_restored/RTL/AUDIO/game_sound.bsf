@@ -10,9 +10,9 @@ File > Create/Update > Create Symbol Files for Current File.
 */
 (header "symbol" (version "1.2"))
 (symbol
-	(rect 16 16 256 160)
+	(rect 16 16 256 176)
 	(text "game_sound" (rect 5 0 75 19)(font "Intel Clear" (font_size 8)))
-	(text "inst" (rect 8 123 36 140)(font "Intel Clear" ))
+	(text "inst" (rect 8 139 36 156)(font "Intel Clear" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -69,7 +69,14 @@ File > Create/Update > Create Symbol Files for Current File.
 		(text "soundSelect[3..0]" (rect 100 43 219 62)(font "Intel Clear" (font_size 8)))
 		(line (pt 240 48)(pt 224 48)(line_width 3))
 	)
+	(port
+		(pt 0 128)
+		(input)
+		(text "soundOn" (rect 0 0 49 19)(font "Intel Clear" (font_size 8)))
+		(text "soundOn" (rect 21 123 70 142)(font "Intel Clear" (font_size 8)))
+		(line (pt 0 128)(pt 16 128))
+	)
 	(drawing
-		(rectangle (rect 16 16 224 128))
+		(rectangle (rect 16 16 224 144))
 	)
 )
