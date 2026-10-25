@@ -6,16 +6,19 @@
 // carried_draw alone, driven directly (tip position, rope direction, show, object type):
 // T1 all 6 objects x 5 rope angles (15, 45, 90, 135, 165 deg): a 160x160 window around the tip is
 //    scanned pixel by pixel and compared with an INDEPENDENT model:
-//      direction = round(256*cos/sin) computed here with $cos/$sin (not the hook's table),
-//      centre    = tip + (CARRY_OFFSET_PX + size/2) * direction / 256,
+//      left      = tip x - size/2                      (hangs straight down under the claw)
+//      top       = tip y + CARRY_OFFSET_PX - topPad      (first visible row tucked in the claw)
+//      topPad    = first non-transparent row, found HERE by scanning the picture (not copied
+//                  from carried_draw's table -> a wrong table in carried_draw fails T1)
 //      picture   = the sprite table (object_sprites.svh = the same pictures as the objects field).
+//    The rope angle must NOT move the object (same place at all 5 angles).
 //    Every pixel must match, including the transparent ones (drawingRequest = 0 there).
 // T2 show = 0 -> nothing at all, for every object
 // T3 object code 0 (nothing on the hook) or 7 (unused) with show = 1 -> nothing
 // T4 tip near the bottom-right corner -> the object is cut by the screen edge, no wrap-around
 // T5 output timing: the drawing request comes exactly 1 clock after its pixel (same as hook_draw)
-// Images: frames/carry_types_90deg.bmp (all 6 objects hanging straight down)
-//         frames/carry_angles_gold_large.bmp (large gold at the 5 angles)
+// Images: frames/carry_types_90deg.bmp (all 6 objects in the claw)
+//         frames/carry_angles_gold_large.bmp (large gold at the 5 angles - always under the claw)
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
 // stimulus on the falling edge.
 
@@ -88,15 +91,21 @@ function automatic logic [7:0] sprite_px(input int t, input int sx, input int sy
         default: return 8'hFF;
     endcase
 endfunction
+function automatic int top_pad(input int t);     // first row of the picture that is not transparent
+    int sz;
+    sz = size_of(t);
+    for (int y = 0; y < sz; y++) for (int x = 0; x < sz; x++)
+        if (sprite_px(t, x, y) != 8'hFF) return y;
+    return 0;
+endfunction
 int ref_left, ref_top;      // where the model puts the sprite (for the waves)
 function automatic logic [7:0] model(input int t, input int tipx, input int tipy, input int c, input int s,
                                      input int x, input int y, input bit on);
-    int sz, d, lx, ty;
+    int sz, lx, ty;
     sz = size_of(t);
     if (!on || sz == 0) return 8'hFF;
-    d  = CARRY_OFFSET_PX + sz / 2;
-    lx = tipx + ((d * c) >>> 8) - sz / 2;      // >>> on an int = rounds down, like the hardware
-    ty = tipy + ((d * s) >>> 8) - sz / 2;
+    lx = tipx - sz / 2;                          // c, s (rope angle) are ignored on purpose
+    ty = tipy + CARRY_OFFSET_PX - top_pad(t);
     ref_left = lx; ref_top = ty;
     if (x < lx || x >= lx + sz || y < ty || y >= ty + sz) return 8'hFF;
     return sprite_px(t, x - lx, y - ty);
@@ -169,9 +178,9 @@ localparam int ANGLES [0:4] = '{15, 45, 90, 135, 165};
 int c, s, ok_cases, lat_ok, rise;
 
 initial begin
-    $display("\n##### tb_carried_draw VERSION 11.0 (2026-10-25, object on the claw along the rope) - if not the version Claude announced, run the full  do run_carried_draw.do  #####");
-    $display("   CARRY_OFFSET_PX = %0d -> tip-to-centre distance small %0d, medium %0d, large %0d px",
-             CARRY_OFFSET_PX, CARRY_OFFSET_PX + 8, CARRY_OFFSET_PX + 16, CARRY_OFFSET_PX + 32);
+    $display("\n##### tb_carried_draw VERSION 12.0 (2026-10-25, object hangs IN the claw, straight down) - if not the version Claude announced, run the full  do run_carried_draw.do  #####");
+    $display("   CARRY_OFFSET_PX = %0d -> first visible row of the object is %0d px below the tip, centred in x",
+             CARRY_OFFSET_PX, CARRY_OFFSET_PX);
     repeat (3) @(negedge clk); resetN = 1; repeat (2) @(negedge clk);
 
     // ------------------------------------------------------------ T1
@@ -231,7 +240,7 @@ initial begin
 
     // ------------------------------------------------------------ T5
     begin_test(5, "T5 1 clock latency");
-    set_case(1, 320, 240, 90, 1'b1, c, s);                // small gold straight down: centre (320, 252)
+    set_case(1, 320, 240, 90, 1'b1, c, s);                // small gold: box (312, 243) -> (320,252) = sprite (8, 9)
     lat_ok = 0; rise = -1;
     for (int k = 0; k < 4; k++) begin                     // hold one pixel for 4 clocks
         @(negedge clk) begin pixelX = 320; pixelY = 252; end
@@ -242,7 +251,7 @@ initial begin
     @(negedge clk) begin pixelX = 320; pixelY = 252; end  // enter on this clock
     check(!drawingRequest, "on the clock the pixel arrives: not yet (registered)");
     @(negedge clk);
-    check(drawingRequest == (sprite_px(1, 8, 8) != 8'hFF) && RGBout == sprite_px(1, 8, 8),
+    check(drawingRequest == (sprite_px(1, 8, 9) != 8'hFF) && RGBout == sprite_px(1, 8, 9),
           $sformatf("one clock later: the sprite pixel %h (same timing as hook_draw)", RGBout));
 
     // ------------------------------------------------------------ end

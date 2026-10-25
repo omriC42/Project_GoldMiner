@@ -1304,7 +1304,7 @@ agreement for further details.
 	(annotation_block (parameter)(rect -3576 -320 -3333 -263))
 )
 (symbol
-	(rect -4184 -8 -3888 280)
+	(rect -4184 -12 -3888 276)
 	(text "hook_block" (rect 5 0 72 19)(font "Intel Clear" (font_size 8)))
 	(text "inst41" (rect 8 267 36 284)(font "Intel Clear" ))
 	(port

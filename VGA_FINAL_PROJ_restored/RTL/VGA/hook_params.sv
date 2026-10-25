@@ -36,8 +36,9 @@ package hook_params;
   localparam logic [7:0]  ROPE_COLOR         = 8'h49;  // dark grey
   localparam logic [7:0]  CLAW_COLOR         = 8'hB6;  // light grey (metal)
   // the caught object hangs on the claw while it is pulled back (carried_draw.sv, Oct 2026):
-  // its centre is CARRY_OFFSET_PX + half its size past the claw tip, along the rope
-  localparam int          CARRY_OFFSET_PX    = 4;      // small -> 4+8 = 12 px, medium 4+16 = 20 px, large 4+32 = 36 px
+  // it hangs straight down under the claw; its first visible row is CARRY_OFFSET_PX px below the tip.
+  // 4 = tucked under the claw's bottom bar (claw rows tip+4..tip+5). Bigger = lower, smaller = higher.
+  localparam int          CARRY_OFFSET_PX    = 4;
   // =========================================================
 
 

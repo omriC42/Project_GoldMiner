@@ -1,5 +1,5 @@
 # run_carried_draw.do - the caught object hanging on the claw (carried_draw), GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_carried_draw.do        (expect VERSION 11.0)
+# Usage:  cd <project>/tests   then   do run_carried_draw.do        (expect VERSION 12.0)
 # To run again after ANY file change: the full  do run_carried_draw.do  (it recompiles).
 # 'restart -f ; run -all' does NOT recompile.
 onbreak {resume}
