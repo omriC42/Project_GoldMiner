@@ -1,13 +1,13 @@
 # run_game_integration.do - Step 8.5: the hook inside the game (GUI mode, nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_game_integration.do        (expect VERSION 8.5.7)
+# Usage:  cd <project>/tests   then   do run_game_integration.do        (expect VERSION 8.5.9)
 # To run again after ANY file change: the full  do run_game_integration.do  (it recompiles).
 onbreak {resume}
 file mkdir frames
 catch {quit -sim}
 set LIB lib_game_integration
 if {![file exists $LIB/_info]} {catch {file delete -force $LIB}; vlib $LIB}
-vlog -work $LIB -sv ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv ../RTL/VGA/hook_draw.sv \
-     ../RTL/VGA/hook_block.sv ../RTL/VGA/miner_move.sv ../RTL/VGA/square_object.sv \
+vlog -work $LIB -sv +incdir+../RTL/VGA ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv ../RTL/VGA/hook_draw.sv \
+     ../RTL/VGA/carried_draw.sv ../RTL/VGA/hook_block.sv ../RTL/VGA/miner_move.sv ../RTL/VGA/square_object.sv \
      ../RTL/VGA/minerBitMap.sv ../RTL/VGA/dust_draw.sv ../RTL/VGA/ObjectsMatrixBitMap.sv \
      ../RTL/VGA/game_hud.sv ../RTL/VGA/objects_mux.sv tb_game_integration.sv
 vsim -voptargs=+acc $LIB.tb_game_integration
@@ -43,7 +43,15 @@ add wave -noupdate -color Gold     /tb_game_integration/goldDR
 add wave -noupdate -color Red      /tb_game_integration/hookCatch
 add wave -noupdate -color Orange   /tb_game_integration/goldCollected
 add wave -noupdate -radix unsigned /tb_game_integration/goldValue
-add wave -noupdate -divider {DUST (key AND NOT hookBusy)}
+add wave -noupdate -divider {CARRY + SCORE AT THE TOP (8.5.9)}
+add wave -noupdate                 /tb_game_integration/hb/carryShow
+add wave -noupdate                 /tb_game_integration/hb/carryDR
+add wave -noupdate -radix unsigned /tb_game_integration/n_carry_px
+add wave -noupdate -radix unsigned /tb_game_integration/n_carry_seen
+add wave -noupdate -color Green    /tb_game_integration/hookDeliver
+add wave -noupdate -radix unsigned /tb_game_integration/hookDeliverValue
+add wave -noupdate -radix unsigned /tb_game_integration/n_deliver
+add wave -noupdate -divider {DUST (real motion: miner movingLeft/movingRight)}
 add wave -noupdate -color Cyan     /tb_game_integration/dustLeftKey
 add wave -noupdate -color Cyan     /tb_game_integration/dustRightKey
 add wave -noupdate                 /tb_game_integration/dust/dustOn

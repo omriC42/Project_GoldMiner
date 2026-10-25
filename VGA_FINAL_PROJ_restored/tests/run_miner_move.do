@@ -1,5 +1,5 @@
 # run_miner_move.do - Step 5: miner movement + hook lock, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_miner_move.do        (expect VERSION 5.2)
+# Usage:  cd <project>/tests   then   do run_miner_move.do        (expect VERSION 5.3)
 # To run again after ANY file change: the full  do run_miner_move.do  (it recompiles).
 onbreak {resume}
 catch {quit -sim}
@@ -23,6 +23,8 @@ add wave -noupdate -color Cyan    /tb_miner_move/key6
 add wave -noupdate -color Red     /tb_miner_move/hookBusy
 add wave -noupdate -divider {MINER}
 add wave -noupdate -color Orange  /tb_miner_move/minerMoving
+add wave -noupdate -color Gray70  /tb_miner_move/movingLeft
+add wave -noupdate -color Gray70  /tb_miner_move/movingRight
 add wave -noupdate                /tb_miner_move/dut/SM_Motion
 add wave -noupdate -radix decimal -format Analog-Step -height 60 -min -64 -max 64 -color Magenta /tb_miner_move/xspeed
 add wave -noupdate -radix decimal -format Analog-Step -height 80 -min 0 -max 640 -color Cyan /tb_miner_move/minerX

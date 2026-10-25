@@ -35,6 +35,9 @@ package hook_params;
   localparam int          ROPE_HALF_WIDTH_X4 = 4;      // rope half-width in 1/4 px: 4 -> 1 px each side (about 3 px wide)
   localparam logic [7:0]  ROPE_COLOR         = 8'h49;  // dark grey
   localparam logic [7:0]  CLAW_COLOR         = 8'hB6;  // light grey (metal)
+  // the caught object hangs on the claw while it is pulled back (carried_draw.sv, Oct 2026):
+  // its centre is CARRY_OFFSET_PX + half its size past the claw tip, along the rope
+  localparam int          CARRY_OFFSET_PX    = 4;      // small -> 4+8 = 12 px, medium 4+16 = 20 px, large 4+32 = 36 px
   // =========================================================
 
 

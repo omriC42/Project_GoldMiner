@@ -16,6 +16,12 @@
 //    hookCatch (when the gold field has updated it) and chooses the pull-back speed from
 //    game_params.sv. Empty hook (border / floor) -> RETRACT_EMPTY from hook_params.sv.
 //    The speeds are converted to per-frame steps at compile time (the STEP_* table below).
+//  * Oct 2026: CARRY + SCORE AT THE TOP. While the hook pulls something back, carried_draw hangs
+//    the caught sprite on the claw, along the rope (its pixels go out on hookDR/hookRGB, the claw
+//    is drawn on top of it, and it is NOT part of tipDR - it never catches anything).
+//    When the pull-back ends (RETRACT -> SWING) with something on the hook, deliverPulse (1 clock)
+//    + deliverValue (its dollars, game_params.sv) go to game_hud -> the score goes up at the TOP.
+//    An empty pull-back (border / floor) delivers nothing.
 
 module hook_block (
     input  logic               clk,
@@ -37,7 +43,9 @@ module hook_block (
     output logic               tipDR,         // claw pixel only      -> collision
     output logic               hookBusy,      // hook is out          -> lock the miner
     output logic        [1:0]  hookState,     // 0 SWING, 1 SHOOT, 2 RETRACT
-    output logic               hookCatch      // 1-clock pulses: claw on gold/rock while shooting -> Gold_DISPLAY
+    output logic               hookCatch,     // 1-clock pulses: claw on gold/rock while shooting -> Objects_DISPLAY
+    output logic               deliverPulse,  // 1 clock when a caught object reaches the top -> game_hud
+    output logic        [5:0]  deliverValue   // its value in dollars                          -> game_hud
 );
 
 import hook_params::*;
@@ -168,19 +176,72 @@ end
 // ---------------- the hook ----------------
 logic signed [10:0] Xend, Yend;
 logic        [10:0] R;
+logic signed  [9:0] dirCos, dirSin;   // rope direction (for the carried object)
 
 hook_move u_move (
     .clk, .resetN, .startOfFrame,
     .shoot_key(shoot_req), .tipCollision(tipCollision || hookCatch), .freeze,
     .retractStep,
-    .X0, .Y0, .Xend, .Yend, .R, .hookState
+    .X0, .Y0, .Xend, .Yend, .R, .hookState, .dirCos, .dirSin
 );
 
+logic       drawDR;                   // rope or claw (hook_draw)
+logic [7:0] drawRGB;
 hook_draw u_draw (
     .clk, .resetN, .pixelX, .pixelY,
     .X0, .Y0, .Xend, .Yend, .R,
-    .drawingRequest(hookDR), .RGBout(hookRGB), .tipDR
+    .drawingRequest(drawDR), .RGBout(drawRGB), .tipDR
 );
+
+// ---------------- the caught object on the claw (Oct 2026) ----------------
+logic       carryShow;                // something on the hook AND being pulled back
+logic       carryDR;
+logic [7:0] carryRGB;
+assign carryShow = caught && (hookState == 2'd2);
+carried_draw u_carry (
+    .clk, .resetN, .pixelX, .pixelY,
+    .Xend, .Yend, .dirCos, .dirSin,
+    .show(carryShow), .objType(caughtType),
+    .drawingRequest(carryDR), .RGBout(carryRGB)
+);
+// all three are 1 clock after their pixel. Order on the screen: claw > carried object > rope.
+assign hookDR  = drawDR || carryDR;
+assign hookRGB = tipDR   ? drawRGB  :      // claw pixel (tipDR = claw only)
+                 carryDR ? carryRGB :      // the object
+                           drawRGB;        // rope (or nothing)
+
+// ---------------- score at the top (Oct 2026) ----------------
+// the object's value, from game_params.sv (plain case, no function)
+logic [5:0] caughtValue;
+always_comb begin
+    case (caughtType)
+        GOLD_SMALL:  caughtValue = 6'(GOLD_SMALL_VALUE);
+        GOLD_MEDIUM: caughtValue = 6'(GOLD_MEDIUM_VALUE);
+        GOLD_LARGE:  caughtValue = 6'(GOLD_LARGE_VALUE);
+        ROCK_SMALL:  caughtValue = 6'(ROCK_SMALL_VALUE);
+        ROCK_MEDIUM: caughtValue = 6'(ROCK_MEDIUM_VALUE);
+        ROCK_LARGE:  caughtValue = 6'(ROCK_LARGE_VALUE);
+        default:     caughtValue = 6'd0;
+    endcase
+end
+// RETRACT -> SWING with something on the hook = it arrived at the top -> one pulse with its value.
+// (on that clock 'caught' is still 1; it is cleared on the next clock because the state is SWING)
+logic [1:0] hookState_d;
+always_ff @(posedge clk or negedge resetN) begin
+    if (!resetN) begin
+        hookState_d  <= 2'd0;
+        deliverPulse <= 1'b0;
+        deliverValue <= 6'd0;
+    end
+    else begin
+        hookState_d  <= hookState;
+        deliverPulse <= 1'b0;
+        if (hookState_d == 2'd2 && hookState == 2'd0 && caught) begin
+            deliverPulse <= 1'b1;
+            deliverValue <= caughtValue;
+        end
+    end
+end
 
 assign hookBusy = (hookState != 2'd0);
 

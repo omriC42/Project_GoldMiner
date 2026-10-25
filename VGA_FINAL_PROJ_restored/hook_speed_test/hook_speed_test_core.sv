@@ -68,7 +68,8 @@ hook_move u_move (
     .clk, .resetN(hookResetN), .startOfFrame,
     .shoot_key(key_shoot), .tipCollision(key_catch), .freeze(paused),
     .retractStep(10'(RETRACT_EMPTY_STEP_FP)),   // Step 9: empty-hook pull-back speed
-    .X0(ORIGIN_X), .Y0(ORIGIN_Y), .Xend, .Yend, .R, .hookState
+    .X0(ORIGIN_X), .Y0(ORIGIN_Y), .Xend, .Yend, .R, .hookState,
+    .dirCos(), .dirSin()                        // Oct 2026 outputs, not used in this test project
 );
 
 hook_draw u_draw (

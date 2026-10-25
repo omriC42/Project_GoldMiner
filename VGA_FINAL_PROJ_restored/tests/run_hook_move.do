@@ -60,6 +60,10 @@ add wave -noupdate /tb_hook_move/meas_shoot_px_s
 add wave -noupdate /tb_hook_move/meas_retract_px_s
 add wave -noupdate -radix unsigned /tb_hook_move/meas_R_changes_3frames
 
+add wave -noupdate -divider {ROPE DIRECTION (Oct 2026)}
+add wave -noupdate -radix decimal -format Analog-Step -height 40 -min -256 -max 256 /tb_hook_move/dirCos
+add wave -noupdate -radix decimal -format Analog-Step -height 40 -min -256 -max 256 /tb_hook_move/dirSin
+add wave -noupdate -radix unsigned -color Red /tb_hook_move/dir_bad
 configure wave -namecolwidth 230 -valuecolwidth 120 -timelineunits us
 update
 

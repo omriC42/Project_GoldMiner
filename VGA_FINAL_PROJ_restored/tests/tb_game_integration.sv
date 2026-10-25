@@ -1,6 +1,6 @@
 // tb_game_integration.sv - Step 8.5: the hook inside the GAME, played like a player would.
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.5.7)
+// Run:  ModelSim -> cd <project>/tests -> do run_game_integration.do      (expect VERSION 8.5.9)
 // Checklist: tests/CHECKLIST_step85_integration.md
 //
 // The REAL modules, wired exactly like TOP_VGA_DEMO_KBD.bdf / Miner_Block_T.bdf / Objects_DISPLAY.bdf:
@@ -8,7 +8,8 @@
 //   hook       : hook_block (minerX/minerY/minerMoving from the miner, hookBusy back to the miner,
 //                goldDR from the gold field, hookCatch to the gold field, catchType = goldType)
 //   gold field : square_object 512x256 at (64,224) + ObjectsMatrixBitMap (newLevel from game_hud)
-//   score      : game_hud (collectPulse / collectValue = goldCollected / goldValue)
+//   score      : game_hud (collectPulse / collectValue = hook_block deliverPulse / deliverValue:
+//                the score is added when the hook is back at the TOP with the object - Oct 2026 8.5.9)
 //   screen     : objects_mux (for the images)
 // Not included: VGA_Controller (the testbench makes the pixels + startOfFrame), keyboard (keys are
 // driven directly: key2 = shoot, key4 = left, key6 = right), audio, the background picture ROM
@@ -23,9 +24,13 @@
 // T5 miner locked while the hook is out (key 4 held the whole time)
 // T6 hook back -> miner free again (the same held key 4 now moves it)
 // T7 a second catch: score adds up, key 2 during the pull-back is ignored
+// 8.5.9 CARRY: the caught object is drawn on the rope during the pull-back (T5: every carried
+//    pixel reaches the screen, centred D px below the claw), and the score is added only when the
+//    hook is back at the top (T5/T7: unchanged at the catch, +value on arrival, ONE deliverPulse).
 // Step 9: every catch also MEASURES the pull-back speed and compares it with game_params.sv
 // Dust (Oct 2026, partner's 6-picture dust): T2 dust on the correct side while walking and gone after
-//   the round ends, T5 NO dust round starts while the hook is out, T6 dust again when free.
+//   the round ends, T5 NO dust round starts while the hook is out, T6 dust again when free,
+//   T8 (8.5.8) key 6 held against the right wall: the dust stops (the cart does not move).
 // Images: frames/game_1_start.bmp ... game_6_second.bmp
 //
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
@@ -48,6 +53,7 @@ logic key2 = 0, key4 = 0, key6 = 0;            // keypad keys (keyIsPressed[2], 
 // =====================================================================================
 logic signed [10:0] minerX, minerY;
 logic minerMoving, hookBusy;
+logic dustLeftKey, dustRightKey;          // = miner movingLeft / movingRight -> dust_draw leftKey / rightKey
 logic [2:0] HitEdgeCode;
 logic [10:0] smOffX, smOffY; logic smRecDR; logic [7:0] smRecRGB;
 logic smileyDR; logic [7:0] smileyRGB;
@@ -57,7 +63,7 @@ miner_move #(.INITIAL_X(280), .INITIAL_Y(32), .INITIAL_X_SPEED(60), .INITIAL_Y_S
     .clk, .resetN, .startOfFrame(sof),
     .Y_direction_key(key4), .toggle_x_key(key6),
     .collision(1'b0), .HitEdgeCode,
-    .hookBusy, .minerMoving,
+    .hookBusy, .minerMoving, .movingLeft(dustLeftKey), .movingRight(dustRightKey),
     .topLeftX(minerX), .topLeftY(minerY));
 square_object #(.OBJECT_WIDTH_X(64), .OBJECT_HEIGHT_Y(64), .OBJECT_COLOR(8'h00)) minerBox (
     .clk, .resetN, .pixelX, .pixelY, .topLeftX(minerX), .topLeftY(minerY),
@@ -65,10 +71,7 @@ square_object #(.OBJECT_WIDTH_X(64), .OBJECT_HEIGHT_Y(64), .OBJECT_COLOR(8'h00))
 minerBitMap minerBmp (
     .clk, .resetN, .offsetX(smOffX), .offsetY(smOffY), .InsideRectangle(smRecDR),
     .drawingRequest(smileyDR), .RGBout(smileyRGB), .HitEdgeCode);
-// dust keys exactly like Miner_Block_T.bdf: key AND NOT hookBusy (NOT inst8 + AND2 inst9/inst10)
-logic dustLeftKey, dustRightKey;
-assign dustLeftKey  = key4 && !hookBusy;
-assign dustRightKey = key6 && !hookBusy;
+// dust exactly like Miner_Block_T.bdf (Oct 2026): the REAL motion from miner_move
 dust_draw dust (
     .clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
     .leftKey(dustLeftKey), .rightKey(dustRightKey),
@@ -94,11 +97,13 @@ ObjectsMatrixBitMap gbm (
 // HOOK  (= hook_block inst41)
 // =====================================================================================
 logic hookDR, tipDR; logic [7:0] hookRGB; logic [1:0] hookState;
+logic hookDeliver; logic [5:0] hookDeliverValue;     // score at the top (TOP: hook_block -> game_hud)
 hook_block hb (
     .clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY,
     .minerX, .minerY, .minerMoving, .shoot_key(key2),
     .tipCollision(1'b0), .goldDR, .freeze(1'b0), .catchType(goldType),
-    .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch);
+    .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
+    .deliverPulse(hookDeliver), .deliverValue(hookDeliverValue));
 
 // =====================================================================================
 // SCORE  (= game_hud inst28)
@@ -106,7 +111,7 @@ hook_block hb (
 logic hudDR; logic [7:0] hudRGB; logic timeUp, gameOver, levelWon;
 game_hud hud (
     .clk, .resetN, .pixelX, .pixelY,
-    .collectPulse(goldCollected), .collectValue(goldValue), .gameOverKey(1'b0), .nextLevelKey(1'b0),
+    .collectPulse(hookDeliver), .collectValue(hookDeliverValue), .gameOverKey(1'b0), .nextLevelKey(1'b0),
     .drawingRequest(hudDR), .RGBout(hudRGB), .timeUp, .gameOver, .levelWon, .newLevel);
 
 // =====================================================================================
@@ -138,6 +143,7 @@ int  ropeY0;     assign ropeY0    = hb.Y0;
 int  minerXspeed; assign minerXspeed = miner.Xspeed;
 int  score;      assign score     = hud.dollars;
 int  n_hookCatch = 0, n_collect = 0, last_value = -1, type_at_collect = -1;
+int  n_deliver = 0, last_deliver = -1;          // 8.5.9: hook_block deliverPulse (score at the top)
 real meas_pull_px_s = 0, exp_pull_px_s = 0;     // pull-back speed with the object (Step 9)
 int  tgt_row = -1, tgt_col = -1, tgt_obj = 0, tgt_value = 0, tgt_cx = 0, tgt_cy = 0, tgt_r = 0;
 bit  hook_followed = 1;                        // X0/Y0 always = miner + (HOOK_DX, HOOK_DY)
@@ -152,7 +158,37 @@ end
 always @(posedge clk) begin
     if (hookCatch)     n_hookCatch++;
     if (goldCollected) begin n_collect++; last_value = goldValue; type_at_collect = goldType; end
+    if (hookDeliver)   begin n_deliver++; last_deliver = hookDeliverValue; end
 end
+// carried object on the screen (8.5.9): counted during the full-frame images.
+// carryDR belongs to the pixel of one clock earlier; RGBOut (objects_mux) is one more clock later.
+int  n_carry_px = 0, n_carry_seen = 0, carry_x0, carry_x1, carry_y0, carry_y1;
+logic carry_d = 0; logic [7:0] carryRGB_d = 0; int pxd1 = 0, pyd1 = 0, pxd2 = 0, pyd2 = 0;
+always @(posedge clk) begin
+    pxd1 <= pixelX; pyd1 <= pixelY;
+    carry_d <= hb.carryDR && !hb.tipDR; carryRGB_d <= hookRGB;
+    if (scan_kind == "FULL FRAME") begin
+        if (hb.carryDR && !hb.tipDR) begin
+            n_carry_px++;
+            if (pxd1 < carry_x0) carry_x0 = pxd1;  if (pxd1 > carry_x1) carry_x1 = pxd1;
+            if (pyd1 < carry_y0) carry_y0 = pyd1;  if (pyd1 > carry_y1) carry_y1 = pyd1;
+        end
+        if (carry_d && RGBOut == carryRGB_d) n_carry_seen++;
+    end
+end
+task automatic carry_reset();
+    n_carry_px = 0; n_carry_seen = 0; carry_x0 = 9999; carry_x1 = -1; carry_y0 = 9999; carry_y1 = -1;
+endtask
+function automatic int carry_dist(input int t);   // claw tip -> sprite centre along the rope (hook_params)
+    case (t) 1, 4: return CARRY_OFFSET_PX + 8; 2, 5: return CARRY_OFFSET_PX + 16; 3, 6: return CARRY_OFFSET_PX + 32;
+             default: return 0; endcase
+endfunction
+function automatic int carry_top(input int t);    // tip -> first opaque row of the hanging sprite
+    // = D - half + first opaque row of the sprite (object_sprites.svh: 1, 3, 3, 2, 4, 7)
+    case (t) 1: return CARRY_OFFSET_PX + 1; 2: return CARRY_OFFSET_PX + 3; 3: return CARRY_OFFSET_PX + 3;
+             4: return CARRY_OFFSET_PX + 2; 5: return CARRY_OFFSET_PX + 4; 6: return CARRY_OFFSET_PX + 7;
+             default: return 0; endcase
+endfunction
 realtime t_start [0:8];
 realtime t_end   [0:8];
 task automatic begin_test(input int n, input string name);
@@ -347,7 +383,7 @@ int  f, w, x_before, x_at_shot, r_peak, score_before, r_a2, r_b2, mask_copy [1:3
 bit  x_constant, x_still, others_same, r_down;
 
 initial begin
-    $display("\n##### tb_game_integration VERSION 8.5.7 (2026-10-20, keyboard dust: 6 pictures, gated by hookBusy) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
+    $display("\n##### tb_game_integration VERSION 8.5.9 (2026-10-25, object carried on the rope, score at the top) - if not the version Claude announced, run the full  do run_game_integration.do  #####");
     $display("   hook_params: swing %0d deg/s (%0d..%0d deg), shoot %0d px/s, empty pull-back %0d px/s",
              SWING_DEG_PER_SEC, SWING_MIN_DEG, SWING_MAX_DEG, SHOOT_PX_PER_SEC, RETRACT_EMPTY_PX_PER_SEC);
     $display("   game_params: difficulty %s, level 1 target %0d (+%0d per level), %0d s per level", diff_now.name(),
@@ -401,7 +437,7 @@ initial begin
     begin_test(4, "T4 aim by timing + shoot = catch");
     mask_copy = '{default:0};
     for (int row = 1; row < 4; row++) for (int col = 0; col < 8; col++) mask_copy[row][col] = gbm.MazeBitMapMask[row][col];
-    n_hookCatch = 0; n_collect = 0; score_before = score;
+    n_hookCatch = 0; n_collect = 0; n_deliver = 0; score_before = score;
     shoot_when_down(w);
     check(hookState == 2'd1 && hookBusy, $sformatf("waited %0d frames for 90 deg, key 2 -> SHOOT at %0d deg, hookBusy = 1", w, angle_deg));
     snapshot("frames/game_2_shot.bmp");
@@ -427,10 +463,19 @@ initial begin
     check(others_same, "all other objects are unchanged");
     check(n_collect == 1 && last_value == tgt_value,
           $sformatf("ONE collectPulse, value %0d (expected %0d)", last_value, tgt_value));
-    check(score == score_before + tgt_value, $sformatf("score %0d -> %0d on the HUD", score_before, score));
+    check(score == score_before && n_deliver == 0,
+          $sformatf("score NOT changed at the catch (still %0d, no deliverPulse) - it is added at the top", score));
     check(type_at_collect == tgt_obj && hb.caughtType == tgt_obj,
           $sformatf("gold field reported type %0d, hook latched type %0d (expected %0d)", type_at_collect, hb.caughtType, tgt_obj));
+    carry_reset();
     snapshot("frames/game_3_caught.bmp");
+    check(n_carry_px > 0 && n_carry_seen == n_carry_px,
+          $sformatf("the caught object is drawn on the rope: %0d pixels, %0d of them on the screen (RGBOut)", n_carry_px, n_carry_seen));
+    // (the bottom may be cut by the screen edge for a low large object, so the TOP edge is checked)
+    check(n_carry_px > 0 && (carry_x0 + carry_x1) / 2 - hb.Xend <= 3 && hb.Xend - (carry_x0 + carry_x1) / 2 <= 3 &&
+          carry_y0 - (hb.Yend + carry_top(tgt_obj)) <= 1 && (hb.Yend + carry_top(tgt_obj)) - carry_y0 <= 1,
+          $sformatf("object hangs BELOW the claw on the rope: x centre %0d (claw %0d +-3), top y %0d (expected %0d = tip + %0d), centre %0d px down the rope",
+                    (carry_x0 + carry_x1) / 2, hb.Xend, carry_y0, hb.Yend + carry_top(tgt_obj), carry_top(tgt_obj), carry_dist(tgt_obj)));
     exp_pull_px_s = expected_pull(tgt_obj);
     pull_back_measured(f, x_still);
     if (!x_still || minerX != x_at_shot) x_constant = 0;
@@ -440,6 +485,9 @@ initial begin
     check(x_constant, $sformatf("key 4 held during SHOOT + RETRACT: miner did not move (x stayed %0d)", x_at_shot));
     check(n_dust_start_busy == 0, $sformatf("key 4 held while the hook was out: NO dust round started (%0d)", n_dust_start_busy));
     check(hookState == 2'd0 && !hookBusy && hb.R == MIN_R, $sformatf("hook back after %0d frames: SWING, R = %0d, hookBusy = 0", f, hb.R));
+    repeat (5) @(negedge clk);
+    check(n_deliver == 1 && last_deliver == tgt_value && score == score_before + tgt_value,
+          $sformatf("hook at the top: ONE deliverPulse, value %0d -> score %0d -> %0d on the HUD", last_deliver, score_before, score));
 
     // ------------------------------------------------------------ T6
     begin_test(6, "T6 miner free again");
@@ -457,12 +505,12 @@ initial begin
     walk_to(tgt_cx, f);
     check((hb.X0 - tgt_cx) <= 4 && (tgt_cx - hb.X0) <= 4,
           $sformatf("walked %0d frames, rope above target 2: x %0d vs %0d", f, hb.X0, tgt_cx));
-    n_hookCatch = 0; n_collect = 0; score_before = score;
+    n_hookCatch = 0; n_collect = 0; n_deliver = 0; score_before = score;
     shoot_when_down(w);
     f = 0; while (hookState == 2'd1 && f < 400) begin game_frame(); f++; end
     repeat (10) @(negedge clk);
-    check(n_collect == 1 && last_value == tgt_value && score == score_before + tgt_value,
-          $sformatf("second catch: value %0d, score %0d -> %0d", last_value, score_before, score));
+    check(n_collect == 1 && last_value == tgt_value && score == score_before && n_deliver == 0,
+          $sformatf("second catch: value %0d, score still %0d until the hook is home", last_value, score));
     exp_pull_px_s = expected_pull(tgt_obj);
     r_a2 = hb.u_move.R_fp; frames(10); r_b2 = hb.u_move.R_fp;
     meas_pull_px_s = real'(r_a2 - r_b2) / 64.0 / 10.0 * (FRAME_RATE_X100 / 100.0);
@@ -477,12 +525,27 @@ initial begin
     snapshot("frames/game_5_second.bmp");
     f = 0; while (hookState != 2'd0 && f < 1500) begin game_frame(); f++; end
     check(hookState == 2'd0 && count_objects() == 6, $sformatf("hook back, %0d objects left (expected 6)", count_objects()));
+    repeat (5) @(negedge clk);
+    check(n_deliver == 1 && last_deliver == tgt_value && score == score_before + tgt_value,
+          $sformatf("second object at the top: ONE deliverPulse -> score %0d -> %0d (+%0d)", score_before, score, tgt_value));
     snapshot("frames/game_6_end.bmp");
 
+    // ------------------------------------------------------------ T8
+    begin_test(8, "T8 no dust against the wall");
+    @(negedge clk) key6 = 1;
+    f = 0; x_before = -1;
+    while (minerX != x_before && f < 1500) begin x_before = minerX; frames(5); f += 5; end
+    check(minerX == 573, $sformatf("key 6 held: miner reached the right border x = 573 after %0d frames (x %0d)", f, minerX));
+    w = 0; while (dust.dustOn && w < 60) begin game_frame(); w++; end
+    check(!dust.dustOn && !dustRightKey, $sformatf("key 6 STILL held at the wall: dust finished its round and stopped (%0d frames)", w));
+    frames(20);
+    check(!dust.dustOn, "20 more frames against the wall: still no dust");
+    @(negedge clk) key6 = 0;
+
     // ------------------------------------------------------------ end
-    t_end[7] = $realtime; test_no = 0;
+    t_end[8] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
-    write_windows_file(7);
+    write_windows_file(8);
     $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
              nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
     $display("Images: tests/frames/game_*.bmp   Simulation PAUSED (not closed). zt <n> zooms on test n.\n");

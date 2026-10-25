@@ -1,11 +1,13 @@
 // tb_miner_move.sv - Step 5: miner movement + the new hook lock
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_miner_move.do        (expect VERSION 5.2)
+// Run:  ModelSim -> cd <project>/tests -> do run_miner_move.do        (expect VERSION 5.3)
 // Checklist: tests/CHECKLIST_step5_miner.md
 //
 // Checks: normal movement with keys 4/6 is unchanged, minerMoving = key 4 or 6,
 // hookBusy = 1 stops the miner in the SAME frame (also while gliding after a key release)
 // and ignores the keys, hookBusy = 0 frees it again, screen borders still work.
+// Oct 2026 (5.3): movingLeft / movingRight follow the REAL speed (dust): 1 while moving or gliding,
+// 0 at a border with the key still held and 0 while hookBusy.
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded
 // loops, stimulus on the falling edge.
 
@@ -17,14 +19,14 @@ always #5 clk = ~clk;
 
 logic key4 = 0, key6 = 0, hookBusy = 0;
 logic signed [10:0] topLeftX, topLeftY;
-logic minerMoving;
+logic minerMoving, movingLeft, movingRight;
 
 // same parameter values as the game's top level (TOP_VGA_DEMO_KBD passes initial_x 280, x speed 60)
 miner_move #(.INITIAL_X(280), .INITIAL_X_SPEED(60)) dut (
     .clk, .resetN, .startOfFrame(sof),
     .Y_direction_key(key4), .toggle_x_key(key6),
     .collision(1'b0), .HitEdgeCode(3'b000),
-    .hookBusy, .minerMoving,
+    .hookBusy, .minerMoving, .movingLeft, .movingRight,
     .topLeftX, .topLeftY
 );
 
@@ -71,7 +73,7 @@ endtask
 int x0, x1, f;
 
 initial begin
-    $display("\n##### tb_miner_move VERSION 5.2 (2026-10-20, smiley_move renamed miner_move) - if not the version Claude announced, run the full  do run_miner_move.do  #####");
+    $display("\n##### tb_miner_move VERSION 5.3 (2026-10-25, movingLeft/movingRight = real motion for the dust) - if not the version Claude announced, run the full  do run_miner_move.do  #####");
 
     // ------------------------------------------------------------ T1
     begin_test(1, "T1 reset position");
@@ -87,12 +89,14 @@ initial begin
     check(minerMoving, "key 6 held -> minerMoving = 1 (immediately)");
     x0 = topLeftX; frames(30); x1 = topLeftX;
     check(x1 > x0 + 10, $sformatf("moved right: %0d -> %0d", x0, x1));
+    check(movingRight && !movingLeft, "moving right -> movingRight = 1, movingLeft = 0");
     @(negedge clk) key6 = 0;
     @(negedge clk);
     check(!minerMoving, "key released -> minerMoving = 0 (immediately)");
     x0 = topLeftX; frames(30); x1 = topLeftX;
     check(x1 > x0, $sformatf("glides a little after release (normal behaviour): %0d -> %0d", x0, x1));
     check(xspeed == 0, "then stops (speed 0)");
+    check(!movingRight && !movingLeft, "stopped -> movingRight = movingLeft = 0 (no dust)");
 
     // ------------------------------------------------------------ T3
     begin_test(3, "T3 hookBusy locks while key held");
@@ -104,6 +108,7 @@ initial begin
     check(xspeed == 0, "hookBusy -> speed 0 in the SAME frame");
     x0 = topLeftX; frames(30); x1 = topLeftX;
     check(x1 == x0, $sformatf("key 6 still held for 30 frames, miner does not move: %0d -> %0d", x0, x1));
+    check(!movingRight && !movingLeft, "hookBusy with key 6 held -> movingRight = 0 (no dust while the hook is out)");
     @(negedge clk) key6 = 0; hookBusy = 0;
 
     // ------------------------------------------------------------ T4
@@ -113,6 +118,7 @@ initial begin
     @(negedge clk) key4 = 0;                        // released -> would glide for several frames
     frames(1);
     check(xspeed < 0, $sformatf("gliding left after release, speed %0d", xspeed));
+    check(movingLeft && !movingRight, "gliding left with no key -> movingLeft = 1 (dust continues during the glide)");
     @(negedge clk) hookBusy = 1;
     frames(1);
     x0 = topLeftX; frames(20); x1 = topLeftX;
@@ -129,6 +135,7 @@ initial begin
     f = 0; while (topLeftX > 2 && f < 1000) begin frames(10); f += 10; end
     frames(10);
     check(topLeftX == 2, $sformatf("stops at the left border x = 2 (got %0d)", topLeftX));
+    check(!movingLeft && !movingRight, "key 4 still held at the left border -> movingLeft = 0 (no dust against the wall)");
     @(negedge clk) key4 = 0;
     frames(5);
 

@@ -1,5 +1,5 @@
 # Step 4 - hook_block wrapper: what to check BY EYE
-ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.2 -> expect 18 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.4 -> expect 40 PASS, 0 FAIL.
 
 | Test (zt n) | Look at | Expected |
 |---|---|---|
@@ -11,11 +11,17 @@ ModelSim: cd tests -> do run_hook_block.do -> first line must be VERSION 4.2 -> 
 | T3 | shoot_key released then pressed | ONE shoot_req pulse (1 clock) -> hookState SHOOT, hookBusy 1 |
 | T4 | hookBusy | high for the whole SHOOT + RETRACT, low again exactly when hookState returns to SWING |
 | T5 | freeze high | angle curve flat; resumes when freeze goes low |
-| T6 | two shots, catchWeight 0 then 63 | both pull-backs take the same number of frames (weights come in Step 9) |
-Never: hookBusy = 1 while SWING; a shoot_req pulse while minerMoving = 1; chk_fail pulses.
+| T6 | two shots ended by tipCollision (no gold), catchType 0 then 6 | both pull-backs take the same number of frames (catchType alone does not make the hook heavy); n_deliver stays 0 |
+| T7 | 6 catches (catchType 1..6, goldDR on the claw pixel) | each: hookCatch -> caught = 1, caughtType = t, RETRACT; carryShow high for the whole pull-back |
+| T7 | n_carry / n_claw / n_order_bad / n_or_bad | n_carry > 0 (object drawn), n_order_bad = 0 (claw always on top of the object), n_or_bad = 0 (hookDR = rope OR claw OR object) |
+| T7 | deliverPulse (green) / deliverValue | ONE pulse when hookState returns to SWING, value = 12, 24, 36, 4, 8, 12 (game_params.sv) |
+| T8 | empty pull-back (tipCollision) | carryShow stays 0, n_carry 0, no deliverPulse |
+| T9 | during SHOOT | n_claw > 0, n_carry = 0 (nothing hangs on the claw on the way down) |
+Never: hookBusy = 1 while SWING; a shoot_req pulse while minerMoving = 1; a deliverPulse without a catch; two deliverPulses for one catch; chk_fail pulses.
 
 ## Quartus check of the MAIN project (Lab1Demo)
 Open Lab1Demo.qpf -> Processing -> Start -> Start Analysis & Synthesis (about 1-3 min).
-Expected: 0 errors. hook_block is not used in the top level yet, so Quartus may say it is
-not part of the design hierarchy - that is fine. The game itself is unchanged.
+Expected: 0 errors. hook_block is inst41 in TOP_VGA_DEMO_KBD; since Oct 2026 it also holds
+carried_draw (the object on the claw) and sends deliverPulse/deliverValue to game_hud (score at the top).
+carried_draw includes RTL/VGA/object_sprites.svh - the qsf has SEARCH_PATH RTL/VGA for it.
 Then tell Claude - it will read output_files/Lab1Demo.map.rpt directly.

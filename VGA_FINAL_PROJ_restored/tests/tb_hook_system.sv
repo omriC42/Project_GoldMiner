@@ -34,13 +34,28 @@ logic signed [10:0] X0 = 11'sd320, Y0 = 11'sd164;
 logic signed [10:0] Xend, Yend;
 logic [10:0] R;
 logic [1:0]  hookState;
+logic signed [9:0] dirCos, dirSin;     // Oct 2026: rope direction outputs
 logic [10:0] pixelX = 0, pixelY = 0;
 logic        drawingRequest, tipDR;
 logic [7:0]  RGBout;
 
 hook_move mv (.clk, .resetN, .startOfFrame(sof), .shoot_key, .tipCollision, .freeze,
               .retractStep(10'(RETRACT_EMPTY_STEP_FP)),   // Step 9 port: empty-hook speed
-              .X0, .Y0, .Xend, .Yend, .R, .hookState);
+              .X0, .Y0, .Xend, .Yend, .R, .hookState, .dirCos, .dirSin);
+
+// Oct 2026 (dirCos/dirSin outputs for the carried object): checked on EVERY clock against
+// round(256*cos/sin(angle)) computed here with $cos/$sin - independent of the hook's table.
+int dir_checks = 0, dir_bad = 0;
+always @(posedge clk) if (resetN) begin
+    automatic int ec = int'(256.0 * $cos(mv.angle_idx * 3 * 3.14159265358979 / 180.0));
+    automatic int es = int'(256.0 * $sin(mv.angle_idx * 3 * 3.14159265358979 / 180.0));
+    dir_checks++;
+    if (int'(dirCos) != ec || int'(dirSin) != es) begin
+        if (dir_bad < 3) $display("   dirCos/dirSin wrong at angle index %0d: %0d,%0d expected %0d,%0d", mv.angle_idx, dirCos, dirSin, ec, es);
+        dir_bad++;
+    end
+end
+
 hook_draw dr (.clk, .resetN, .pixelX, .pixelY, .X0, .Y0, .Xend, .Yend, .R,
               .drawingRequest, .RGBout, .tipDR);
 
@@ -253,7 +268,7 @@ int  f, idx, minIdx, maxIdx, shot_idx, maxR, r_at_hit;
 bit  r_constant, angle_constant;
 
 initial begin
-    $display("\n##### tb_hook_system VERSION 3.4 (file date 2026-10-20, Step 9 retractStep port) - if this is not the version Claude announced, run the full  do run_*.do  (restart does NOT recompile) #####");
+    $display("\n##### tb_hook_system VERSION 3.5 (file date 2026-10-25, + dirCos/dirSin outputs) - if this is not the version Claude announced, run the full  do run_*.do  (restart does NOT recompile) #####");
     $display("\n===== tb_hook_system: hook_move + hook_draw together (images: %0d) =====", SAVE_IMAGES);
 
     // ------------------------------------------------------------ T1
@@ -365,6 +380,8 @@ initial begin
     check(collisions == 0, "no tipCollision -> rope alone never catches");
     check(hookState == 2'd0, "still swinging");
     gold_on = 0;
+
+    check(dir_bad == 0, $sformatf("dirCos/dirSin = the rope angle on all %0d clocks (%0d wrong)", dir_checks, dir_bad));
 
     // ------------------------------------------------------------ end
     t_end[5] = $realtime; test_no = 0;

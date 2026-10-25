@@ -1,13 +1,13 @@
 # run_mux_hook.do - Step 6+8: objects_mux with the hook + hook_block, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_mux_hook.do        (expect VERSION 6.4)
+# Usage:  cd <project>/tests   then   do run_mux_hook.do        (expect VERSION 6.5)
 # To run again after ANY file change: the full  do run_mux_hook.do  (it recompiles).
 onbreak {resume}
 file mkdir frames
 catch {quit -sim}
 set LIB lib_mux_hook
 if {![file exists $LIB/_info]} {catch {file delete -force $LIB}; vlib $LIB}
-vlog -work $LIB -sv ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv ../RTL/VGA/hook_draw.sv \
-     ../RTL/VGA/hook_block.sv ../RTL/VGA/objects_mux.sv tb_mux_hook.sv
+vlog -work $LIB -sv +incdir+../RTL/VGA ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv ../RTL/VGA/hook_draw.sv \
+     ../RTL/VGA/carried_draw.sv ../RTL/VGA/hook_block.sv ../RTL/VGA/objects_mux.sv tb_mux_hook.sv
 vsim -voptargs=+acc $LIB.tb_mux_hook
 quietly WaveActivateNextPane {} 0
 add wave -noupdate -divider {TEST PROGRESS}

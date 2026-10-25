@@ -1,5 +1,5 @@
 # Step 5 - miner position + lock: what to check BY EYE
-ModelSim: cd tests -> do run_miner_move.do -> first line VERSION 5.2 -> expect 14 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_miner_move.do -> first line VERSION 5.3 -> expect 14 PASS, 0 FAIL.
 
 | zt | Look at | Expected |
 |---|---|---|

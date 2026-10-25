@@ -70,6 +70,10 @@ add wave -noupdate -radix decimal  /tb_hook_system/meas_hit_x
 add wave -noupdate -radix decimal  /tb_hook_system/meas_hit_y
 add wave -noupdate -radix unsigned -color Red /tb_hook_system/scan_extra
 
+add wave -noupdate -divider {ROPE DIRECTION (Oct 2026)}
+add wave -noupdate -radix decimal -format Analog-Step -height 40 -min -256 -max 256 /tb_hook_system/dirCos
+add wave -noupdate -radix decimal -format Analog-Step -height 40 -min -256 -max 256 /tb_hook_system/dirSin
+add wave -noupdate -radix unsigned -color Red /tb_hook_system/dir_bad
 configure wave -namecolwidth 230 -valuecolwidth 110 -timelineunits ms
 update
 

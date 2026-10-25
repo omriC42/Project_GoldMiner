@@ -1,5 +1,5 @@
 # Step 9 - weight + game_params.sv: what to check BY EYE
-ModelSim: cd tests -> do run_hook_weight.do -> first line VERSION 9.4.1 -> expect 52 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_hook_weight.do -> first line VERSION 9.5 -> expect 65 PASS, 0 FAIL.
 All expected numbers are read from game_params.sv / hook_params.sv: after you change a number,
 run this test again - it checks the new number and that it still fits.
 
@@ -14,6 +14,9 @@ run this test again - it checks the new number and that it still fits.
 | 4 | retractStep (purple) | jumps from 265 (empty) to the object's step when caught, back to 265 when the hook is home |
 | 4 | R falling edges | different slopes: rock large is the flattest (slowest), gold small the steepest; the last shot (type 0, no gold) goes to the floor (~313) and comes back at the empty speed |
 | 4 | meas_pull_px_s vs exp_pull_px_s | equal within 3% for every shot |
+| 4 | top_score (gold, 9.5) | does NOT move at hookCatch; jumps up by the object's value (12, 24, 36, 4, 8, 12 by default) only when R is back at the top and hookState = SWING -> a staircase 12, 36, 72, 76, 84, 96 |
+| 4 | dPulse (green) / dValue | ONE short pulse per gold shot, exactly when the hook gets home; dValue = the value; NO pulse after the last (empty) shot |
+| 4 | hb/carryDR | only while R falls (object drawn on the rope during the pull-back), never while shooting. Few pulses here: this test scans only 21x21 px around the tip; the full picture check is in tb_carried_draw / tb_hook_block |
 | 5 | Transcript first line | the game's HUD uses DIFFICULTY from game_params.sv (start/step printed) |
 | 5 | cur_diff 0, 1, 2 | the same game played 3 times: EASY, NORMAL, HARD HUD |
 | 5 | seconds (green) | counts down from START_SECONDS to 0 four times per difficulty (1 s = 100 clocks here) |
@@ -31,7 +34,7 @@ run this test again - it checks the new number and that it still fits.
 | Catch a small gold | comes back quickly |
 | Catch a large rock | comes back clearly slowly (the slowest) |
 | Miss (floor/wall) | comes back at the old empty speed |
-| Score | values as in game_params.sv |
+| Score | values as in game_params.sv, added only when the hook is back at the top (not at the catch) |
 | Win level 1 | the target on the HUD goes up by TARGET_STEP (NORMAL: 48 -> 78 -> 108) |
 | Press keypad + | next level at once: level +1, target +step, clock 1:00, score 0, new gold layout |
 | Hold keypad + | only ONE level per press |

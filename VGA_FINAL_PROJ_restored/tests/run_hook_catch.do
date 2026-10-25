@@ -1,13 +1,13 @@
 # run_hook_catch.do - Step 7: catching gold with the claw, GUI mode (nothing closes by itself)
-# Usage:  cd <project>/tests   then   do run_hook_catch.do        (expect VERSION 7.3)
+# Usage:  cd <project>/tests   then   do run_hook_catch.do        (expect VERSION 7.4)
 # To run again after ANY file change: the full  do run_hook_catch.do  (it recompiles).
 onbreak {resume}
 file mkdir frames
 catch {quit -sim}
 set LIB lib_hook_catch
 if {![file exists $LIB/_info]} {catch {file delete -force $LIB}; vlib $LIB}
-vlog -work $LIB -sv ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv ../RTL/VGA/hook_draw.sv \
-     ../RTL/VGA/hook_block.sv ../RTL/VGA/objects_mux.sv ../RTL/VGA/square_object.sv \
+vlog -work $LIB -sv +incdir+../RTL/VGA ../RTL/VGA/hook_params.sv ../RTL/VGA/game_params.sv ../RTL/VGA/hook_move.sv ../RTL/VGA/hook_draw.sv \
+     ../RTL/VGA/carried_draw.sv ../RTL/VGA/hook_block.sv ../RTL/VGA/objects_mux.sv ../RTL/VGA/square_object.sv \
      ../RTL/VGA/ObjectsMatrixBitMap.sv tb_hook_catch.sv
 vsim -voptargs=+acc $LIB.tb_hook_catch
 radix define HookState {2'd0 "SWING", 2'd1 "SHOOT", 2'd2 "RETRACT", -default unsigned}
@@ -35,6 +35,9 @@ add wave -noupdate -color Red      /tb_hook_catch/hookCatch
 add wave -noupdate -color Orange   /tb_hook_catch/collectPulse
 add wave -noupdate -radix unsigned /tb_hook_catch/collectValue
 add wave -noupdate -radix unsigned /tb_hook_catch/n_hookCatch
+add wave -noupdate -color Green    /tb_hook_catch/deliverPulse
+add wave -noupdate -radix unsigned /tb_hook_catch/deliverValue
+add wave -noupdate                 /tb_hook_catch/hb/carryDR
 add wave -noupdate -radix unsigned /tb_hook_catch/n_collect
 add wave -noupdate -radix unsigned /tb_hook_catch/lat_gold
 add wave -noupdate -radix unsigned /tb_hook_catch/lat_tip

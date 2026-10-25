@@ -12,6 +12,8 @@
 //  * 3-degree angle table (61 entries) for a smooth swing
 // Oct 2026 (Step 9): the pull-back step comes from the input retractStep (hook_block picks it:
 //  empty hook or the weight of the caught object, see game_params.sv).
+// Oct 2026: outputs dirCos / dirSin = 256*cos / 256*sin of the current angle (the same table values
+//  used for the tip), so hook_block can hang the caught object along the rope (carried_draw).
 //
 // Angle convention (screen coordinates, y grows downward):
 //   index 0 = 0 deg = pointing right, index 30 = 90 deg = straight down,
@@ -31,7 +33,9 @@ module hook_move (
     output logic signed [10:0]  Xend,          // hook tip position
     output logic signed [10:0]  Yend,
     output logic        [10:0]  R,             // rope length in pixels (used by hook_draw)
-    output logic        [1:0]   hookState      // 0 = swing, 1 = shoot, 2 = retract
+    output logic        [1:0]   hookState,     // 0 = swing, 1 = shoot, 2 = retract
+    output logic signed [9:0]   dirCos,        // 256*cos(angle) - rope direction (for the carried object)
+    output logic signed [9:0]   dirSin         // 256*sin(angle)
 );
 
 import hook_params::*;
@@ -158,5 +162,8 @@ assign dx_full = $signed({1'b0, R}) * LUT_COS[angle_idx];
 assign dy_full = $signed({1'b0, R}) * LUT_SIN[angle_idx];
 assign Xend    = X0 + 11'(dx_full >>> 8);
 assign Yend    = Y0 + 11'(dy_full >>> 8);
+// rope direction (Oct 2026): the same table values as above
+assign dirCos  = LUT_COS[angle_idx];
+assign dirSin  = LUT_SIN[angle_idx];
 
 endmodule

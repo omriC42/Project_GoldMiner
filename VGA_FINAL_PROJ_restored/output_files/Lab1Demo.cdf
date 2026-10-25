@@ -6,7 +6,7 @@ JedecChain;
 	P ActionCode(Ign)
 		Device PartName(SOCVHPS) MfrSpec(OpMask(0));
 	P ActionCode(Cfg)
-		Device PartName(5CSXFC6D6F31) Path("C:/Users/omric/Downloads/Project_GoldMiner-miner-gold-rock/Project_GoldMiner-miner-gold-rock/VGA_FINAL_PROJ_merged/output_files/") File("Lab1Demo.sof") MfrSpec(OpMask(1));
+		Device PartName(5CSXFC6D6F31) Path("C:/Users/omric/Desktop/GoldMiner_git/output_files/") File("Lab1Demo.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

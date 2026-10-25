@@ -1,6 +1,7 @@
 # Step 7 - catching: what to check BY EYE
-ModelSim: cd tests -> do run_hook_catch.do -> first line VERSION 7.3 -> expect 14 PASS, 0 FAIL.
+ModelSim: cd tests -> do run_hook_catch.do -> first line VERSION 7.4 -> expect 16 PASS, 0 FAIL.
 The gold layout is random (built at reset); T1 prints it in the Transcript and picks a target.
+7.4: deliverPulse (green) = ONE pulse when the hook gets home WITH the object (deliverValue = its value); none after T4's empty shot. hb/carryDR is active during the pull-back (object drawn on the rope, see catch_2_caught.bmp).
 
 | zt | Look at | Expected |
 |---|---|---|

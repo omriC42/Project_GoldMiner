@@ -1,6 +1,6 @@
 // tb_hook_weight.sv - Step 9: weight + game_params.sv (the moved parameters still work)
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.4.1)
+// Run:  ModelSim -> cd <project>/tests -> do run_hook_weight.do        (expect VERSION 9.5)
 // Checklist: tests/CHECKLIST_step9_weight.md
 //
 // Every expected number below is read from game_params.sv / hook_params.sv, so after you change
@@ -13,6 +13,10 @@
 // T4 real hook_block, shot straight down by timing into a gold band, once for EACH object type:
 //    the hook latches the type, the pull-back speed is MEASURED and compared with game_params.sv,
 //    the hook comes back and forgets the object. Then one shot with no gold: empty speed.
+//    Oct 2026 (9.5) SCORE AT THE TOP: a game_hud (real clock, so its time never runs out here) gets
+//    its score from hook_block deliverPulse/deliverValue exactly like the game: the score must NOT
+//    change at the catch, and must go up by the object's value (game_params.sv) when the hook is
+//    back up - ONE pulse per catch, none for the empty shot.
 // T5 game_hud: START_SECONDS and the level targets from game_params.sv, for EASY, NORMAL and HARD
 //    (one HUD per difficulty, fast clock: 1 "second" = 100 clocks). Each HUD plays 4 levels:
 //    level 1 target = TARGET_START, every won level adds TARGET_STEP (max 999), the screen digits
@@ -51,9 +55,23 @@ always @(posedge clk) begin
 end
 logic goldDR; assign goldDR = band_p2;
 logic hookDR, tipDR, hookBusy, hookCatch; logic [7:0] hookRGB; logic [1:0] hookState;
+logic dPulse; logic [5:0] dValue;             // 9.5: deliverPulse / deliverValue (score at the top)
 hook_block hb (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
                .minerMoving(1'b0), .shoot_key, .tipCollision(1'b0), .goldDR, .freeze(1'b0),
-               .catchType, .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch);
+               .catchType, .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
+               .deliverPulse(dPulse), .deliverValue(dValue));
+// score at the top (9.5): the score HUD gets its dollars from the hook, like TOP_VGA_DEMO_KBD
+logic hsDR, hsTimeUp, hsGameOver, hsLevelWon, hsNewLevel; logic [7:0] hsRGB;
+game_hud hudScore (.clk, .resetN, .pixelX(11'd0), .pixelY(11'd0),
+    .collectPulse(dPulse), .collectValue(dValue), .gameOverKey(1'b0), .nextLevelKey(1'b0),
+    .drawingRequest(hsDR), .RGBout(hsRGB), .timeUp(hsTimeUp), .gameOver(hsGameOver), .levelWon(hsLevelWon),
+    .newLevel(hsNewLevel));
+int top_score; assign top_score = hudScore.dollars;
+int n_deliver = 0, sum_deliver = 0, n_hsLevel = 0;
+always @(posedge clk) begin
+    if (dPulse) begin n_deliver++; sum_deliver += dValue; end
+    if (hsNewLevel) n_hsLevel++;      // must stay 0: levels change only when the clock runs out
+end
 
 // =====================================================================================
 // GOLD FIELD (only its value table is used, T2)
@@ -213,8 +231,9 @@ endfunction
 
 // shoot straight down by timing, catch in the band (or hit the floor), measure the pull-back
 task automatic shot_test(input int t, input bit with_gold);
-    int f, ra, rb;
+    int f, ra, rb, s0, d0, v0, l0;
     cur_type = t;
+    s0 = top_score; d0 = n_deliver; v0 = sum_deliver; l0 = n_hsLevel;
     @(negedge clk) begin catchType = 3'(t); band_on = with_gold; end
     n_catch = 0;
     f = 0; while (int'(hb.u_move.angle_idx) != DOWN_IDX && f < 600) begin game_frame(); f++; end
@@ -224,6 +243,9 @@ task automatic shot_test(input int t, input bit with_gold);
     if (with_gold)
         check(n_catch > 0 && hb.caught && caughtType == t,
               $sformatf("%s: caught in the band at tip y %0d, hook latched type %0d", type_name(t), hb.Yend, caughtType));
+    if (with_gold)
+        check(top_score == s0 && n_deliver == d0,
+              $sformatf("%s: score NOT changed at the catch (still %0d) - it counts at the top", type_name(t), top_score));
     else
         check(n_catch == 0 && !hb.caught && hb.Yend >= Y_MAX,
               $sformatf("no gold: hook reached the floor (tip y %0d), nothing latched", hb.Yend));
@@ -239,6 +261,15 @@ task automatic shot_test(input int t, input bit with_gold);
     if (with_gold)
         check(hookState == 2'd0 && hb.R == MIN_R && !hb.caught,
               $sformatf("%s: back after %0d frames (%0.1f s), hook empty again", type_name(t), f, f / FPS));
+    repeat (5) @(negedge clk);
+    if (with_gold)
+        check(n_deliver == d0 + 1 && sum_deliver - v0 == value_param(t) && n_hsLevel == l0 &&
+              top_score == s0 + value_param(t),
+              $sformatf("%s: at the top ONE delivery of %0d (game_params %0d) -> score %0d -> %0d", type_name(t),
+                        sum_deliver - v0, value_param(t), s0, top_score));
+    else
+        check(n_deliver == d0 && top_score == s0,
+              $sformatf("empty shot back at the top: no delivery, score stays %0d", top_score));
     @(negedge clk) band_on = 0;
 endtask
 
@@ -348,7 +379,7 @@ bit ok_all;
 int c;
 
 initial begin
-    $display("\n##### tb_hook_weight VERSION 9.4.1 (2026-10-20, score >= target, + cheat, merged project) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
+    $display("\n##### tb_hook_weight VERSION 9.5 (2026-10-25, score at the top) - if not the version Claude announced, run the full  do run_hook_weight.do  #####");
     $display("   game_params: difficulty %s, %0d s per level, targets EASY %0d+%0d, NORMAL %0d+%0d, HARD %0d+%0d per level",
              diff_now.name(), game_params::START_SECONDS,
              game_params::TARGET_START_EASY, game_params::TARGET_STEP_EASY, game_params::TARGET_START_NORMAL,

@@ -33,10 +33,25 @@ logic signed [10:0] X0 = 11'sd320, Y0 = 11'sd164;
 logic signed [10:0] Xend, Yend;
 logic [10:0] R;
 logic [1:0]  hookState;
+logic signed [9:0] dirCos, dirSin;     // Oct 2026: rope direction outputs
 
 hook_move dut (.clk, .resetN, .startOfFrame(sof), .shoot_key, .tipCollision, .freeze,
                .retractStep(10'(RETRACT_EMPTY_STEP_FP)),   // Step 9 port: empty-hook speed
-               .X0, .Y0, .Xend, .Yend, .R, .hookState);
+               .X0, .Y0, .Xend, .Yend, .R, .hookState, .dirCos, .dirSin);
+
+// Oct 2026 (dirCos/dirSin outputs for the carried object): checked on EVERY clock against
+// round(256*cos/sin(angle)) computed here with $cos/$sin - independent of the hook's table.
+int dir_checks = 0, dir_bad = 0;
+always @(posedge clk) if (resetN) begin
+    automatic int ec = int'(256.0 * $cos(dut.angle_idx * 3 * 3.14159265358979 / 180.0));
+    automatic int es = int'(256.0 * $sin(dut.angle_idx * 3 * 3.14159265358979 / 180.0));
+    dir_checks++;
+    if (int'(dirCos) != ec || int'(dirSin) != es) begin
+        if (dir_bad < 3) $display("   dirCos/dirSin wrong at angle index %0d: %0d,%0d expected %0d,%0d", dut.angle_idx, dirCos, dirSin, ec, es);
+        dir_bad++;
+    end
+end
+
 
 always #5 clk = ~clk;
 
@@ -122,7 +137,7 @@ int f, r0, r1, lastIdx, maxJump, minIdx, maxIdx, idx, jump;
 real t;
 
 initial begin
-    $display("\n##### tb_hook_move VERSION 1.4 (file date 2026-10-20, Step 9 retractStep port) - if this is not the version Claude announced, run the full  do run_*.do  (restart does NOT recompile) #####");
+    $display("\n##### tb_hook_move VERSION 1.5 (file date 2026-10-25, + dirCos/dirSin outputs) - if this is not the version Claude announced, run the full  do run_*.do  (restart does NOT recompile) #####");
     $display("\n===== tb_hook_move  (SWING %0d deg/s, SHOOT %0d px/s, RETRACT %0d px/s) =====",
              SWING_DEG_PER_SEC, SHOOT_PX_PER_SEC, RETRACT_EMPTY_PX_PER_SEC);
     $display("   per-frame steps (x64): swing %0d, shoot %0d, retract %0d",
@@ -262,6 +277,8 @@ initial begin
           $sformatf("left wall: retract at Xend = %0d (X_MIN = %0d)", Xend, X_MIN));
     f = 0; while (hookState != 2'd0 && f < 1000) begin frames(1); f++; end
     frames(5);
+
+    check(dir_bad == 0, $sformatf("dirCos/dirSin = the rope angle on all %0d clocks of T1..T8 (%0d wrong)", dir_checks, dir_bad));
 
     // ================================================================ end
     t_end[8]  = $realtime;

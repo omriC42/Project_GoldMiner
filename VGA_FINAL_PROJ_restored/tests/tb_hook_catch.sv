@@ -1,7 +1,7 @@
 // tb_hook_catch.sv - Step 7: CATCHING. Real objects field (square_object + ObjectsMatrixBitMap,
 // same parameters as Objects_DISPLAY) + real hook_block + objects_mux (for the images).
 //
-// Run:  ModelSim -> cd <project>/tests -> do run_hook_catch.do        (expect VERSION 7.3)
+// Run:  ModelSim -> cd <project>/tests -> do run_hook_catch.do        (expect VERSION 7.4)
 // Checklist: tests/CHECKLIST_step7_catch.md
 //
 // T1 reads the random layout and picks a target object (biggest gold, else biggest rock).
@@ -10,6 +10,8 @@
 // T3 places the miner above the target, shoots straight down: hookCatch -> object removed,
 //    ONE collectPulse with the right value, hook pulls back.
 // T4 shoots down where there is no gold field (x = 600): no catch, hook turns at the floor.
+// 7.4 (Oct 2026): hook_block deliverPulse/deliverValue (score at the top): T3 ONE delivery with the
+//    object's value when the hook is home, T4 none after the empty shot.
 // Images: frames/catch_1_before.bmp, catch_2_caught.bmp, catch_3_after.bmp
 // Note: to shoot exactly straight down the testbench FORCES the swing angle to 90 deg for
 // the moment of the key press (shown as force_angle in the waves). Real play aims by timing.
@@ -40,10 +42,12 @@ ObjectsMatrixBitMap gbm (
 
 // ---------------- the hook ----------------
 logic hookDR, tipDR, hookBusy; logic [7:0] hookRGB; logic [1:0] hookState;
+logic deliverPulse; logic [5:0] deliverValue;         // 7.4: score at the top
 hook_block hb (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
                .minerMoving(1'b0), .shoot_key, .tipCollision(1'b0), .goldDR, .freeze(1'b0),
                .catchType(collectType),
-               .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch);
+               .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
+               .deliverPulse, .deliverValue);
 
 // ---------------- screen (for the images) ----------------
 logic [7:0] RGBOut;
@@ -62,12 +66,14 @@ logic [8*16:1] scan_kind = "idle";
 int  frame_no = 0;
 bit  force_angle = 0;
 int  n_hookCatch = 0, n_collect = 0, last_value = 0;
+int  n_deliver = 0, last_deliver = -1;
 int  lat_gold = -1, lat_tip = -1;
 int  tgt_row = -1, tgt_col = -1, tgt_type = 0, tgt_value = 0, tgt_cx = 0, tgt_cy = 0;
 int  angle_deg; assign angle_deg = hb.u_move.angle_idx * ANGLE_STEP_DEG;
 always @(posedge clk) begin
     if (hookCatch)    n_hookCatch++;
     if (collectPulse) begin n_collect++; last_value = collectValue; end
+    if (deliverPulse) begin n_deliver++; last_deliver = deliverValue; end
 end
 realtime t_start [0:8];
 realtime t_end   [0:8];
@@ -179,7 +185,7 @@ endtask
 int f, best, t, r0;
 
 initial begin
-    $display("\n##### tb_hook_catch VERSION 7.3 (2026-10-20, merged project: ObjectsMatrixBitMap sprites) - if not the version Claude announced, run the full  do run_hook_catch.do  #####");
+    $display("\n##### tb_hook_catch VERSION 7.4 (2026-10-25, deliverPulse at the top) - if not the version Claude announced, run the full  do run_hook_catch.do  #####");
     repeat (3) @(negedge clk); resetN = 1;
     repeat (5) @(negedge clk);
 
@@ -220,7 +226,7 @@ initial begin
     @(negedge clk) shoot_key = 1; repeat (3) @(negedge clk); shoot_key = 0;
     @(negedge clk); release hb.u_move.angle_fp; force_angle = 0;
     check(hookState == 2'd1, "SHOOT started at 90 deg");
-    n_hookCatch = 0; n_collect = 0;
+    n_hookCatch = 0; n_collect = 0; n_deliver = 0;
     f = 0;
     while (hookState == 2'd1 && f < 400) begin game_frame(); f++; end
     check(n_hookCatch > 0, $sformatf("hookCatch fired after %0d frames (%0d pulse(s))", f, n_hookCatch));
@@ -234,6 +240,9 @@ initial begin
     snapshot("frames/catch_2_caught.bmp");
     f = 0; while (hookState != 2'd0 && f < 1500) begin game_frame(); f++; end   // heavy objects come back slowly (Step 9)
     check(hookState == 2'd0 && hb.R == MIN_R, $sformatf("back to SWING after %0d frames", f));
+    repeat (5) @(negedge clk);
+    check(n_deliver == 1 && last_deliver == tgt_value,
+          $sformatf("hook home with the object: ONE deliverPulse (got %0d), deliverValue %0d (expected %0d)", n_deliver, last_deliver, tgt_value));
     snapshot("frames/catch_3_after.bmp");
 
     // ------------------------------------------------------------ T4
@@ -243,10 +252,13 @@ initial begin
     force_angle = 1; force hb.u_move.angle_fp = 13'(30 * FP);
     @(negedge clk) shoot_key = 1; repeat (3) @(negedge clk); shoot_key = 0;
     @(negedge clk); release hb.u_move.angle_fp; force_angle = 0;
-    n_hookCatch = 0; n_collect = 0; r0 = 0;
+    n_hookCatch = 0; n_collect = 0; n_deliver = 0; r0 = 0;
     f = 0; while (hookState == 2'd1 && f < 400) begin game_frame(); f++; if (hb.R > r0) r0 = hb.R; end
     check(n_hookCatch == 0 && n_collect == 0, "no hookCatch, no collectPulse");
     check(hb.Yend >= Y_MAX, $sformatf("hook went all the way to the floor (tip y %0d)", hb.Yend));
+    f = 0; while (hookState != 2'd0 && f < 1500) begin game_frame(); f++; end
+    repeat (5) @(negedge clk);
+    check(hookState == 2'd0 && n_deliver == 0, $sformatf("empty hook back home after %0d frames: NO deliverPulse", f));
 
     t_end[4] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");

@@ -9,6 +9,7 @@
 // good practice code - Dudy MAR 2025
 // Oct 2026 (hook integration Step 5): input hookBusy locks the miner while the hook is out
 //   (keys ignored, speed forced to 0); output minerMoving = key 4 or key 6 held (no shooting while moving).
+// Oct 2026: outputs movingLeft / movingRight = the real speed direction (for the dust).
 
 module	miner_move	(	
  
@@ -21,6 +22,8 @@ module	miner_move	(
 					input  logic [2:0] HitEdgeCode, 
 					input  logic hookBusy,          // 1 while the hook is out -> miner locked
 					output logic minerMoving,       // 1 while key 4 or key 6 is held
+					output logic movingLeft,        // 1 while the cart REALLY moves left  (speed < 0) -> dust
+					output logic movingRight,       // 1 while the cart REALLY moves right (speed > 0) -> dust
 					output logic signed 	[10:0] topLeftX, // output the top left corner 
 					output logic signed	[10:0] topLeftY  // can be negative , if the object is partliy outside 
 					
@@ -224,6 +227,11 @@ end // end fsm_sync
 
 
 assign minerMoving = Y_direction_key || toggle_x_key;   // key 4 or key 6 held
+// real motion (Oct 2026): the speed is 0 at a screen border and while the hook is out (hookBusy),
+// so the dust (dust_draw leftKey/rightKey) only appears when the cart actually moves - also
+// during the short glide after a key is released.
+assign movingLeft  = (Xspeed < 0);
+assign movingRight = (Xspeed > 0);
 
 //return from FIXED point trunc back to prame size parameters 
   

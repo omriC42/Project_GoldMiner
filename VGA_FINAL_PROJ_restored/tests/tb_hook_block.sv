@@ -1,6 +1,6 @@
 // tb_hook_block.sv - Step 4: the hook_block wrapper (hook_move + hook_draw + new rules)
 //
-// Run:  ModelSim -> cd <project>/tests  ->  do run_hook_block.do      (expect VERSION 4.3)
+// Run:  ModelSim -> cd <project>/tests  ->  do run_hook_block.do      (expect VERSION 4.4)
 // Checklist: tests/CHECKLIST_step4_hook_block.md
 //
 // Tests the NEW things in the wrapper:
@@ -9,6 +9,11 @@
 //   * hookBusy = 1 during SHOOT and RETRACT (Step 5 uses it to lock the miner)
 //   * freeze passes through; catchType alone does nothing (only a REAL catch (hookCatch) loads a weight)
 //   * drawing outputs: 2 full frames saved as images with the miner at different places
+//   * Oct 2026 (4.4): CARRY + SCORE AT THE TOP. T7 catches each of the 6 objects (a fake gold field:
+//     goldDR = 1 while the scan is on the claw): the object hangs on the claw only during RETRACT
+//     (claw drawn over it, it never shows on tipDR), and exactly ONE deliverPulse with the right
+//     value comes when the hook is back up. T8 empty pull-back: no carry, no delivery.
+//     T9 nothing is carried while SHOOTING.
 // Conventions: never exits ($stop), GUI waves, chk pulses, version banner, zt <n>, bounded loops,
 // stimulus on the falling edge.
 
@@ -26,10 +31,16 @@ logic [2:0] catchType = 0;
 logic hookDR, tipDR, hookBusy;
 logic [7:0] hookRGB;
 logic [1:0] hookState;
+logic goldDR_tb = 0;                        // fake gold field: 1 = "the pixel is gold"
+logic hookCatch, deliverPulse;
+logic [5:0] deliverValue;
+int   n_deliver = 0, last_deliver = -1;
+always @(posedge clk) if (deliverPulse) begin n_deliver++; last_deliver = deliverValue; end
 
 hook_block dut (.clk, .resetN, .startOfFrame(sof), .pixelX, .pixelY, .minerX, .minerY,
-                .minerMoving, .shoot_key, .tipCollision, .goldDR(1'b0), .freeze, .catchType,
-                .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch());   // Step 7 ports: no gold here
+                .minerMoving, .shoot_key, .tipCollision, .goldDR(goldDR_tb), .freeze, .catchType,
+                .hookDR, .hookRGB, .tipDR, .hookBusy, .hookState, .hookCatch,
+                .deliverPulse, .deliverValue);
 
 // ---------------- wave helpers ----------------
 logic [8*32:1] test_name = "start";
@@ -43,8 +54,8 @@ assign origin_x  = dut.X0;
 assign origin_y  = dut.Y0;
 assign tip_dx    = dut.Xend - dut.X0;      // tip relative to the origin
 assign tip_dy    = dut.Yend - dut.Y0;
-realtime t_start [0:8];
-realtime t_end   [0:8];
+realtime t_start [0:15];
+realtime t_end   [0:15];
 
 task automatic begin_test(input int n, input string name);
     if (test_no > 0) t_end[test_no] = $realtime;
@@ -130,8 +141,46 @@ endtask
 
 int f, dx0, dy0, n_w0, n_w63, maxR;
 
+// ---------------- carry helpers (4.4) ----------------
+function automatic int value_of(input int t);          // expected dollars = game_params.sv
+    case (t)
+        1: return game_params::GOLD_SMALL_VALUE;  2: return game_params::GOLD_MEDIUM_VALUE; 3: return game_params::GOLD_LARGE_VALUE;
+        4: return game_params::ROCK_SMALL_VALUE;  5: return game_params::ROCK_MEDIUM_VALUE; 6: return game_params::ROCK_LARGE_VALUE;
+        default: return 0;
+    endcase
+endfunction
+// shoot, and after 15 frames let the claw "touch gold" of type t (the fake field reports type t)
+task automatic catch_object(input int t);
+    press(shoot_key); frames(15);
+    @(negedge clk) begin catchType = 3'(t); goldDR_tb = 1; pixelX = dut.Xend; pixelY = dut.Yend; end
+    repeat (6) @(negedge clk);
+    goldDR_tb = 0;
+    @(negedge clk);
+endtask
+// scan a 180x180 window around the claw tip (hook frozen: no startOfFrame) and count
+int n_carry = 0, n_claw = 0, n_order_bad = 0, n_or_bad = 0;
+task automatic scan_carry();
+    int qx, qy, x0, y0;
+    n_carry = 0; n_claw = 0; n_order_bad = 0; n_or_bad = 0; qx = -1;
+    x0 = dut.Xend - 90; y0 = dut.Yend - 90;
+    for (int n = 0; n <= 180*180; n++) begin
+        @(negedge clk);
+        if (qx >= 0) begin                                       // outputs of the pixel one clock ago
+            if (dut.carryDR) n_carry++;
+            if (tipDR) n_claw++;
+            if (hookDR !== (dut.drawDR || dut.carryDR)) n_or_bad++;
+            if (tipDR && hookRGB !== CLAW_COLOR) n_order_bad++;                       // claw on top
+            if (!tipDR && dut.carryDR && hookRGB !== dut.carryRGB) n_order_bad++;      // object over the rope
+        end
+        qx = x0 + n % 180; qy = y0 + n / 180;
+        if (n < 180*180 && qx >= 0 && qx < 640 && qy >= 0 && qy < 480) begin pixelX = qx; pixelY = qy; end
+        else begin qx = -1; pixelX = 0; pixelY = 0; end
+    end
+endtask
+int n_before, fr;
+
 initial begin
-    $display("\n##### tb_hook_block VERSION 4.3 (2026-10-20) - if not the version Claude announced, run the full  do run_hook_block.do  #####");
+    $display("\n##### tb_hook_block VERSION 4.4 (2026-10-25, carry + score at the top) - if not the version Claude announced, run the full  do run_hook_block.do  #####");
 
     // ------------------------------------------------------------ T1
     begin_test(1, "T1 reset");
@@ -207,10 +256,52 @@ initial begin
     check(n_w0 == n_w63, $sformatf("tipCollision (no gold) pulls back at EMPTY speed even with catchType 6: %0d and %0d frames", n_w0, n_w63));
     @(negedge clk) catchType = 3'd0;
 
+    check(n_deliver == 0, $sformatf("no deliverPulse from any of these empty pull-backs (%0d)", n_deliver));
+
+    // ------------------------------------------------------------ T7
+    begin_test(7, "T7 carry + score at the top x6");
+    for (int t = 1; t <= 6; t++) begin
+        n_before = n_deliver;
+        catch_object(t);
+        check(hookState == 2'd2 && dut.caught && int'(dut.caughtType) == t && n_deliver == n_before,
+              $sformatf("%0d: caught type %0d -> RETRACT, nothing delivered yet", t, int'(dut.caughtType)));
+        frames(3);
+        scan_carry();
+        check(n_carry > 0 && n_order_bad == 0 && n_or_bad == 0,
+              $sformatf("%0d: object on the claw while pulling back: %0d px, claw on top, order errors %0d, hookDR errors %0d", t, n_carry, n_order_bad, n_or_bad));
+        fr = 0; while (hookState != 2'd0 && fr < 2000) begin frames(1); fr++; end
+        repeat (3) @(negedge clk);
+        check(n_deliver == n_before + 1 && last_deliver == value_of(t),
+              $sformatf("%0d: back at the top after %0d frames -> ONE deliverPulse, value %0d (game_params %0d)", t, fr, last_deliver, value_of(t)));
+    end
+    scan_carry();
+    check(n_carry == 0 && !dut.caught, $sformatf("back to SWING: nothing hangs on the claw any more (%0d px)", n_carry));
+    @(negedge clk) catchType = 3'd0;
+
+    // ------------------------------------------------------------ T8
+    begin_test(8, "T8 empty pull-back");
+    n_before = n_deliver;
+    press(shoot_key); frames(20);
+    @(negedge clk) tipCollision = 1; @(negedge clk) tipCollision = 0;
+    frames(2);
+    scan_carry();
+    check(hookState == 2'd2 && n_carry == 0, $sformatf("empty RETRACT: nothing on the claw (%0d px)", n_carry));
+    fr = 0; while (hookState != 2'd0 && fr < 2000) begin frames(1); fr++; end
+    repeat (3) @(negedge clk);
+    check(n_deliver == n_before, "empty pull-back reached the top: NO deliverPulse");
+
+    // ------------------------------------------------------------ T9
+    begin_test(9, "T9 nothing carried while shooting");
+    press(shoot_key); frames(10);
+    scan_carry();
+    check(hookState == 2'd1 && n_carry == 0 && n_claw > 0, $sformatf("SHOOT: claw drawn (%0d px), no object (%0d px)", n_claw, n_carry));
+    @(negedge clk) tipCollision = 1; @(negedge clk) tipCollision = 0;
+    fr = 0; while (hookState != 2'd0 && fr < 2000) begin frames(1); fr++; end
+
     // ------------------------------------------------------------ end
-    t_end[6] = $realtime; test_no = 0;
+    t_end[9] = $realtime; test_no = 0;
     $sformat(test_name, "%s", (nFail == 0) ? "DONE - ALL PASSED" : "DONE - SEE FAILS");
-    write_windows_file(6);
+    write_windows_file(9);
     $display("\n===== SUMMARY: %0d PASS, %0d FAIL  ->  %s =====",
              nPass, nFail, (nFail == 0) ? "ALL PASSED" : "FAILURES (red pulses on chk_fail)");
     $display("Images: tests/frames/block_*.bmp   Simulation PAUSED (not closed). zt <n> zooms on test n.\n");
