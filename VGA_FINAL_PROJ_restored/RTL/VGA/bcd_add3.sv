@@ -1,4 +1,4 @@
-// bcd_add3 - adds two 3-digit decimal (BCD) numbers, the way it is done on paper (B10, Oct 2026)
+// bcd_add3 - adds two 3-digit decimal (BCD) numbers, the way it is done on paper
 // (c) Technion IIT, Department of Electrical Engineering 2026
 //
 //  * a and b are 3 decimal digits each, 4 bits per digit: {hundreds, tens, ones}, every digit 0..9.

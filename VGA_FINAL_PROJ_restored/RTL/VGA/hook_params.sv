@@ -1,23 +1,13 @@
 // hook_params.sv - ALL tunable settings of the hook in one place.
-// Gold Miner project, Oct 2026.
+// Gold Miner project.
 //
-// HOW TO CHANGE A SPEED:
-//   1. Change a number in the "EDIT HERE" section (real-world units: deg/s, px/s).
-//   2. Recompile (the small hook_speed_test project compiles in a few minutes).
-//   Nothing else needs to change - the per-frame steps below are computed by
-//   Quartus at compile time (no extra hardware).
-//
-// WHY "PER SECOND" AND NOT "PER FRAME":
-//   startOfFrame comes from VGA_Controller at 72.58 Hz (31.5 MHz / (833*521)),
-//   NOT 30 Hz as old comments in the project say. Writing speeds per second and
-//   converting here keeps them correct if the frame rate ever changes.
 
 package hook_params;
 
-  // ======================= EDIT HERE =======================
-  localparam int SWING_DEG_PER_SEC        = 120; // swing speed. 220 -> 0..180 deg in ~0.8 s (full back-and-forth ~1.65 s)
+  // ======================= adjustable easily =======================
+  localparam int SWING_DEG_PER_SEC        = 120; // swing speed. 120 -> 15..165 deg in 1.25 s (full back-and-forth 2.5 s)
   localparam int SHOOT_PX_PER_SEC         = 200; // hook going down/out
-  localparam int RETRACT_EMPTY_PX_PER_SEC = 300; // pull-back with nothing caught (weights are added in Step 9)
+  localparam int RETRACT_EMPTY_PX_PER_SEC = 300; // pull-back with nothing caught (with an object: game_params.sv)
 
   localparam int MIN_R      = 40;  // rope length while swinging [px]
   localparam int X_MIN      = 2;   // hook tip may not go left of this x  -> retract
@@ -35,15 +25,15 @@ package hook_params;
   localparam int          ROPE_HALF_WIDTH_X4 = 4;      // rope half-width in 1/4 px: 4 -> 1 px each side (about 3 px wide)
   localparam logic [7:0]  ROPE_COLOR         = 8'h49;  // dark grey
   localparam logic [7:0]  CLAW_COLOR         = 8'hB6;  // light grey (metal)
-  // the caught object hangs on the claw while it is pulled back (carried_draw.sv, Oct 2026):
+  // the caught object hangs on the claw while it is pulled back (carried_draw.sv):
   // it hangs straight down under the claw; its first visible row is CARRY_OFFSET_PX px below the tip.
   // 4 = tucked under the claw's bottom bar (claw rows tip+4..tip+5). Bigger = lower, smaller = higher.
   localparam int          CARRY_OFFSET_PX    = 4;
   // =========================================================
 
 
-  // ---------------- do not edit below this line ----------------
-  localparam int FRAME_RATE_X100 = 7258; // measured: 72.58 Hz (see tests/clock_check.py)
+  // calculated parameters
+  localparam int FRAME_RATE_X100 = 7258; // measured
   localparam int FP              = 64;   // fixed point: values kept x64 (same trick as smiley_move)
   localparam int FP_BITS         = 6;    // log2(FP)
 
@@ -54,7 +44,7 @@ package hook_params;
   localparam int SWING_MAX_FP = (SWING_MAX_DEG / ANGLE_STEP_DEG) * FP;   // 165 -> 3520
   // per-frame steps in fixed point (rounded):  value_per_sec * FP / frames_per_sec
   localparam int SWING_STEP_FP   = (SWING_DEG_PER_SEC * FP * 100 + (ANGLE_STEP_DEG * FRAME_RATE_X100) / 2)
-                                  / (ANGLE_STEP_DEG * FRAME_RATE_X100);                          // 220 -> 65 (1.02 idx/frame)
+                                  / (ANGLE_STEP_DEG * FRAME_RATE_X100);                          // 120 -> 35 (0.55 idx/frame)
   localparam int SHOOT_STEP_FP   = (SHOOT_PX_PER_SEC * FP * 100 + FRAME_RATE_X100 / 2) / FRAME_RATE_X100;          // 200 -> 176 (2.75 px/frame)
   localparam int RETRACT_EMPTY_STEP_FP = (RETRACT_EMPTY_PX_PER_SEC * FP * 100 + FRAME_RATE_X100 / 2) / FRAME_RATE_X100; // 300 -> 265
 

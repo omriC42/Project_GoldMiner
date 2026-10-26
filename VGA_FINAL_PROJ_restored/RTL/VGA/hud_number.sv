@@ -1,4 +1,4 @@
-// hud_number - a number of up to 3 decimal digits on the HUD, left-aligned (B10, Oct 2026)
+// hud_number - a number of up to 3 decimal digits on the HUD, left-aligned
 // (c) Technion IIT, Department of Electrical Engineering 2026
 //
 //  * value = {hundreds, tens, ones}, 4 bits per digit.

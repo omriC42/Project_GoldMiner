@@ -7,15 +7,15 @@
 // updated to state machine Dudy March 2023 
 // update the hit and collision algoritm - Eyal MAR 2024
 // good practice code - Dudy MAR 2025
-// Oct 2026 (hook integration Step 5): input hookBusy locks the miner while the hook is out
+// input hookBusy locks the miner while the hook is out
 //   (keys ignored, speed forced to 0); output minerMoving = key 4 or key 6 held (no shooting while moving).
-// Oct 2026: outputs movingLeft / movingRight = the real speed direction (for the dust).
+// outputs movingLeft / movingRight = the real speed direction (for the dust).
 
 module	miner_move	(	
  
 					input	 logic clk,
 					input	 logic resetN,
-					input	 logic startOfFrame,      //short pulse every start of frame 30Hz 
+					input	 logic startOfFrame,      //short pulse every start of frame 72.58Hz 
 					input	 logic Y_direction_key,   //move Y Up   
 					input	 logic toggle_x_key,      //toggle X   
 					input  logic collision,         //collision if miner hits an object
@@ -30,7 +30,7 @@ module	miner_move	(
 );
 
 
-// a module used to generate the  ball trajectory.  
+// a module used to move the miner (mine cart).  
 
 parameter int INITIAL_X = 280;
 parameter int INITIAL_Y = 185;
@@ -227,7 +227,7 @@ end // end fsm_sync
 
 
 assign minerMoving = Y_direction_key || toggle_x_key;   // key 4 or key 6 held
-// real motion (Oct 2026): the speed is 0 at a screen border and while the hook is out (hookBusy),
+// real motion: the speed is 0 at a screen border and while the hook is out (hookBusy),
 // so the dust (dust_draw leftKey/rightKey) only appears when the cart actually moves - also
 // during the short glide after a key is released.
 assign movingLeft  = (Xspeed < 0);

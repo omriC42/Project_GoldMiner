@@ -1,12 +1,11 @@
-// GameJukeBox - the "sheet music" of the Gold Miner game sounds (Step 11, Oct 2026).
+// GameJukeBox - the "sheet music" of the Gold Miner game sounds.
 // Same idea and format as the course JukeBox1: for the selected sound and the current note
 // number (noteIndex) it gives the note's pitch (tone -> ToneDecoder in AUDIO.bdf) and its length
-// in beats. A length of 0 = end of the sound. NEW here: each sound also has its own tempo
+// in beats. A length of 0 = end of the sound. Each sound also has its own tempo
 // (beatCs = one beat in 1/100 s, from game_params.sv), so short effects can be faster.
 //
 // Pitches: one octave from do (~1043 Hz) to si, then DO, DO#, RE of the next octave (ToneDecoder).
-// To change a sound: edit its lines below (pitch, beats), recompile. Previews were made as .wav
-// files at these exact pitches and lengths before the hardware was written.
+// To change a sound: edit its lines below (pitch, beats), recompile.
 //
 //   sound      notes (pitch x beats)                                tempo   length
 //   catch      sol x2, do x3                                        fast    ~0.23 s
@@ -37,12 +36,12 @@ always_comb begin
     len    = '{default: 4'd0};         // length 0 everywhere = "end" unless written below
     beatCs = 6'(SOUND_BEAT_SLOW_CS);
     case (sound_t'(melodySelect))
-        SND_CATCH: begin                                   // hook shot sound
+        SND_CATCH: begin                                   // claw grabbed something
             beatCs = 6'(SOUND_BEAT_FAST_CS);
             frq[0] = sol;   len[0] = 4'd2;
             frq[1] = do_;   len[1] = 4'd3;
         end
-        SND_MONEY: begin                                   // object acquired sound
+        SND_MONEY: begin                                   // the object reached the top, score goes up
             beatCs = 6'(SOUND_BEAT_FAST_CS);
             frq[0] = do_;   len[0] = 4'd1;
             frq[1] = mi;    len[1] = 4'd1;

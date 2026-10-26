@@ -1,32 +1,4 @@
 // game_hud - numbers at the top of the screen, levels, and GAME OVER
-// (c) Technion IIT, Department of Electrical Engineering 2026
-//
-//  1. Clock   : counts down the level time -> 0:00 (one step every CLOCK_HZ clocks = 1 second).
-//     The time (30/60/90 s, timeSel), the difficulty (targets) and cheats on/off are INPUTS from the
-//     settings screen; the numbers for each choice are in game_params.sv.
-//  2. Dollars : every collectPulse adds collectValue (the value of what the hook brought up).
-//  3. Target  : level 1 needs TARGET_START, every won level adds TARGET_STEP (max 999), both
-//               chosen by the difficulty input.   Level: starts at 1 (max 99).
-//  4. When the clock reaches 0:00:
-//        dollars >= target -> next level: level + 1, clock back to the start, dollars back to 0,
-//                             newLevel pulse (the gold field builds a new random layout).
-//        otherwise         -> GAME OVER: the game stops and "GAME OVER" is shown in the middle of
-//                             the screen until the game is reset.
-//        Cheats (only when cheatsOn = 1): keypad * = GAME OVER at once, keypad + = next level at once.
-//  5. Drawing : red text. Numbers: hud_number / hud_digit (5x7 font drawn 4x bigger, 20x28 per
-//               digit). "GAME OVER" uses the same kind of font drawn 8x bigger (40x56 per letter).
-//
-//  DECIMAL DIGITS ONLY (B10, Oct 2026): every number is kept ONLY as decimal digits (4 bits each,
-//  0..9), because that is what is drawn - no binary copy, no divider:
-//     clock   minD : secT secO      (counts down, 0 -> 9 with a borrow, 0 -> 5 for the tens of seconds)
-//     dollars dolH dolT dolO        (+ collectValue, column by column in bcd_add3)
-//     target  tgtH tgtT tgtO        (+ target step at every new level, bcd_add3)
-//     level   lvlT lvlO             (+ 1 at every new level)
-//  Comparing decimal digits works directly: {dolH,dolT,dolO} >= {tgtH,tgtT,tgtO} as 12-bit numbers
-//  gives the same answer as comparing the numbers themselves (the left digit counts most, like
-//  in binary), and "time is up" is simply all clock digits = 0.
-//  The start values of every setting are CONSTANTS, written as decimal digits (Quartus works out
-//  the "/" and "%" on the constants while compiling).
 
 module game_hud (
     input  logic        clk,            // 31.5 MHz
@@ -37,8 +9,8 @@ module game_hud (
     input  logic  [5:0] collectValue,   // its value in dollars
     input  logic        gameOverKey,    // cheat: keypad * ends the game
     input  logic        nextLevelKey,   // cheat: keypad + jumps to next level
-    input  logic  [1:0] difficulty,     // settings: 0 EASY, 1 NORMAL, 2 HARD (game_params::difficulty_t)
-    input  logic  [1:0] timeSel,        // settings: 0 short, 1 normal, 2 long (LEVEL_TIME_* in game_params)
+    input  logic  [1:0] difficulty,     // settings: 0 EASY, 1 NORMAL, 2 HARD 
+    input  logic  [1:0] timeSel,        // settings: 0 short, 1 normal, 2 long 
     input  logic        cheatsOn,       // settings: 1 = keypad + and * work
     output logic        drawingRequest,
     output logic  [7:0] RGBout,

@@ -1,11 +1,6 @@
-// ObjectsMatrixBitMap File (was GoldsMatrixBitMap) 
+// ObjectsMatrixBitMap File 
 // A two level bitmap. displaying randomly spawned rocks and gold on the screen in an 8x4 grid (8 columns x 4 rows).
 // Sprites: Large (64x64), Medium (32x32), Small (16x16) bitmaps made with BMPConverter_V21 (8-bit RRRGGGBB, 8'hFF = transparent).
-// (c) Technion IIT, Department of Electrical Engineering 2026
-// Oct 2026 (hook integration Step 9): the object values come from game_params.sv, and the new
-//   output collectType tells the hook WHAT it caught (its weight decides the pull-back speed).
-// Oct 2026 (Step 14): input difficulty (settings screen) sets the share of GOLD in a new layout
-//   (game_params GOLD_PERCENT_EASY/NORMAL/HARD); before, gold/rock was always 50/50.
 
 module	ObjectsMatrixBitMap	(	
 					input	logic	clk,
@@ -67,7 +62,7 @@ localparam  int NUM_OBJECTS = PLAY_CELLS / CELLS_PER_OBJECT ;  // 8
 localparam  int RAND_BITS_PER_OBJECT = 10 ; // 4 bits position + 2 bits size + 4 bits gold-or-rock draw
                                             // (8 objects x 10 = 80 of the 96 random bits)
 
-// ---- share of GOLD (Step 14) --------------------------------------------------
+// ---- share of GOLD --------------------------------------------------
 // Each object draws a random number 0..15 and is GOLD when it is below the threshold of the
 // current difficulty: round(GOLD_PERCENT x 16 / 100) - constants, worked out while compiling.
 localparam  logic [4:0] GOLD_BELOW_EASY   = 5'((game_params::GOLD_PERCENT_EASY   * 16 + 50) / 100);   // 70% -> 11
@@ -84,9 +79,9 @@ end
 
 logic [2:0] MazeBitMapMask [0:NUM_ROWS-1][0:NUM_COLS-1];  
 
-// ---- which cell of a group gets the object (Step 12, Oct 2026: no "%" in the hardware) ----
+// ---- which cell of a group gets the object (no "%" in the hardware) ----
 // 4 random bits (0..15) -> cell 0..CELLS_PER_OBJECT-1 of the group. A table of CONSTANTS:
-// Quartus works out the "%" while compiling, so no divider is built (the old "r % 3" built 8).
+// Quartus works out the "%" while compiling, so no divider is built.
 localparam logic [3:0] CELL_OF_RANDOM [0:15] = '{
     4'( 0 % CELLS_PER_OBJECT), 4'( 1 % CELLS_PER_OBJECT), 4'( 2 % CELLS_PER_OBJECT), 4'( 3 % CELLS_PER_OBJECT),
     4'( 4 % CELLS_PER_OBJECT), 4'( 5 % CELLS_PER_OBJECT), 4'( 6 % CELLS_PER_OBJECT), 4'( 7 % CELLS_PER_OBJECT),
@@ -96,7 +91,7 @@ localparam logic [3:0] CELL_OF_RANDOM [0:15] = '{
 // 96-bit LFSR (taps 96,94,49,47 = maximal length). It runs freely all the time
 // and is sampled on the first clock after reset (and at every new level), so the
 // layout depends on WHEN reset / the new level happens.
-// 96 bits are enough for up to 13 objects * 7 bits.
+// 96 bits are enough for up to 9 objects * 10 bits.
 logic [95:0] rand_counter = 96'hABCD1234_5A5AC3C3_0F1E2D3C;
 
 always_ff @(posedge clk) begin
@@ -105,7 +100,7 @@ end
 
 // ---- layout memory ------------------------------------------------------------
 // loadLayout (first clock after reset) or newLevel (level won) -> build a new random layout.
-// It is built synchronously: building it inside the asynchronous reset (the old way) made
+// It is built synchronously: building it inside the asynchronous reset makes
 // Quartus replace the grid registers with latches (warnings 13004/13310).
 logic loadLayout;
 logic clearCell;   // the hook touches an object on the current pixel
@@ -153,7 +148,7 @@ end
 
 
 // ---- SPRITE BITMAPS: the 6 sprite tables (gold/rock small/medium/large) --------------
-// Oct 2026: moved unchanged to object_sprites.svh, shared with carried_draw.sv (the object
+// They are in object_sprites.svh, shared with carried_draw.sv (the object
 // on the hook). Sprite sizes and positions inside the cell are described there.
 `include "object_sprites.svh"
 
@@ -180,7 +175,6 @@ assign inMedium = (cellX >= MEDIUM_START) && (cellX < MEDIUM_START + 6'd32) &&
 
 // ---- VALUE (dollars) of the object in the current cell ----------------------------
 // Set in game_params.sv (EDIT HERE section) - do not change them here.
-// Step 12 (Oct 2026): a plain case instead of the old objectValue() function.
 logic [5:0] cellValue;
 always_comb begin
 	case (MazeBitMapMask[offsetY_MSB][offsetX_MSB])

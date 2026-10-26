@@ -3,10 +3,10 @@
 //
 //  PRELIMINARY VERSION  -  23 March 2025
 //
-// Gold Miner changes (Step 11, Oct 2026) - marked "GM" below:
+// Gold Miner changes - marked "GM" below:
 //  GM1 the sheet music comes from GameJukeBox (the 4 game sounds) instead of JukeBox1.
 //  GM2 the beat length comes from the jukebox (each sound has its own tempo) and the gap after
-//      every note from game_params.sv (SOUND_GAP_CS) - they were fixed localparams.
+//      every note from game_params.sv (SOUND_GAP_CS).
 //  GM3 a start pulse ALWAYS restarts from the first note, even in the middle of a sound
 //      ("the newest sound wins"). A one-clock s_load state reads the first note's length after
 //      noteIndex went back to 0.
