@@ -1,35 +1,5 @@
-// hook_block - the complete Gold Miner hook: hook_move + hook_draw in one block.
-// Replaces Hook_Block_T.bdf (Step 4 of hook integration, Oct 2026).
+// hook_block - the complete Gold Miner hook: hook_move + hook_draw + carried_draw in one block.
 // Symbol for the top-level schematic: hook_block.bsf
-//
-// Rules decided with the user:
-//  * the rope starts under the miner: X0 = minerX + HOOK_DX, Y0 = minerY + HOOK_DY (hook_params.sv)
-//  * NO shooting while the miner moves: a shot needs a FRESH press of key 2 while minerMoving = 0.
-//    Holding 2 while moving and then stopping does NOT shoot - press 2 again.
-//  * hookBusy = 1 while the hook is out (SHOOT or RETRACT) -> used in Step 5 to lock the miner.
-//  * Step 7: CATCHING. hookCatch = claw pixel AND gold/rock pixel, only while SHOOTING.
-//    It goes to the gold field (object disappears, score) and back into hook_move (pull back).
-//    Pixel alignment: tipDR is 1 clock after its pixel, GoldDrawingRequest is 2 clocks after
-//    its pixel (square_object + GoldsMatrixBitMap registers), so tipDR is delayed 1 clock here.
-//  * Step 9: WEIGHT. The gold field reports the code of the object it removed (catchType,
-//    1..3 gold small/medium/large, 4..6 rock small/medium/large). It is latched one clock after
-//    hookCatch (when the gold field has updated it) and chooses the pull-back speed from
-//    game_params.sv. Empty hook (border / floor) -> RETRACT_EMPTY from hook_params.sv.
-//    The speeds are converted to per-frame steps at compile time (the STEP_* table below).
-//  * Oct 2026: CARRY + SCORE AT THE TOP. While the hook pulls something back, carried_draw hangs
-//    the caught sprite on the claw, along the rope (its pixels go out on hookDR/hookRGB, the claw
-//    is drawn on top of it, and it is NOT part of tipDR - it never catches anything).
-//    When the pull-back ends (RETRACT -> SWING) with something on the hook, deliverPulse (1 clock)
-//    + deliverValue (its dollars, game_params.sv) go to game_hud -> the score goes up at the TOP.
-//    An empty pull-back (border / floor) delivers nothing.
-//  * Oct 2026 (Step 10): GAME OVER + NEW LEVEL.
-//    freeze (= game_hud gameOver): the hook stops where it is (hook_move) AND cannot catch
-//    (hookCatch is blocked), so nothing disappears from the gold field on the frozen screen.
-//    newLevel (1-clock pulse from game_hud): the hook goes straight back to the top, empty
-//    (hook_move restart). Whatever was on it is dropped WITHOUT a deliverPulse - an object
-//    still on the rope when the level ends is lost (decided with the user).
-//  * Oct 2026 (Step 14): input difficulty (from the settings screen) picks the column of the
-//    pull-back table below - before, it was the fixed DIFFICULTY of game_params.sv.
 
 module hook_block (
     input  logic               clk,
@@ -37,15 +7,15 @@ module hook_block (
     input  logic               startOfFrame,
     input  logic        [10:0] pixelX,
     input  logic        [10:0] pixelY,
-    input  logic signed [10:0] minerX,        // miner top-left corner (Smiley_Block_T, Step 5)
+    input  logic signed [10:0] minerX,        // miner top-left corner (Miner_Block_T)
     input  logic signed [10:0] minerY,
     input  logic               minerMoving,   // key 4 or key 6 held
     input  logic               shoot_key,     // key 2 (level, straight from the keyboard)
     input  logic               tipCollision,  // extra 'caught' input (tests); GND in the game
-    input  logic               goldDR,        // GoldDrawingRequest from Gold_DISPLAY (2 clocks after its pixel)
+    input  logic               goldDR,        // drawing request of the gold field, Objects_DISPLAY (2 clocks after its pixel)
     input  logic               freeze,        // game over (game_hud gameOver): hold + no catching
     input  logic               newLevel,      // 1-clock pulse (game_hud): hook back to the top, empty
-    input  logic        [2:0]  catchType,     // Gold_DISPLAY.collectType: code of the object just taken
+    input  logic        [2:0]  catchType,     // Objects_DISPLAY collectType: code of the object just taken
     input  logic        [1:0]  difficulty,    // settings: 0 EASY, 1 NORMAL, 2 HARD -> pull-back speeds
 
     output logic               hookDR,        // rope or claw pixel   -> objects_mux
@@ -75,7 +45,7 @@ always_ff @(posedge clk or negedge resetN) begin
 end
 assign shoot_req = shoot_key && !shoot_key_d && !minerMoving;
 
-// ---------------- catching (Step 7) ----------------
+// ---------------- catching ----------------
 logic tipDR_d;            // tipDR delayed to line up with goldDR (same pixel)
 always_ff @(posedge clk or negedge resetN) begin
     if (!resetN) begin
@@ -88,7 +58,7 @@ always_ff @(posedge clk or negedge resetN) begin
     end
 end
 
-// ---------------- weight (Step 9) ----------------
+// ---------------- weight ----------------
 // Pull-back step per frame (pixels x64) for every object and difficulty.
 // All numbers come from game_params.sv; Quartus works them out at compile time:
 //     step = (object px/s  x  difficulty percent / 100)  x 64 / 72.58 frames per second  (rounded)
@@ -118,13 +88,13 @@ localparam int STEP_ROCK_S_HARD   = (RETRACT_ROCK_SMALL_PX_PER_SEC  * PULL_SPEED
 localparam int STEP_ROCK_M_HARD   = (RETRACT_ROCK_MEDIUM_PX_PER_SEC * PULL_SPEED_PERCENT_HARD   / 100 * FP * 100 + FR / 2) / FR;
 localparam int STEP_ROCK_L_HARD   = (RETRACT_ROCK_LARGE_PX_PER_SEC  * PULL_SPEED_PERCENT_HARD   / 100 * FP * 100 + FR / 2) / FR;
 
-// The difficulty in use = the input from the settings screen (Step 14)
+// The difficulty in use = the input from the settings screen
 difficulty_t diffNow;
 assign diffNow = difficulty_t'(difficulty);
 
 // What is on the hook. catchType is valid one clock after hookCatch (the gold field registers it).
 logic    hookCatch_d;
-logic    caught;          // 1 = something is on the hook (this shot)
+logic    caught;         
 object_t caughtType;
 always_ff @(posedge clk or negedge resetN) begin
     if (!resetN) begin
@@ -134,7 +104,7 @@ always_ff @(posedge clk or negedge resetN) begin
     end
     else begin
         hookCatch_d <= hookCatch;
-        if (newLevel || hookState == 2'd0) begin  // back to swinging / new level -> hook is empty again
+        if (newLevel || hookState == 2'd0) begin  // back to swinging / new level 
             caught     <= 1'b0;
             caughtType <= OBJ_NONE;
         end
@@ -148,7 +118,7 @@ end
 // Pick the pull-back step: empty hook, or the caught object at the current difficulty.
 logic [9:0] retractStep;
 always_comb begin
-    retractStep = 10'(RETRACT_EMPTY_STEP_FP);                 // empty hook (hook_params.sv)
+    retractStep = 10'(RETRACT_EMPTY_STEP_FP);                 // empty hook speed
     if (caught) begin
         case (diffNow)
             EASY:   case (caughtType)
@@ -186,7 +156,7 @@ end
 // ---------------- the hook ----------------
 logic signed [10:0] Xend, Yend;
 logic        [10:0] R;
-logic signed  [9:0] dirCos, dirSin;   // rope direction (for the carried object)
+logic signed  [9:0] dirCos, dirSin;   // rope direction (carried_draw does not use it any more)
 
 hook_move u_move (
     .clk, .resetN, .startOfFrame,
@@ -203,7 +173,7 @@ hook_draw u_draw (
     .drawingRequest(drawDR), .RGBout(drawRGB), .tipDR
 );
 
-// ---------------- the caught object on the claw (Oct 2026) ----------------
+// ---------------- the caught object in the claw ----------------
 logic       carryShow;                // something on the hook AND being pulled back
 logic       carryDR;
 logic [7:0] carryRGB;
@@ -220,8 +190,8 @@ assign hookRGB = tipDR   ? drawRGB  :      // claw pixel (tipDR = claw only)
                  carryDR ? carryRGB :      // the object
                            drawRGB;        // rope (or nothing)
 
-// ---------------- score at the top (Oct 2026) ----------------
-// the object's value, from game_params.sv (plain case, no function)
+// ---------------- score at the top ----------------
+// the object's value, from game_params.sv
 logic [5:0] caughtValue;
 always_comb begin
     case (caughtType)
@@ -234,9 +204,7 @@ always_comb begin
         default:     caughtValue = 6'd0;
     endcase
 end
-// RETRACT -> SWING with something on the hook = it arrived at the top -> one pulse with its value.
-// (on that clock 'caught' is still 1; it is cleared on the next clock because the state is SWING)
-// A new level also ends RETRACT, but it clears 'caught' on the same clock -> no pulse (object lost).
+// handle score pulse
 logic [1:0] hookState_d;
 always_ff @(posedge clk or negedge resetN) begin
     if (!resetN) begin

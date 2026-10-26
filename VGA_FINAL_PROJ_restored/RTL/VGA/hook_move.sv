@@ -1,22 +1,5 @@
 // (c) Technion IIT, Department of Electrical Engineering 2025
 // hook_move - Gold Miner hook motion (swing / shoot / retract).
-// Based on the course smiley_move template (Alex Grinshpun, Dudy, Eyal Lev).
-//
-// Oct 2026 cleanup (Step 1 of hook integration):
-//  * merge-conflict leftovers removed
-//  * X0/Y0 are 11-bit coordinates (were 1-bit by mistake), R is now an output
-//  * all speeds come from hook_params.sv (deg/s, px/s) and use fixed point x64,
-//    so the hook is no longer 2.4x too fast (frames are 72.58 Hz, not 30 Hz)
-//  * retract moves only on startOfFrame (old version moved every clock = 2 us)
-//  * shoot_key is edge-detected: one press = one shot, holding does not re-shoot
-//  * 3-degree angle table (61 entries) for a smooth swing
-// Oct 2026 (Step 9): the pull-back step comes from the input retractStep (hook_block picks it:
-//  empty hook or the weight of the caught object, see game_params.sv).
-// Oct 2026: outputs dirCos / dirSin = 256*cos / 256*sin of the current angle (the same table values
-//  used for the tip), so hook_block can hang the caught object along the rope (carried_draw).
-// Oct 2026 (Step 10): input restart (1-clock pulse, new level) -> the hook is put back at the top:
-//  SWING, shortest rope, pointing straight down, like after reset. It wins over freeze.
-//
 // Angle convention (screen coordinates, y grows downward):
 //   index 0 = 0 deg = pointing right, index 30 = 90 deg = straight down,
 //   index 60 = 180 deg = pointing left.
@@ -37,7 +20,7 @@ module hook_move (
     output logic signed [10:0]  Yend,
     output logic        [10:0]  R,             // rope length in pixels (used by hook_draw)
     output logic        [1:0]   hookState,     // 0 = swing, 1 = shoot, 2 = retract
-    output logic signed [9:0]   dirCos,        // 256*cos(angle) - rope direction (for the carried object)
+    output logic signed [9:0]   dirCos,        // 256*cos(angle) - rope direction (not used any more)
     output logic signed [9:0]   dirSin         // 256*sin(angle)
 );
 
@@ -171,7 +154,7 @@ assign dx_full = $signed({1'b0, R}) * LUT_COS[angle_idx];
 assign dy_full = $signed({1'b0, R}) * LUT_SIN[angle_idx];
 assign Xend    = X0 + 11'(dx_full >>> 8);
 assign Yend    = Y0 + 11'(dy_full >>> 8);
-// rope direction (Oct 2026): the same table values as above
+// rope direction: the same table values as above
 assign dirCos  = LUT_COS[angle_idx];
 assign dirSin  = LUT_SIN[angle_idx];
 

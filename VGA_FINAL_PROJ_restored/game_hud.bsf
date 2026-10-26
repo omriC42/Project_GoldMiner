@@ -95,13 +95,6 @@ agreement for further details.
 		(line (pt 232 48)(pt 216 48)(line_width 3))
 	)
 	(port
-		(pt 232 64)
-		(output)
-		(text "timeUp" (rect 0 0 28 12)(font "Arial" ))
-		(text "timeUp" (rect 183 59 211 71)(font "Arial" ))
-		(line (pt 232 64)(pt 216 64)(line_width 1))
-	)
-	(port
 		(pt 232 80)
 		(output)
 		(text "gameOver" (rect 0 0 43 12)(font "Arial" ))

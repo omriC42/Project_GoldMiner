@@ -1,23 +1,8 @@
 // carried_draw - draws the caught gold/rock hanging on the claw while the hook pulls it back.
-// Gold Miner project, Oct 2026. Lives inside hook_block (its pixels go out on hookDR / hookRGB).
+// Gold Miner project. Lives inside hook_block (its pixels go out on hookDR / hookRGB).
 //
 //  * The pictures are the SAME 6 sprites as the objects field (object_sprites.svh, shared with
 //    ObjectsMatrixBitMap) - small 16x16, medium 32x32, large 64x64, 8'hFF = transparent.
-//  * Position (Oct 25 2026 fix - the object is now IN the claw at every rope angle):
-//    the claw sprite (hook_draw) never rotates - its prongs always open DOWN - so the object hangs
-//    straight down under the claw, centred on the tip in X:
-//        left = Xend - size/2
-//        top  = Yend + CARRY_OFFSET_PX - topPad
-//    topPad = the transparent rows at the top of each picture (object_sprites.svh), so the FIRST
-//    VISIBLE row of the object is CARRY_OFFSET_PX (4) px below the tip = under the claw's bottom bar
-//    (claw rows Yend+4..+5, drawn on top) -> the claw grips the object with no gap.
-//    (Before: the centre was pushed along the rope, so at 15/165 deg the object sat BESIDE the claw,
-//     and the transparent rows left a gap of up to 7 px under it.)
-//    dirCos / dirSin are no longer used; the ports stay so hook_block and the .bsf do not change.
-//  * show = 1 only while something is on the hook AND the hook is pulling back (hook_block).
-//  * Timing: the centre is registered once per clock (it only changes at startOfFrame), then the
-//    pixel test + sprite read are registered -> 1 clock latency, the same as hook_draw.
-//  * It never catches anything: it is not part of tipDR.
 
 module carried_draw (
     input  logic               clk,

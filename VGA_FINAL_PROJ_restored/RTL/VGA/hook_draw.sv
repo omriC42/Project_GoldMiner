@@ -1,12 +1,9 @@
 // hook_draw - draws the hook rope (origin -> tip) and a claw sprite at the tip.
 // Gold Miner project.
 //
-// Oct 2026 cleanup (Step 2 of hook integration):
-//  * merge-conflict leftovers removed
 //  * port names match hook_move (X0,Y0,Xend,Yend,R)
 //  * rope test works at every angle, including horizontal 0/180 deg
-//    (old version only drew when the tip was BELOW the origin)
-//  * NEW claw sprite (16x16) centred on the tip, with its own output tipDR.
+//  * claw sprite (16x16) centred on the tip, with its own output tipDR.
 //    Only tipDR is used for catching gold/rocks - the rope itself never catches.
 //  * rope width and colors come from hook_params.sv
 //

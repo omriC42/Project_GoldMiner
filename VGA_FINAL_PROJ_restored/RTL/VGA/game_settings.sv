@@ -1,12 +1,5 @@
-// game_settings - the screens of Gold Miner and the player's settings (Step 14, Oct 2026)
+// game_settings - the screens of Gold Miner and the player's settings
 // (c) Technion IIT, Department of Electrical Engineering 2026
-//
-//  Screens (screen output, drawn by start_screen.sv):
-//
-//      OPENING ──ENTER──► PLAYING            (gameResetN = 1 only while PLAYING: the game blocks
-//         │                  ▲                 are held in reset on the other screens, so every
-//         └──+──► SETTINGS ──┘ ENTER           game starts clean with the chosen settings)
-//      PLAYING + GAME OVER ──ENTER──► OPENING  (a new game without KEY0; the settings are kept)
 //
 //  Settings screen (rows in the order of settings_screen.png):
 //      row 0 DIFFICULTY  EASY / NORMAL / HARD      -> difficulty  0 / 1 / 2
@@ -15,10 +8,7 @@
 //      row 3 CHEATS      ON / OFF                  -> cheatsOn    1 / 0
 //    keypad 8 / 2 = cursor up / down (stops at the first / last row),
 //    keypad 4 / 6 = the value to the left / right (stops at the ends), + does nothing here.
-//    The cursor starts on row 0 every time the settings screen is opened.
-//  * Every key acts ONCE per press (rising edge). A key held while KEY0 is released is ignored
-//    until it is pressed again (the "previous" values reset to 1, like the old start_screen).
-//  * The settings are reset ONLY by KEY0 (resetN), to the defaults of game_params.sv.
+//   The settings are reset ONLY by KEY0 (resetN), to the defaults of game_params.sv.
 
 module game_settings (
     input  logic       clk,

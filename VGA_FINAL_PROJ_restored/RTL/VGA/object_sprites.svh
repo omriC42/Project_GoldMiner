@@ -1,6 +1,6 @@
 // object_sprites.svh - the 6 gold/rock sprites of Gold Miner, shared by two blocks:
 //   ObjectsMatrixBitMap.sv (the objects field) and carried_draw.sv (the object on the hook).
-// Moved here unchanged from ObjectsMatrixBitMap.sv (Oct 2026) so both blocks use ONE copy of the
+// Both blocks use ONE copy of the
 // pictures - change a picture here and both the field and the hook show it.
 // Included INSIDE a module (`include "object_sprites.svh"), it declares the 6 colour tables.
 

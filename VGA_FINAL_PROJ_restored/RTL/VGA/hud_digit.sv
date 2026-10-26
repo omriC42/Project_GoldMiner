@@ -1,10 +1,9 @@
-// hud_digit - one digit place of the HUD (Step 12, Oct 2026): is the current pixel on the digit?
-// Replaces the old digitAt() function of game_hud (no functions in the RTL).
+// hud_digit - one digit place of the HUD: is the current pixel on the digit?
 //
 //  * The digit is drawn with a 5x7 font, every font pixel 4x4 screen pixels -> 20x28 pixels.
 //  * (X, Y) = top-left corner of the digit place on the screen (parameters, fixed per instance).
 //  * show = 0 -> nothing (used for leading zeros: "7" instead of "007").
-//  * Combinational, like the old function: game_hud registers the final colour.
+//  * Combinational: game_hud registers the final colour.
 
 module hud_digit #(
     parameter int X = 0,      // top-left corner of this digit place

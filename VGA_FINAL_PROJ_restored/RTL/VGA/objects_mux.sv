@@ -6,8 +6,8 @@
 // coding convention dudy December 2018
 
 //-- Eyal Lev 31 Jan 2021
-// Oct 2026 (hook integration Step 6+8): hook input, drawn just below the miner
-//   priority: miner > hook (rope + claw) > dust > timer > objects (gold/rocks) > background
+// hook input, drawn just below the miner
+//   priority: miner > hook (rope + claw) > dust > HUD > objects (gold/rocks) > background
 
 module	objects_mux	(	
 					input		logic	clk,
@@ -24,7 +24,7 @@ module	objects_mux	(
 					input    logic dustDrawingRequest,
 					input		logic	[7:0] dustRGB,
 
-		  // countdown clock (top right of the screen)
+		  // HUD: clock, score, target, level, GAME OVER (game_hud)
 					input    logic timerDrawingRequest,
 					input		logic	[7:0] timerRGB,
 

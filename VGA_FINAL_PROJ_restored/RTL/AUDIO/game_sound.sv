@@ -1,19 +1,5 @@
-// game_sound - turns game events into "play sound N" for melody_player_1 (Step 11, Oct 2026).
-//
-//   event (TOP_VGA_DEMO_KBD net)                    sound (game_params::sound_t)
-//   objectCollected  (gold field: object taken)     SND_CATCH     "clunk"
-//   deliverPulse     (hook_block: object at top)    SND_MONEY     "cha-ching"
-//   newLevel         (game_hud: level won / + key)  SND_LEVEL     fanfare
-//   gameOver         (game_hud, 0 -> 1 only)        SND_GAMEOVER  sad tune
-//
-//  * The NEWEST event always wins: it restarts the player with its own sound, cutting whatever
-//    was playing (decided with the user). If two events come on the SAME clock (rare), the more
-//    important one is taken: game over > level > money > catch.
-//  * soundSelect is held until the next event, because the jukebox reads it during the whole
-//    sound. startSound is a 1-clock pulse, on the same clock as the new soundSelect.
-//  * Each sound can be switched off in game_params.sv (SOUND_*_ON); an off event does nothing.
-//  * resetN = gameResetN: silent on the opening screen.
-//  * Oct 2026 (Step 14): input soundOn (settings screen): 0 = no sound starts at all.
+// game_sound - turns game events into "play sound N" for melody_player_1.
+
 
 module game_sound #(
     // on/off per sound: the game uses game_params.sv; a testbench may override them

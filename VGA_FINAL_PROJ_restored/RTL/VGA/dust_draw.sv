@@ -1,24 +1,11 @@
 // dust_draw - dust cloud behind the mine cart while the player drives it
 // (c) Technion IIT, Department of Electrical Engineering 2026
 //
-// How it works (simple version, Oct 2026):
-//  1. KEYS: the dust starts when the player holds the LEFT key (key 4) or the RIGHT key (key 6)
-//     - the same keys that move the cart (Y_direction_key / toggle_x_key in miner_move).
-//       RIGHT key -> the cart drives right -> the dust is on the LEFT side of the cart.
-//       LEFT  key -> the cart drives left  -> the dust is on the RIGHT side of the cart.
-//       Both keys together do not move the cart, so they make no dust either.
-//  2. ANIMATION: 6 pictures of a dust cloud (dust_picture_1 .. dust_picture_6, below).
-//     Every FRAMES_PER_PICTURE screen frames we switch to the next picture:
-//        1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 1 -> ...
-//     When the key is released, the cloud finishes the current round (until picture 6)
-//     and then disappears.
-//  3. DRAWING: the picture (32x32 pixels) is drawn next to the back wheel of the cart,
-//     exactly like every other bitmap in the game: inside the 32x32 box we read the color
-//     from the picture, 8'hFF = transparent, drawingRequest = (RGBout != transparent).
-//     On the left side the picture is mirrored so the dust blows AWAY from the cart.
-//     It goes to objects_mux under the miner, and it is NOT part of any collision.
-//
-// The old version (3 round puffs calculated with phases) is saved as dust_draw.sv.puffs_backup
+
+// ANIMATION: 6 pictures of a dust cloud (dust_picture_1 .. dust_picture_6, below).
+// Every FRAMES_PER_PICTURE screen frames we switch to the next picture
+// On the left side the picture is mirrored so the dust blows AWAY from the cart.
+// It goes to objects_mux under the miner, and it is NOT part of any collision.
 
 module dust_draw (
     input  logic               clk,

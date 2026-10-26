@@ -1,21 +1,5 @@
 // start_screen - draws the opening screen and the settings screen of Gold Miner
 // (c) Technion IIT, Department of Electrical Engineering 2026
-//
-//  Oct 2026 (Step 14): only DRAWING here. Which screen is shown, the cursor and the settings come
-//  from game_settings.sv (it also holds the game in reset outside PLAYING).
-//
-//  1. OPENING  : the picture start_screen.hex, 320x240 drawn 2x2 (640x480).
-//  2. SETTINGS : the picture settings_screen.hex, 160x120 drawn 4x4, plus two things drawn by
-//                this logic on top of it:
-//                  * a yellow ARROW (16x28 triangle) left of the label of the selected row,
-//                  * a green FRAME (2 pixels thick) around the chosen value of every row.
-//                Where the rows and the value words are on the screen is in settings_layout.svh,
-//                written by make_menu_pictures.py together with the picture, so they always match.
-//  3. PLAYING  : RGBOut = gameRGB (the game picture from objects_mux).
-//
-//  Pictures: to change them, edit RTL/VGA/make_menu_pictures.py and run it (it writes both .hex
-//  files, both .png previews and settings_layout.svh), then recompile.
-//  Timing: the picture memories and the arrow/frames are registered (1 clock, like every bitmap).
 
 module start_screen (
     input  logic        clk,          // 31.5 MHz
